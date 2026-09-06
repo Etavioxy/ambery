@@ -9,7 +9,7 @@ English | [中文](spec.zh.md)
 
 ## Architecture decisions
 
-1. **Serves every package read-only**: case files may exercise core, terminal leaves, and apps; case does not expose its own contract surface to them.
+1. **Serves every package read-only**: case files may exercise core, terminal packages, and apps; case does not expose its own contract surface to them.
 2. **Snapshot is truth**: the case data section preserves JSONL raw text; replay derives assertions from the log, not from hand-written expectations.
 
 ## Fixed constraints

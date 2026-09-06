@@ -2,7 +2,7 @@
 
 [English](spec.md) | 中文
 
-> 文档职责/导航：见 [docs-spec.zh.md](docs-spec.zh.md)。概念定义见 [concepts.zh.md](concepts.zh.md)；本文件记录仓库级结构（包拆分与目录布局）与本体技术选型。运行机制住在 `docs/`；叶包的 spec 在各自目录下的 `packages/`。
+> 文档职责/导航：见 [docs-spec.zh.md](docs-spec.zh.md)。概念定义见 [concepts.zh.md](concepts.zh.md)；本文件记录仓库级结构（包拆分与目录布局）与本体技术选型。运行机制住在 `docs/`；终端/agent 包的 spec 在各自目录下的 `packages/`。
 
 ## 包拆分
 
@@ -11,11 +11,11 @@ packages/
 ├── core/                          本体 crate（ambery-core + observe-derive + bins）
 ├── case/                          测试回放引擎（ambery-case）
 ├── terminal-lib/                  契约 crate（adapter trait / 信封 / Composite / MapAdapter 桩）
-├── terminals/                     每终端一叶
+├── terminals/                     每终端一包
 │   ├── wt/                        C# UIA sidecar
 │   ├── zellij/                    进程内 CLI adapter
-│   └── ghostty/…                  未来叶
-├── agents/                        每 agent CLI 一叶
+│   └── ghostty/…                  未来终端包
+├── agents/                        每 agent CLI 一包
 │   ├── claude/                    hook 脚本 + filter + marker
 │   └── opencode/
 └── apps/                          前端形态包
@@ -24,8 +24,7 @@ packages/
 ```
 
 - Spec 分布：每个有 crate 的包在自己的目录下带 spec（`packages/case/spec.md`、`packages/terminal-lib/spec.md`、`packages/apps/spec.md`、`packages/terminals/wt|zellij/spec.md`、`packages/agents/claude|opencode/spec.md`）；根文件（本文件）承载结构与本体的技术选型。
-- 文档：`docs/` 留在根、不拆；接入类文档住在 `docs/`（`docs/terminal/`、`docs/agents/`、`docs/cron.md`——见 docs-spec 责任地图），不进 packages。
-- 依赖：`core` → `terminal-lib` 仅此；`terminals/*` 与 `agents/*` → `terminal-lib` 仅此；叶之间互不依赖、也不依赖 core；`apps/*` → `core`；`case` → 全部（只读服务）。协议（concepts §5，Ambery Protocol）是跨包共享的契约。
+- 依赖：`core` → `terminal-lib` 仅此；`terminals/*` 与 `agents/*` → `terminal-lib` 仅此；终端/agent 包之间互不依赖、也不依赖 core；`apps/*` → `core`；`case` → 全部（只读服务）。激活的终端/agent 包的组装发生在二进制/配置层，因此二进制（`apps/*`、`case`、core 自带的 bins）可以为接线额外依赖终端/agent crate。协议（concepts §5，Ambery Protocol）是跨包共享的契约。
 
 ## 技术选型（本体）
 
@@ -44,11 +43,11 @@ packages/
 ## 架构决定（本体）
 
 1. **两个进程家族，一个协议**：宿主进程是唯一消费者；外部软件只经 Ambery Protocol 的契约面接触（宿主推送 = hook；宿主读取 = enumerate/read；agent 消费 = Tool Set）。无旁路通道。
-2. **终端接入只经契约消费**：core 依赖 `ambery-terminal-lib`，永不依赖叶；组装（哪些叶激活）发生在二进制/配置层。
+2. **终端接入只经契约消费**：core 依赖 `ambery-terminal-lib`，永不依赖终端包；组装（哪些终端包激活）发生在二进制/配置层。
 3. **存储永远 append-only**：重启靠 replay 恢复状态；压缩是标记不是删除；`context.jsonl.bad` 隔离解析失败行而非丢弃。
 4. **Config 与 Storage 是两个域**：单文件 `config.json` + 身份提示词 `AGENTS.md` 在 config 根；运行数据在 `storage/`；路径由 `core/paths.rs` 解析（`AMBERY_CONFIG_DIR` / `AMBERY_STORAGE_DIR` 可覆盖）。
 
 ## 固定约束（本体）
 
 - 外部进程只观测、不臆断：无证据不做生命周期推断。
-- AmberyBackend 不内嵌任何叶的知识（core 代码路径中不出现 wt/zellij/claude 名字；叶经契约到达）。
+- AmberyBackend 不内嵌任何终端的知识（core 代码路径中不出现 wt/zellij/claude 名字；终端包经契约到达）。

@@ -12,4 +12,4 @@
 
 ## 固定约束
 
-- 与所有 agent 叶相同的叶契约：经 `ambery-terminal-lib` 注册、三态读、hook 载荷不带内容。
+- 与所有 agent 包相同的包契约：经 `ambery-terminal-lib` 注册、三态读、hook 载荷不带内容。
