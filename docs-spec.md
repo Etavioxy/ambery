@@ -63,6 +63,7 @@ Each `docs/*.md` has one responsibility. The grouping is reading organization, n
 - `window-positioning.md` — window direction layout engine
 - `window-follow.md` — window follow coordinate system, responsibility layering, and state semantics
 - `pet-window-size.md` — pet window size formula and principles
+- `card-window-size.md` — Card window size: single source, projection into the Card file, and window creation
 - `theme.md` — theme/color table and its Config facility
 
 ### Internationalization

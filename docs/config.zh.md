@@ -81,6 +81,35 @@ keys(system) ∩ keys(user) = ∅
 
 两池 key 全局唯一，所以不存在 user 覆盖 system 的隐式优先级。用户可通过本地设置面板把表情在两池间原子移动；移动后的完整 Config 必须通过统一 validation。基础状态可以在两池间移动，仍参与默认状态和 `set_autonomy(key)` 的按 key 解析；系统池的额外职责仅是尺寸扫描来源。
 
+### UI 组
+
+壳层 UI 行为住在 `ui` 子树；当行为本身是 per-window 时，字段也是 per-window：
+
+```rust
+struct UiConfig {
+    pub topmost: TopmostConfig,
+}
+
+struct TopmostConfig {
+    pub pet: TopmostMode,
+    pub chat: TopmostMode,
+    pub shelf: TopmostMode,
+    pub card: TopmostMode,
+}
+
+enum TopmostMode { Aggressive, Topmost, Off }
+```
+
+| 路径 | 默认 | 取值含义 |
+|---|---|---|
+| `ui.topmost.pet` | `aggressive` | 始终压在其他窗口之上，含跨虚拟桌面 |
+| `ui.topmost.chat` | `topmost` | 仅窗口的 `alwaysOnTop` 属性 |
+| `ui.topmost.shelf` | `topmost` | 同上 |
+| `ui.topmost.card` | `topmost` | 同上 |
+| `ui.font` | `"Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif` | Card 的字体族列表；实际解析到的必须是命名字体——泛型族可以渲染，但不作尺寸权威（docs/card-window-size.zh.md §字体标识） |
+
+`topmost` 取值变化作用于运行中的窗口；`ui.font` 变化让全部 Card 尺寸投影失效（docs/card-window-size.zh.md §重算触发）。窗口层机制归 docs/tauri-shell.zh.md §模块拆分（`window.rs`）。
+
 ## 字段 metadata
 
 目标语法使用同一个项目属性承载字段语义；具体 derive 实现负责让 `#[config(...)]` 成为合法 attribute，并生成供 loader / reflect / tool 共用的 descriptor tree。

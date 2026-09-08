@@ -114,7 +114,7 @@ Queue admits: "demo-webapp finished (3800 characters). Evaluate whether to notif
   LLM:     tool_calls: [
              set_autonomy { key: "notify", motion: "bounce" },
              call_component { id: "notify-ft", type: "text_card",
-               title: "ft done", text: "Done" }
+               content: { title: "ft done", text: "Done" } }
            ]
   Context: [+ assistant (tool_calls)] [+ tool { ok: true }] [+ tool { ok: true, rendered: "notify-ft" }]
   LLM:     → assistant "Card popped up (´ω`)"

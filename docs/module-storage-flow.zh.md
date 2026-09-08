@@ -10,6 +10,10 @@
 ══════════════════════ 代码模块分层 ══════════════════════
 
   表现层    前端窗口：pet / chat / card-* / menu（Tauri，非 headless）
+            ├─ store（状态层）：core 拥有的可读状态的收敛面
+            ├─ 动作层（action layer）：写动作 + effect 上报
+            ├─ 窗口层（window layer）：OS 窗口的尺寸 / 位置 / 显示（adapter + 壳）
+            └─ 渲染层（rendering layer）：DOM 构建 + CSS + 尺寸推导（每类型由注册表提供 sizeModel）
   ─────────────────────────────────────────────────────────
   编排层    AmberyBackend（ambery.rs）
             handle_hook │ handle_timer_scan │ run_trigger │ execute_tool │ drain_queue

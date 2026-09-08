@@ -12,11 +12,11 @@ English | [中文](multi-window.zh.md)
 | `chat` | 320×380 | Chat panel | When invoked (right-click toggle: chat:toggle) |
 | `menu` | 380×560 | Settings panel (schema-driven, docs/config.md) | Pops up on tray right-click, hides on focus loss |
 | `shelf` | pet×3 (clamped to 180–480×120–240) | Cards Shelf (transient popup layer for Card management, not a Surface, docs/view.md) | pet middle-click: pops up to the upper right over pet; closes on middle-click / focus loss |
-| `card-<id>` | Dynamic (measured from content; offsetWidth/Height already include border) | Single Card (Component) | When the Card is alive and visible |
+| `card-<id>` | Projected size (Card file `_meta.layout.size`, docs/card-window-size.md) | Single Card (Component) | When the Card is alive and visible |
 
 Static windows (pet/chat/menu) are all small windows with `transparent: true` + `decorations: false` + `alwaysOnTop: true` (no full-screen transparent layer spread across the middle), so there is no problem of blocking desktop clicks. `card-<id>` is created by pet via `ensure_card_window` (authoritative Rust registry decision, docs/case-runner.md §Window Decision Hoisted) — one independent window per id, updated in place for the same id (continuous management protocol, docs/components.md).
 
-Transparent-window chrome rules (the single source for styles is the comment at the top of `styles.css`): filled panels (chat/shelf/menu) use `box-sizing: border-box` + 100% to fill the window, and the border is drawn inside the box itself, so it naturally falls within the window bounds; Card measurement includes the border, so the window exactly wraps the content; pet is compensated by the window-size formula + BORDER_PX (docs/pet-window-size.md).
+Transparent-window chrome rules (the single source for styles is the comment at the top of `styles.css`): filled panels (chat/shelf/menu) use `box-sizing: border-box` + 100% to fill the window, and the border is drawn inside the box itself, so it naturally falls within the window bounds; a Card's box includes its own border, and the window is created at the projected size (docs/card-window-size.md); pet is compensated by the window-size formula + BORDER_PX (docs/pet-window-size.md).
 
 ## Data Channels
 

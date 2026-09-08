@@ -10,21 +10,15 @@ This document defines each tool's parameter schema, return structure, and call s
 
 ## call_component
 
-Creates / updates / closes Card windows. The same id creates on first use and updates in place afterwards. The tool schema declares the complete fields of each type via `anyOf`.
+Creates / updates / closes Card windows. The same id creates on first use and updates in place afterwards. The tool schema declares each type's `content` shape via an `anyOf` generated from the type registry (docs/components.md §Type registry).
 
 | Parameter | Type | Required | Validation |
 |------|------|------|------|
 | `spec.id` | string | ✓ | `[A-Za-z0-9_\-/.]+`, not empty. No spaces, Chinese characters, or special characters |
-| `spec.type` | string | ✓ | `text_card` / `quick_jump` / `git_display` / `data_chart` / `todobox` |
+| `spec.type` | string | ✓ | a registered Component type (docs/components.md §Type registry) |
 | `spec.direction` | string | | `auto` / `n` / `ne` / `e` / `se` / `s` / `sw` / `w` / `nw` |
-| `spec.title` | string | required when type = text_card/git_display/data_chart/todobox | not empty |
-| `spec.text` | string | required when type = text_card | not empty |
-| `spec.label` | string | required when type = quick_jump | not empty |
-| `spec.target` | string | required when type = quick_jump | not empty |
-| `spec.items` | array | required when type = todobox | `[{text: string, done: boolean}]` |
-| `spec.entries` | array | required when type = git_display | `[{hash: string, msg: string, time: string}]` |
-| `spec.diff` | string | optional when type = git_display | — |
-| `spec.chart` | object | required when type = data_chart | `{kind: "line"/"bar"/"pie", labels: string[], series: [{name, data}]}` |
+| `spec.action` | string | | `close` closes the Card; `content` is then ignored |
+| `spec.content` | object | ✓ | shape owned by `spec.type`; `text_card.content.text` is a markdown subset (docs/components.md §Rendering) |
 
 **return**
 

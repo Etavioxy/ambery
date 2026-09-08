@@ -81,6 +81,35 @@ keys(system) ∩ keys(user) = ∅
 
 Keys are globally unique across the two pools, so there is no implicit priority of user overriding system. The user can atomically move kaomoji between the two pools via the local settings panel; the complete Config after the move must pass unified validation. Base states can be moved between the two pools and still participate in default states and per-key resolution in `set_autonomy(key)`; the system pool's additional responsibility is only being the scan source for window-size scans.
 
+### UI Group
+
+Shell-level UI behaviour lives in the `ui` subtree; a field is per-window when the behaviour itself is per-window:
+
+```rust
+struct UiConfig {
+    pub topmost: TopmostConfig,
+}
+
+struct TopmostConfig {
+    pub pet: TopmostMode,
+    pub chat: TopmostMode,
+    pub shelf: TopmostMode,
+    pub card: TopmostMode,
+}
+
+enum TopmostMode { Aggressive, Topmost, Off }
+```
+
+| Path | Default | Value meaning |
+|---|---|---|
+| `ui.topmost.pet` | `aggressive` | stay above other windows, including across virtual desktops |
+| `ui.topmost.chat` | `topmost` | the window's `alwaysOnTop` property |
+| `ui.topmost.shelf` | `topmost` | same |
+| `ui.topmost.card` | `topmost` | same |
+| `ui.font` | `"Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif` | the Card font family list; the family that resolves must be a named family — a generic family may render but does not serve as a size authority (docs/card-window-size.md §Font identity) |
+
+A change to a `topmost` value applies to the running windows; a change to `ui.font` invalidates every Card size projection (docs/card-window-size.md §Recompute triggers). The window-level mechanism is owned by docs/tauri-shell.md §Module split (`window.rs`).
+
 ## Field Metadata
 
 The target syntax uses the same project attribute to carry field semantics; the concrete derive implementation is responsible for making `#[config(...)]` a legal attribute and for generating the descriptor tree shared by loader / reflect / tool.

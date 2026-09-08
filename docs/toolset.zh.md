@@ -10,21 +10,15 @@ pet 可调用的九个 function definitions（call_component / fetch_terminal / 
 
 ## call_component
 
-创建/更新/关闭卡片窗口。同一 id 首次创建、后续原地更新。Tool schema 以 `anyOf` 声明每种类型的完整字段。
+创建/更新/关闭卡片窗口。同一 id 首次创建、后续原地更新。Tool schema 以注册表生成的 `anyOf` 声明每种类型的 `content` 形状（docs/components.md §类型注册表）。
 
 | 参数 | 类型 | 必填 | 校验 |
 |------|------|------|------|
 | `spec.id` | string | ✓ | `[A-Za-z0-9_\-/.]+`，不为空。不含空格、中文、特殊字符 |
-| `spec.type` | string | ✓ | `text_card` / `quick_jump` / `git_display` / `data_chart` / `todobox` |
+| `spec.type` | string | ✓ | 已注册的 Component 类型（docs/components.md §类型注册表） |
 | `spec.direction` | string | | `auto` / `n` / `ne` / `e` / `se` / `s` / `sw` / `w` / `nw` |
-| `spec.title` | string | type = text_card/git_display/data_chart/todobox 时必填 | 非空 |
-| `spec.text` | string | type = text_card 时必填 | 非空 |
-| `spec.label` | string | type = quick_jump 时必填 | 非空 |
-| `spec.target` | string | type = quick_jump 时必填 | 非空 |
-| `spec.items` | array | type = todobox 时必填 | `[{text: string, done: boolean}]` |
-| `spec.entries` | array | type = git_display 时必填 | `[{hash: string, msg: string, time: string}]` |
-| `spec.diff` | string | type = git_display 时可选 | — |
-| `spec.chart` | object | type = data_chart 时必填 | `{kind: "line"/"bar"/"pie", labels: string[], series: [{name, data}]}` |
+| `spec.action` | string | | `close` 关闭卡片，此时忽略 `content` |
+| `spec.content` | object | ✓ | 形状由 `spec.type` 拥有；`text_card.content.text` 是 markdown 子集（docs/components.md §渲染） |
 
 **return**
 

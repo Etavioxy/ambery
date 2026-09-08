@@ -64,6 +64,7 @@
 - `window-positioning.md` — 窗口方位布局引擎
 - `window-follow.md` — 窗口跟随坐标系、职责分层与状态语义
 - `pet-window-size.md` — pet 窗口尺寸公式与原则
+- `card-window-size.md` — Card 窗口尺寸：唯一来源、向 Card 文件的投影与建窗
 - `theme.md` — 主题/配色表与其 Config 设施
 
 ### 国际化

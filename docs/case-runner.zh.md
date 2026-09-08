@@ -46,6 +46,8 @@ case-runner 的观测范围覆盖前端 TS 能力：headless JS runtime 跑真�
 | `window`（observe target） | 已实现：打印窗口动作序列，并断言不变量——已关闭窗口的 `render_component` 必须伴随新的 `window_opened`，违反即 FAIL |
 | 前端非窗口逻辑（store / 窗口接线） | `frontend-case.test.ts`（headless JS + mock 窗口层） |
 
+**观测边界——渲染层不在范围内**——case-runner 观测的是前端逻辑：store、动作层与窗口接线。渲染层——DOM 构建、CSS 与尺寸推导——不在此处被测，因为尺寸推导建模的是文本测量与布局，属于渲染侧逻辑。投影出来的 Card 尺寸只以**数据**形式进入 case（Card 文件的一个字段），没有任何 case 重算它。
+
 ### 前端读取架构（store 收敛 + invoke 规则）
 
 **store 机制**（`app/src/store.ts`）：

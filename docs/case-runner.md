@@ -46,6 +46,8 @@ The case-runner's observation scope covers frontend TS capabilities: a headless 
 | `window` (observe target) | implemented: prints the window action sequence and asserts invariants — a `render_component` for a closed window must be accompanied by a new `window_opened`; violation = FAIL |
 | frontend non-window logic (store / window wiring) | `frontend-case.test.ts` (headless JS + mock window layer) |
 
+**Observation boundary — the rendering layer is out of scope** — the case-runner observes frontend logic: the store, the action layer and window wiring. The rendering layer — DOM construction, CSS and the size computation — is not exercised here, because the size computation models text measurement and layout and is therefore rendering-side logic. A projected Card size enters a case only as data (a Card file field); no case recomputes it.
+
 ### Frontend read architecture (store convergence + invoke rules)
 
 **store mechanism** (`app/src/store.ts`):

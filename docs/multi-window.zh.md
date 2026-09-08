@@ -12,11 +12,11 @@
 | `chat` | 320×380 | 聊天面板 | 唤出时（右键 toggle：chat:toggle） |
 | `menu` | 380×560 | 设置面板（schema 驱动，docs/config.md） | 托盘右键弹出，失焦隐藏 |
 | `shelf` | pet×3（钳制 180–480×120–240） | Cards Shelf（Card 管理瞬时弹出层，非 Surface，docs/view.md） | pet 中键：遮挡 pet 向右上弹出，中键/失焦即关 |
-| `card-<id>` | 动态（按内容测量，offsetWidth/Height 已含 border） | 单张卡片（Component） | 卡片存活且可见时 |
+| `card-<id>` | 投影尺寸（Card 文件 `_meta.layout.size`，docs/card-window-size.md） | 单张卡片（Component） | 卡片存活且可见时 |
 
 静态窗口（pet/chat/menu）都是 `transparent: true` + `decorations: false` + `alwaysOnTop: true` 的小窗口（不在中间铺全屏透明层），所以不会有挡住桌面点击的问题。`card-<id>` 由 pet 经 `ensure_card_window` 创建（Rust 权威注册表决策，docs/case-runner.md §窗口决策上提）——每 id 一个独立窗口，同 id 原地更新（持续管理协议，docs/components.md）。
 
-透明窗口 chrome 规则（样式单源在 `styles.css` 顶部注释）：填充型面板（chat/shelf/menu）`box-sizing: border-box` + 100% 填满窗口，border 内绘于自身盒内、天然落在窗口边界内；card 测量含 border，窗口恰好包裹内容；pet 由窗口尺寸公式 +BORDER_PX 补偿（docs/pet-window-size.md）。
+透明窗口 chrome 规则（样式单源在 `styles.css` 顶部注释）：填充型面板（chat/shelf/menu）`box-sizing: border-box` + 100% 填满窗口，border 内绘于自身盒内、天然落在窗口边界内；card 的盒含自身 border，窗口按投影尺寸创建（docs/card-window-size.md）；pet 由窗口尺寸公式 +BORDER_PX 补偿（docs/pet-window-size.md）。
 
 ## 数据通道
 

@@ -114,7 +114,7 @@ Queue 放行: "demo-webapp 完成（3800 字）。评估是否通知。"
   LLM:     tool_calls: [
              set_autonomy { key: "notify", motion: "bounce" },
              call_component { id: "notify-ft", type: "text_card",
-               title: "ft 完成", text: "干完了" }
+               content: { title: "ft 完成", text: "干完了" } }
            ]
   Context: [+ assistant (tool_calls)] [+ tool { ok: true }] [+ tool { ok: true, rendered: "notify-ft" }]
   LLM:     → assistant "卡片已弹出 (´ω`)"
