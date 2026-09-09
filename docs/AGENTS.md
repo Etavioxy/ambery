@@ -31,6 +31,7 @@ The public document set = all rows of the table above (README / VISION to be cre
 ## Writing rules
 
 - Write the current state, not change history: avoid "previously/now/no longer", PRs, commits, and positional drift; name the current mechanism. Change stories go into commits / PRs.
+- Name a concept or a section; never reference it by a positional number. Numbering drifts the moment a list is reordered, and every numbered reference breaks with it.
 - One paragraph per line (editor soft-wrap); code blocks, tables, and lists keep their formatting.
 - Code comments write the complete contract, not a reasoning transcript: keep behavior, failures, timing, ownership, exceptions, consequences, and non-obvious choices; delete narration, test walkthroughs, review analysis, and code restatement.
 - State facts directly and name the subject: write the concrete check, type, API, operation, or behavior; do not use metaphors (except defined terms).
