@@ -97,6 +97,32 @@ fn file_path(cards_dir: &Path, id: &str) -> PathBuf {
     cards_dir.join(format!("{id}.card.json"))
 }
 
+/// 读文件（解析失败 = None，调用方决定跳过还是报错）
+fn read_file(path: &Path) -> Option<CardFile> {
+    serde_json::from_str(&std::fs::read_to_string(path).ok()?).ok()
+}
+
+/// 落盘（目录按需创建）——唯一的写入口
+fn write_file(path: &Path, file: &CardFile) -> Result<(), String> {
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).map_err(|e| format!("cards 目录创建失败：{e}"))?;
+    }
+    let text = serde_json::to_string_pretty(file).map_err(|e| format!("Card 序列化失败：{e}"))?;
+    std::fs::write(path, text).map_err(|e| format!("Card 文件写入失败：{e}"))
+}
+
+/// v1 → v2 迁移落盘（读取时一次性升级，之后文件与当前版本一致）
+fn upgrade_file(path: &Path, file: &mut CardFile) {
+    if file.meta.schema >= SCHEMA {
+        return;
+    }
+    file.component = to_envelope(&file.component);
+    file.meta.schema = SCHEMA;
+    if let Err(e) = write_file(path, file) {
+        eprintln!("[cards] 迁移写回失败 {}：{e}", path.display());
+    }
+}
+
 /// 从文件恢复全部 Card 注册表条目（启动 replay：文件即真相，无文件 = 无 Card）。
 /// 坏文件跳过（单文件病灶不带倒整体）；id 取相对路径去 `.card.json` 后缀。
 pub fn load_all(cards_dir: &Path) -> std::collections::HashMap<String, CardEntry> {
@@ -125,11 +151,12 @@ pub fn load_all(cards_dir: &Path) -> std::collections::HashMap<String, CardEntry
             let Ok(text) = std::fs::read_to_string(&path) else {
                 continue;
             };
-            let Ok(file) = serde_json::from_str::<CardFile>(&text) else {
+            let Ok(mut file) = serde_json::from_str::<CardFile>(&text) else {
                 eprintln!("[cards] 坏文件跳过 {}: 解析失败", path.display());
                 continue;
             };
-            // v1 文件在读取时迁移到信封形态（不改写磁盘；下次写入自然升级）
+            // v1 文件在读取时迁移到信封形态并写回（一次性升级）
+            upgrade_file(&path, &mut file);
             let component = to_envelope(&file.component);
             let typ = field(&component, "type")
                 .and_then(Value::as_str)
@@ -173,8 +200,7 @@ pub fn upsert(
         .to_string();
     // 落盘统一为信封形态：v1 的扁平 spec 也写成 v2 文件
     let component = to_envelope(spec);
-    let direction = spec
-        .get("direction")
+    let direction = field(&component, "direction")
         .and_then(Value::as_str)
         .filter(|d| *d != "auto")
         .map(str::to_string);
@@ -214,11 +240,7 @@ pub fn upsert(
         },
     };
     let path = file_path(cards_dir, &id);
-    if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent).map_err(|e| format!("cards 目录创建失败：{e}"))?;
-    }
-    let text = serde_json::to_string_pretty(&file).map_err(|e| format!("Card 序列化失败：{e}"))?;
-    std::fs::write(&path, text).map_err(|e| format!("Card 文件写入失败：{e}"))?;
+    write_file(&path, &file)?;
     let meta = entry.meta.clone();
     cards.insert(id, entry);
     Ok((meta, created))
@@ -252,18 +274,13 @@ pub fn write_layout(
     entry.layout.offset = Some(offset);
     entry.layout.manual = true;
     let path = file_path(cards_dir, id);
-    let Ok(text) = std::fs::read_to_string(&path) else {
-        return Err(format!("Card 文件读取失败：{id}"));
-    };
-    let Ok(mut file) = serde_json::from_str::<CardFile>(&text) else {
-        return Err(format!("Card 文件解析失败：{id}"));
+    let Some(mut file) = read_file(&path) else {
+        return Err(format!("Card 文件读取或解析失败：{id}"));
     };
     file.meta.layout = entry.layout.clone();
-    // 顺手升级到当前文件版本（v1 → v2）
     file.component = to_envelope(&file.component);
     file.meta.schema = SCHEMA;
-    let text = serde_json::to_string_pretty(&file).map_err(|e| format!("Card 序列化失败：{e}"))?;
-    std::fs::write(&path, text).map_err(|e| format!("Card 文件写入失败：{e}"))
+    write_file(&path, &file)
 }
 
 /// 显示选择回写（用户隐藏/恢复）：只改 _meta.user_closed
@@ -278,26 +295,18 @@ pub fn write_user_closed(
     };
     entry.user_closed = user_closed;
     let path = file_path(cards_dir, id);
-    let Ok(text) = std::fs::read_to_string(&path) else {
-        return Err(format!("Card 文件读取失败：{id}"));
-    };
-    let Ok(mut file) = serde_json::from_str::<CardFile>(&text) else {
-        return Err(format!("Card 文件解析失败：{id}"));
+    let Some(mut file) = read_file(&path) else {
+        return Err(format!("Card 文件读取或解析失败：{id}"));
     };
     file.meta.user_closed = user_closed;
-    // 顺手升级到当前文件版本（v1 → v2）
     file.component = to_envelope(&file.component);
     file.meta.schema = SCHEMA;
-    let text = serde_json::to_string_pretty(&file).map_err(|e| format!("Card 序列化失败：{e}"))?;
-    std::fs::write(&path, text).map_err(|e| format!("Card 文件写入失败：{e}"))
+    write_file(&path, &file)
 }
 
 /// 读 component 全文（list_cards IPC / 恢复用）——统一返回信封形态
 pub fn read_component(cards_dir: &Path, id: &str) -> Option<Value> {
-    let text = std::fs::read_to_string(file_path(cards_dir, id)).ok()?;
-    serde_json::from_str::<CardFile>(&text)
-        .ok()
-        .map(|f| to_envelope(&f.component))
+    read_file(&file_path(cards_dir, id)).map(|f| to_envelope(&f.component))
 }
 
 #[cfg(test)]
@@ -423,8 +432,12 @@ mod tests {
         let comp = read_component(&dir, "old").unwrap();
         assert_eq!(comp["content"]["text"], "正文");
         assert!(comp.get("text").is_none(), "v1 顶层字段已收进 content");
+        // 迁移在读取时写回磁盘（一次性升级，之后文件与当前版本一致）
+        let raw: Value = serde_json::from_str(&std::fs::read_to_string(dir.join("old.card.json")).unwrap()).unwrap();
+        assert_eq!(raw["_meta"]["schema"], 2, "读取即升级文件版本");
+        assert_eq!(raw["component"]["content"]["text"], "正文");
 
-        // 任何一次写入都升级磁盘文件（schema 2 + 信封形态）
+        // 之后的写入保持 v2
         write_user_closed(&dir, &mut cards, "old", true).unwrap();
         let raw: Value = serde_json::from_str(&std::fs::read_to_string(dir.join("old.card.json")).unwrap()).unwrap();
         assert_eq!(raw["_meta"]["schema"], 2);
