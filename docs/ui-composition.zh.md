@@ -21,8 +21,39 @@ DOM                rendering   用户看到的东西
 ```
 
 - 窗口是宿主对象。组件从不创建、定尺寸、移动或显示窗口；那是窗口层的事（`docs/module-storage-flow.md`）。
-- Window 组件是窗口的外观与挂载约定：渲染 chrome、声明该窗口的尺寸模型（`fill` 或 `intrinsic`）、渲染恰好一个 Surface 的内容。它是组件世界的入口；窗口管理在它之外。
+- Window 组件是窗口的外观与挂载约定：渲染外框、声明该窗口的尺寸模型（`fill` 或 `intrinsic`）、渲染恰好一个 Surface 的内容。它是组件世界的入口；窗口管理在它之外。标题栏是可选 chrome，不是窗口属性——有标题栏的窗口用 `Panel` 包住内容；pet 与 Cards Shelf 都没有，Card 的标题来自它的内容。
 - 同一张 Card 只有一个组件：无论渲染在自己的窗口里，还是渲染在容器 Surface 里。
+
+```ts
+// 窗口入口 src/windows/chat.ts —— 只挂载 Window 组件，别的什么都不做
+mount(ChatWindow, { target: document.getElementById("app")! });
+```
+
+```svelte
+<!-- ChatWindow.svelte —— 外框来自 Window，标题栏来自 Panel -->
+<Window kind="chat">
+  <Panel title={t("chat.title")} onClose={closeChat}>
+    <ChatPanel />
+  </Panel>
+</Window>
+
+<!-- PetWindow.svelte —— 完全没有 chrome -->
+<Window kind="pet">
+  <PetFace />
+</Window>
+
+<!-- ShelfWindow.svelte —— 没有标题栏的列表 -->
+<Window kind="shelf">
+  <ShelfList />
+</Window>
+```
+
+```rust
+// 宿主：壳按投影尺寸创建窗口；页面从不改窗口尺寸
+WebviewWindowBuilder::new(&app, &label, WebviewUrl::App("index.html#chat".into()))
+    .inner_size(size.w, size.h)
+    .build()?;
+```
 
 ## widget 各层
 

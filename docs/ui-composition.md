@@ -21,8 +21,39 @@ DOM                rendering   what the user sees
 ```
 
 - A window is a host object. A component never creates, sizes, moves or shows a window; that belongs to the window layer (`docs/module-storage-flow.md`).
-- The window component is the window's frame and mount convention: it renders the chrome, declares the window's sizing model (`fill` or `intrinsic`), and renders exactly one Surface's content. It is the entry of the component world; window management stays outside it.
+- The window component is the window's frame and mount convention: it renders the frame, declares the window's sizing model (`fill` or `intrinsic`), and renders exactly one Surface's content. It is the entry of the component world; window management stays outside it. A title bar is optional chrome, not a window property — a window that has one wraps its content in `Panel`; pet and the Cards Shelf have none, and a Card's title comes from its content.
 - One Card component serves every container: the same Card renders inside its own window and inside a container surface.
+
+```ts
+// window entry, src/windows/chat.ts — mounts the window component and does nothing else
+mount(ChatWindow, { target: document.getElementById("app")! });
+```
+
+```svelte
+<!-- ChatWindow.svelte — frame from Window, header from Panel -->
+<Window kind="chat">
+  <Panel title={t("chat.title")} onClose={closeChat}>
+    <ChatPanel />
+  </Panel>
+</Window>
+
+<!-- PetWindow.svelte — no chrome at all -->
+<Window kind="pet">
+  <PetFace />
+</Window>
+
+<!-- ShelfWindow.svelte — a list with no title bar -->
+<Window kind="shelf">
+  <ShelfList />
+</Window>
+```
+
+```rust
+// host: the shell creates the window at the projected size; the page never resizes it
+WebviewWindowBuilder::new(&app, &label, WebviewUrl::App("index.html#chat".into()))
+    .inner_size(size.w, size.h)
+    .build()?;
+```
 
 ## Widget tiers
 
