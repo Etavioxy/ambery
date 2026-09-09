@@ -4,19 +4,23 @@ English | [中文](pet-window-size.zh.md)
 
 > This document defines the size formula and principles of the pet window.
 
-## Scope of This Document
-
-This document defines pet's size, scanning, and positioning contract; for the emoji pool's editing permissions, overall updates, and movement protocol, see `docs/config.md` / `docs/autonomy.md`.
-
 ## Principles
 
-1. **Center invariant** — when the window grows or shrinks, the visual center stays pinned at the same point; after `setSize`, the top-left offset is compensated.
-2. **Pure function** — window size = f(baseline, scale, face, motion); the computation does not read the current OS window size.
-3. **Fixed obstacle area** — reserved by the worst case across all face/motion, so it does not jitter with state and Card/chat layout stays stable.
-4. **Independent per direction** — the four directions top/bottom/left/right each take their own maximum, not bound into a single H and W.
-5. **Measure only face** — `getBoundingClientRect()` measures only the current rendered width of `#face`, not `#view` (avoiding a window-constraint feedback loop); `#face` must be `flex-shrink: 0` to prevent the container from compressing it.
-6. **Center stays on screen** — only at drag end is it verified that the pet center falls within some monitor's available work area; if out of bounds, it is pulled back to the nearest point of the nearest work area. Size changes always keep the center unchanged and do not participate in this boundary correction.
-7. **Animation does not move the center** — the motion CSS `transform` only displaces temporarily within the reserved window space; the first and last animation frames always return to the base position, so `petCenter` does not change. Dragging, attached-window following, obstacle-area positioning, and boundary validation always use the same base center.
+> **Scope of this document** — this document defines pet's size, scanning, and positioning contract; for the emoji pool's editing permissions, overall updates, and movement protocol, see `docs/config.md` / `docs/autonomy.md`.
+
+> **Center invariant** — when the window grows or shrinks, the visual center stays pinned at the same point; after `setSize`, the top-left offset is compensated.
+
+> **Pure function** — window size = f(baseline, scale, face, motion); the computation does not read the current OS window size.
+
+> **Fixed obstacle area** — reserved by the worst case across all face/motion, so it does not jitter with state and Card/chat layout stays stable.
+
+> **Independent per direction** — the four directions top/bottom/left/right each take their own maximum, not bound into a single H and W.
+
+> **Measure only face** — `getBoundingClientRect()` measures only the current rendered width of `#face`, not `#view` (avoiding a window-constraint feedback loop); `#face` must be `flex-shrink: 0` to prevent the container from compressing it.
+
+> **Center stays on screen** — only at drag end is it verified that the pet center falls within some monitor's available work area; if out of bounds, it is pulled back to the nearest point of the nearest work area. Size changes always keep the center unchanged and do not participate in this boundary correction.
+
+> **Animation does not move the center** — the motion CSS `transform` only displaces temporarily within the reserved window space; the first and last animation frames always return to the base position, so `petCenter` does not change. Dragging, attached-window following, obstacle-area positioning, and boundary validation always use the same base center.
 
 ## CSS ↔ JS Consistency Contract
 

@@ -99,8 +99,11 @@ Consumers: the fallback timer scan reads **by the already-located tab** (the ins
 
 ## Principles
 
-- **Plugin-ability (seam)** — each layer boundary is a provider/consumer contract (a seam), so the adapter is pluggable: users add new terminal types and query stages without touching the core.
-- **Responsibilities are not code-cli-specific** — the adapter abstraction serves reading and enumeration for the loop; future terminals may serve purposes beyond a code CLI, so the abstraction must not become code-cli-specialized.
+> **Scope of this document** — this document defines the terminal access abstraction: the layered model, the per-terminal L1 providers, and the L2 query pipeline; the contract surface shared with core belongs to `packages/terminal-lib/spec.md`, and the protocol itself to `docs/access-protocol.md`.
+
+> **Plugin-ability (seam)** — each layer boundary is a provider/consumer contract (a seam), so the adapter is pluggable: users add new terminal types and query stages without touching the core.
+
+> **Responsibilities are not code-cli-specific** — the adapter abstraction serves reading and enumeration for the loop; future terminals may serve purposes beyond a code CLI, so the abstraction must not become code-cli-specialized.
 
 ## Implementations (L1 transport / lookup providers)
 
