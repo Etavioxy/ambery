@@ -35,6 +35,7 @@ The public document set = all rows of the table above (README / VISION to be cre
 - One paragraph per line (editor soft-wrap); code blocks, tables, and lists keep their formatting.
 - Code comments write the complete contract, not a reasoning transcript: keep behavior, failures, timing, ownership, exceptions, consequences, and non-obvious choices; delete narration, test walkthroughs, review analysis, and code restatement.
 - State facts directly and name the subject: write the concrete check, type, API, operation, or behavior; do not use metaphors (except defined terms).
+- Name code by its module, type, function, tool or IPC name — never by source-file path or line number; both rot on the first rename, while a name still finds its definition. Paths that are themselves part of the contract — data artifacts such as `memory/cards/<id>.card.json` or `config.json`, and document paths — are the exception.
 - Example code must match the actual implementation and must not mislead.
 
 ## Slop list (hunt when writing docs)
