@@ -13,8 +13,45 @@ use std::path::{Path, PathBuf};
 
 use crate::lifecycle::CardMeta;
 
-/// _meta.schema 当前版本
-pub const SCHEMA: u32 = 1;
+/// _meta.schema 当前版本：2 = 类型专属字段收在 component.content 里
+pub const SCHEMA: u32 = 2;
+
+/// 信封字段：顶层只放与类型无关的东西，其余顶层字段属于该类型的 content
+const ENVELOPE_KEYS: [&str; 4] = ["id", "type", "direction", "action"];
+
+/// v1 → v2：类型专属的顶层字段移入 content；已是信封形态的原样返回（content 合并）。
+pub fn to_envelope(component: &Value) -> Value {
+    let Some(obj) = component.as_object() else {
+        return component.clone();
+    };
+    let mut out = serde_json::Map::new();
+    let mut content = serde_json::Map::new();
+    for (key, value) in obj {
+        if ENVELOPE_KEYS.contains(&key.as_str()) {
+            out.insert(key.clone(), value.clone());
+        } else if key == "content" {
+            if let Some(map) = value.as_object() {
+                for (k, v) in map {
+                    content.insert(k.clone(), v.clone());
+                }
+            }
+        } else {
+            content.insert(key.clone(), value.clone());
+        }
+    }
+    if !content.is_empty() {
+        out.insert("content".to_string(), Value::Object(content));
+    }
+    Value::Object(out)
+}
+
+/// 读信封字段：content 优先，回退顶层（v1 形态）
+fn field<'a>(component: &'a Value, key: &str) -> Option<&'a Value> {
+    component
+        .get("content")
+        .and_then(|c| c.get(key))
+        .or_else(|| component.get(key))
+}
 
 /// Card 空间布局（Surface 真相：direction 与 auto/manual offset）
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
@@ -92,15 +129,13 @@ pub fn load_all(cards_dir: &Path) -> std::collections::HashMap<String, CardEntry
                 eprintln!("[cards] 坏文件跳过 {}: 解析失败", path.display());
                 continue;
             };
-            let typ = file
-                .component
-                .get("type")
+            // v1 文件在读取时迁移到信封形态（不改写磁盘；下次写入自然升级）
+            let component = to_envelope(&file.component);
+            let typ = field(&component, "type")
                 .and_then(Value::as_str)
                 .unwrap_or("")
                 .to_string();
-            let title = file
-                .component
-                .get("title")
+            let title = field(&component, "title")
                 .and_then(Value::as_str)
                 .unwrap_or("")
                 .to_string();
@@ -136,6 +171,8 @@ pub fn upsert(
         .and_then(Value::as_str)
         .ok_or("spec.id 缺失")?
         .to_string();
+    // 落盘统一为信封形态：v1 的扁平 spec 也写成 v2 文件
+    let component = to_envelope(spec);
     let direction = spec
         .get("direction")
         .and_then(Value::as_str)
@@ -149,13 +186,11 @@ pub fn upsert(
     let entry = CardEntry {
         meta: CardMeta {
             id: id.clone(),
-            typ: spec
-                .get("type")
+            typ: field(&component, "type")
                 .and_then(Value::as_str)
                 .unwrap_or("")
                 .to_string(),
-            title: spec
-                .get("title")
+            title: field(&component, "title")
                 .and_then(Value::as_str)
                 .unwrap_or("")
                 .to_string(),
@@ -170,7 +205,7 @@ pub fn upsert(
         },
     };
     let file = CardFile {
-        component: spec.clone(),
+        component,
         meta: CardFileMeta {
             schema: SCHEMA,
             created: entry.meta.created,
@@ -224,6 +259,9 @@ pub fn write_layout(
         return Err(format!("Card 文件解析失败：{id}"));
     };
     file.meta.layout = entry.layout.clone();
+    // 顺手升级到当前文件版本（v1 → v2）
+    file.component = to_envelope(&file.component);
+    file.meta.schema = SCHEMA;
     let text = serde_json::to_string_pretty(&file).map_err(|e| format!("Card 序列化失败：{e}"))?;
     std::fs::write(&path, text).map_err(|e| format!("Card 文件写入失败：{e}"))
 }
@@ -247,16 +285,19 @@ pub fn write_user_closed(
         return Err(format!("Card 文件解析失败：{id}"));
     };
     file.meta.user_closed = user_closed;
+    // 顺手升级到当前文件版本（v1 → v2）
+    file.component = to_envelope(&file.component);
+    file.meta.schema = SCHEMA;
     let text = serde_json::to_string_pretty(&file).map_err(|e| format!("Card 序列化失败：{e}"))?;
     std::fs::write(&path, text).map_err(|e| format!("Card 文件写入失败：{e}"))
 }
 
-/// 读 component 全文（list_cards IPC / 恢复用）
+/// 读 component 全文（list_cards IPC / 恢复用）——统一返回信封形态
 pub fn read_component(cards_dir: &Path, id: &str) -> Option<Value> {
     let text = std::fs::read_to_string(file_path(cards_dir, id)).ok()?;
     serde_json::from_str::<CardFile>(&text)
         .ok()
-        .map(|f| f.component)
+        .map(|f| to_envelope(&f.component))
 }
 
 #[cfg(test)]
@@ -283,10 +324,12 @@ mod tests {
         assert!(created);
         assert_eq!(meta.created, 1000);
         assert!(dir.join("todo-1.card.json").exists());
-        // 文件形态：component + _meta 同位
+        // 文件形态：component + _meta 同位；类型专属字段在 content 里
         let raw: Value = serde_json::from_str(&std::fs::read_to_string(dir.join("todo-1.card.json")).unwrap()).unwrap();
         assert_eq!(raw["component"]["type"], "todobox");
-        assert_eq!(raw["_meta"]["schema"], 1);
+        assert_eq!(raw["component"]["content"]["title"], "清单");
+        assert!(raw["component"].get("title").is_none(), "类型专属字段不进顶层");
+        assert_eq!(raw["_meta"]["schema"], 2);
         assert_eq!(raw["_meta"]["user_closed"], false);
         // 重启恢复：注册表从文件读
         let loaded = load_all(&dir);
@@ -318,7 +361,7 @@ mod tests {
         assert_eq!(e.layout.direction.as_deref(), Some("ne"), "direction 跟随 spec");
         // 文件里 component 已换、_meta 保留
         let raw: Value = serde_json::from_str(&std::fs::read_to_string(dir.join("todo-1.card.json")).unwrap()).unwrap();
-        assert_eq!(raw["component"]["title"], "清单 v2");
+        assert_eq!(raw["component"]["content"]["title"], "清单 v2");
         assert_eq!(raw["_meta"]["user_closed"], true);
         assert_eq!(raw["_meta"]["layout"]["offset"], serde_json::json!([30, 40]));
         let _ = std::fs::remove_dir_all(dir.parent().unwrap());
@@ -360,6 +403,33 @@ mod tests {
         s["direction"] = Value::from("auto");
         upsert(&dir, &mut cards, &s, 1000).unwrap();
         assert_eq!(cards["a"].layout.direction, None, "auto = 不锁方位");
+        let _ = std::fs::remove_dir_all(dir.parent().unwrap());
+    }
+
+    #[test]
+    fn v1_file_migrates_on_load_and_write() {
+        let dir = tmp("v1");
+        // 手写一份 v1 文件：类型专属字段在顶层
+        let v1 = serde_json::json!({
+            "component": {"id": "old", "type": "text_card", "title": "旧卡", "text": "正文"},
+            "_meta": {"schema": 1, "created": 500, "user_closed": false, "layout": {"manual": false}}
+        });
+        std::fs::write(dir.join("old.card.json"), serde_json::to_string_pretty(&v1).unwrap()).unwrap();
+
+        // 读取即迁移：注册表拿到 type/title，component 已是信封形态
+        let mut cards = load_all(&dir);
+        assert_eq!(cards["old"].meta.typ, "text_card");
+        assert_eq!(cards["old"].meta.title, "旧卡");
+        let comp = read_component(&dir, "old").unwrap();
+        assert_eq!(comp["content"]["text"], "正文");
+        assert!(comp.get("text").is_none(), "v1 顶层字段已收进 content");
+
+        // 任何一次写入都升级磁盘文件（schema 2 + 信封形态）
+        write_user_closed(&dir, &mut cards, "old", true).unwrap();
+        let raw: Value = serde_json::from_str(&std::fs::read_to_string(dir.join("old.card.json")).unwrap()).unwrap();
+        assert_eq!(raw["_meta"]["schema"], 2);
+        assert_eq!(raw["_meta"]["user_closed"], true);
+        assert_eq!(raw["component"]["content"]["text"], "正文");
         let _ = std::fs::remove_dir_all(dir.parent().unwrap());
     }
 }

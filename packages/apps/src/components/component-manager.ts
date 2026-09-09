@@ -6,6 +6,7 @@
 // 浏览器/maximized 模式（默认）：卡片 position:fixed 在 View 锚点周围弹出。
 
 import type { Bridge, ComponentSpec, Direction } from "../bridge";
+import { flattenSpec } from "./component-spec";
 import { attachDrag } from "../drag";
 import { onLanguageChange, t } from "../i18n";
 import type { PositioningEngine } from "../positioning/engine";
@@ -76,7 +77,8 @@ export class ComponentManager {
     }
   }
 
-  render(spec: ComponentSpec) {
+  render(rawSpec: ComponentSpec) {
+    const spec = flattenSpec(rawSpec);
     // windowed 单卡不变式：异 id spec 一律忽略并报出（数据完整性可见）。
     // 正常路径不会到达（card:spec 已按窗口 label 定向 + 过滤），这是结构防线
     if (this.windowed) {

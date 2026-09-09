@@ -4,6 +4,7 @@
 // browser = mock bridge + DOM 卡片显隐。
 
 import type { RestoredCard } from "../bridge";
+import { flattenSpec } from "../components/component-spec";
 import { t } from "../i18n";
 
 /** 类型图标（五类 Component） */
@@ -51,7 +52,7 @@ export class ShelfPanel {
     this.body.innerHTML = "";
     for (const c of cards) {
       const id = c.component.id;
-      const spec = c.component as { title?: string; label?: string };
+      const spec = flattenSpec(c.component) as { title?: string; label?: string };
       const title = spec.title ?? spec.label ?? id;
       const row = document.createElement("div");
       row.className = "shelf-row";

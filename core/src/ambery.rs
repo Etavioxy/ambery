@@ -1766,7 +1766,9 @@ impl<L: Llm> AmberyBackend<L> {
         let lang = crate::i18n::Lang::of(&self.config.harness_language);
         match call.name.as_str() {
             "call_component" => {
-                let spec = args.get("spec").cloned().unwrap_or(Value::Null);
+                // 统一信封形态：类型专属字段归 content（v1 的扁平 spec 也归一后再校验）
+                let spec = crate::cards::to_envelope(&args.get("spec").cloned().unwrap_or(Value::Null));
+                let content = spec.get("content").cloned().unwrap_or(Value::Null);
                 let id = spec
                     .get("id")
                     .and_then(Value::as_str)
@@ -1823,7 +1825,7 @@ impl<L: Llm> AmberyBackend<L> {
                         _ => &[],
                     };
                     let missing: Vec<&str> = required.iter()
-                        .filter(|f| spec.get(f).map_or(true, |v| match v {
+                        .filter(|f| content.get(f).map_or(true, |v| match v {
                             Value::String(s) => s.is_empty(),
                             Value::Array(a) => a.is_empty(),
                             Value::Object(o) => o.is_empty(),
@@ -1839,7 +1841,7 @@ impl<L: Llm> AmberyBackend<L> {
                     }
                     // todobox items 结构校验：[{text, done}]
                     if typ == "todobox" {
-                        let bad = spec["items"].as_array().map(|arr| arr.iter().any(|it| {
+                        let bad = content["items"].as_array().map(|arr| arr.iter().any(|it| {
                             it["text"].as_str().map_or(true, str::is_empty) || it["done"].as_bool().is_none()
                         })).unwrap_or(true);
                         if bad {
@@ -1851,7 +1853,7 @@ impl<L: Llm> AmberyBackend<L> {
                     }
                     // git_display entries / data_chart chart 结构校验
                     if typ == "git_display" {
-                        let bad = spec["entries"].as_array().map(|arr| arr.iter().any(|e| {
+                        let bad = content["entries"].as_array().map(|arr| arr.iter().any(|e| {
                             e["hash"].as_str().is_none() || e["msg"].as_str().is_none() || e["time"].as_str().is_none()
                         })).unwrap_or(true);
                         if bad {
@@ -1862,7 +1864,7 @@ impl<L: Llm> AmberyBackend<L> {
                         }
                     }
                     if typ == "data_chart" {
-                        let c = &spec["chart"];
+                        let c = &content["chart"];
                         let kind_ok = c["kind"].as_str().map_or(false, |k| ["line", "bar", "pie"].contains(&k));
                         let series_ok = c["series"].as_array().map_or(false, |arr| {
                             !arr.is_empty() && arr.iter().all(|s| {
@@ -3189,14 +3191,14 @@ mod tests {
         let card_file = ov.harness.cards_dir().join("todo-1.card.json");
         assert!(card_file.exists(), "创建即落盘 .card.json");
         let on_disk: Value = serde_json::from_str(&std::fs::read_to_string(&card_file).unwrap()).unwrap();
-        assert_eq!(on_disk["component"]["items"][0]["text"], "a");
+        assert_eq!(on_disk["component"]["content"]["items"][0]["text"], "a");
         // 同 id → updated（不再 toggle 关闭）；component 换、_meta 保留
         let (r2, e2) = ov.execute_tool(&mk("b")).await;
         assert_eq!(r2["updated"], json!("todo-1"));
         assert!(matches!(e2[0], Effect::RenderComponent(_)));
         assert!(ov.harness.cards.contains_key("todo-1"));
         let on_disk: Value = serde_json::from_str(&std::fs::read_to_string(&card_file).unwrap()).unwrap();
-        assert_eq!(on_disk["component"]["items"][0]["text"], "b", "更新只换 component");
+        assert_eq!(on_disk["component"]["content"]["items"][0]["text"], "b", "更新只换 component");
         assert_eq!(on_disk["_meta"]["user_closed"], false);
         // close action → closed + CloseComponent effect + dismiss 删文件
         let close_call = crate::context::ToolCall {
