@@ -2,10 +2,11 @@
 // strictPort 防端口漂移导致 tauri dev 等待错位端口）。
 
 import { defineConfig } from "vite";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  plugins: [tailwindcss()],
+  plugins: [svelte(), tailwindcss()],
   server: {
     port: 3000,
     strictPort: true,
