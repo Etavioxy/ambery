@@ -63,6 +63,12 @@ pub struct CardLayout {
     /// 用户亲手拖过：place 保持偏移不重算
     #[serde(default)]
     pub manual: bool,
+    /// 尺寸投影 [宽, 高]（CSS px）：由尺寸计算写回，非用户选择；None = 待算/已过期
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub size: Option<(f64, f64)>,
+    /// 投影的输入身份（布局常量 + 字体标识）；与当前输入不同即过期
+    #[serde(default, rename = "layoutVersion", skip_serializing_if = "Option::is_none")]
+    pub layout_version: Option<String>,
 }
 
 /// Card 注册表条目（运行期投影 = CardMeta + _meta 状态；component 全文在文件）
@@ -222,12 +228,15 @@ pub fn upsert(
                 .to_string(),
             created: meta,
         },
-        // Agent 普通更新不覆盖显示选择；offset/manual 同理保留
+        // Agent 普通更新不覆盖显示选择；offset/manual 同理保留。
         user_closed: existing.map(|e| e.user_closed).unwrap_or(false),
+        // size/layoutVersion 置空 = 投影过期：内容变了，尺寸必须重算后再写回
         layout: CardLayout {
             direction,
             offset: existing.and_then(|e| e.layout.offset),
             manual: existing.map(|e| e.layout.manual).unwrap_or(false),
+            size: None,
+            layout_version: None,
         },
     };
     let file = CardFile {
