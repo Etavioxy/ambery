@@ -7,20 +7,27 @@
 ## 包拆分
 
 ```
-packages/
-├── core/                          本体 crate（ambery-core + observe-derive + bins）
-├── case/                          测试回放引擎（ambery-case）
-├── terminal-lib/                  契约 crate（adapter trait / 信封 / Composite / MapAdapter 桩）
-├── terminals/                     每终端一包
-│   ├── wt/                        C# UIA sidecar
-│   ├── zellij/                    进程内 CLI adapter
-│   └── ghostty/…                  未来终端包
-├── agents/                        每 agent CLI 一包
-│   ├── claude/                    hook 脚本 + filter + marker
-│   └── opencode/
-└── apps/                          前端形态包
-    ├── tauri/                     Tauri 壳
-    └── webui/                     纯 web 形态——同一前端代码的第二宿主
+ambery/
+├── packages/                      包拆分
+│   ├── core/                      本体 crate（ambery-core + observe-derive + bins）
+│   ├── case/                      测试回放引擎（ambery-case）
+│   ├── terminal-lib/              契约 crate
+│   ├── terminals/                 每终端一包
+│   │   ├── wt/                    C# UIA sidecar
+│   │   ├── zellij/                进程内 CLI adapter
+│   │   └── ghostty/…              未来终端包
+│   ├── agents/                    每 agent CLI 一包
+│   │   ├── claude/                hook 脚本 + filter + marker
+│   │   └── opencode/
+│   └── apps/                      前端包
+│       ├── src/                   共享前端
+│       ├── tauri/                 Tauri 壳 + 宿主层
+│       └── webui/                 纯 web 形态——同一前端代码的第二宿主
+├── docs/                          契约文档（docs-spec.zh.md）
+├── experiments/                   一次性原型
+├── reports/                       调研结论
+├── scripts/  tools/               开发脚本与诊断工具
+└── Cargo.toml                     workspace 清单
 ```
 
 - Spec 分布：每个有 crate 的包在自己的目录下带 spec（`packages/case/spec.md`、`packages/terminal-lib/spec.md`、`packages/apps/spec.md`、`packages/terminals/wt|zellij/spec.md`、`packages/agents/claude|opencode/spec.md`）；根文件（本文件）承载结构与本体的技术选型。

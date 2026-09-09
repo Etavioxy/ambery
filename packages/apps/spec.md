@@ -2,6 +2,34 @@
 
 English | [中文](spec.zh.md)
 
+## Structure
+
+```
+packages/apps/                     frontend package
+├── index.html                     page shell shared by every window
+├── vite.config.ts                 frontend build and dev server
+├── package.json                   frontend dependencies and scripts
+├── src/                           frontend body, host-agnostic
+│   ├── main.ts                    window label / hash → entry module
+│   ├── entry/                     per-window entry: createWindowShell + mount
+│   ├── shell/                     services an entry creates: bridge, store, actions, theme, i18n, window adapter
+│   ├── windows/                   window components: the frame and exactly one Surface's content
+│   ├── widgets/                   tier-1 widgets and their variants
+│   ├── components/                tier-2 business components: Card rendering and its type registry, message list, config field rows
+│   ├── size/                      size model: text measurement, block model, per-type sizeModel
+│   ├── positioning/               window placement engine
+│   └── styles/                    token table and the Tailwind entry
+├── test/                          headless frontend cases (vitest)
+├── tauri/                         tauri form: host layer + Tauri shell
+│   └── src-tauri/                 shell crate (frontendDist → ../../dist)
+└── webui/                         pure-web form: host layer (static serving + browser-side IPC transport)
+```
+
+- A form adds its host layer only — window creation, IPC transport, packaging — around the same `src/`.
+- `entry/` is the only place that creates services; `windows/`, `widgets/` and `components/` hold components; `size/` holds the size model and nothing else. Layer rules and widget tiers: `docs/ui-composition.md`.
+- Window management — create, size, place, show, hide, destroy — belongs to the form's host layer (`tauri/src-tauri/`); the frontend never performs it.
+- Content one window uses sits beside its window component; content shared across windows sits in `components/`.
+
 ## Technology choices
 
 | Form | Technology |
@@ -18,7 +46,7 @@ Tradeoffs:
 
 ## Architecture decisions
 
-1. **Each form is one package over the same frontend core**: tauri and webui both embed/serve the same src; they differ in host layer (window management, IPC transport, packaging).
+1. **One frontend, two forms**: tauri and webui are host layers over the same `src/`; they differ in host layer (window management, IPC transport, packaging).
 2. **Forms talk to core only through the established channel** — native IPC in the packaged tauri form; thin HTTP+WS loopback (127.0.0.1) in browser/webui mode. Same frontend code in both modes.
 
 ## Fixed constraints

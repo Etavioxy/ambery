@@ -7,20 +7,27 @@ English | [中文](spec.zh.md)
 ## Package split
 
 ```
-packages/
-├── core/                          host crate (ambery-core + observe-derive + bins)
-├── case/                          test replay engine (ambery-case)
-├── terminal-lib/                  contract crate (adapter trait / envelope / composite / MapAdapter stub)
-├── terminals/                     one package per terminal
-│   ├── wt/                        C# UIA sidecar
-│   ├── zellij/                    in-process CLI adapter
-│   └── ghostty/…                  future terminal packages
-├── agents/                        one package per agent CLI
-│   ├── claude/                    hook script + filter + marker
-│   └── opencode/
-└── apps/                          frontend form packages
-    ├── tauri/                     Tauri shell
-    └── webui/                     pure-web form, same frontend code's second host
+ambery/
+├── packages/                      package split
+│   ├── core/                      host crate (ambery-core + observe-derive + bins)
+│   ├── case/                      test replay engine (ambery-case)
+│   ├── terminal-lib/              contract crate
+│   ├── terminals/                 one package per terminal
+│   │   ├── wt/                    C# UIA sidecar
+│   │   ├── zellij/                in-process CLI adapter
+│   │   └── ghostty/…              future terminal packages
+│   ├── agents/                    one package per agent CLI
+│   │   ├── claude/                hook script + filter + marker
+│   │   └── opencode/
+│   └── apps/                      frontend package
+│       ├── src/                   the shared frontend
+│       ├── tauri/                 Tauri shell + host layer
+│       └── webui/                 pure-web form, same frontend code's second host
+├── docs/                          contract documents (docs-spec.md)
+├── experiments/                   throwaway prototypes
+├── reports/                       research conclusions
+├── scripts/  tools/               development scripts and diagnostics
+└── Cargo.toml                     workspace manifest
 ```
 
 - Specs: each crate-bearing package carries its own spec under its directory (`packages/case/spec.md`, `packages/terminal-lib/spec.md`, `packages/apps/spec.md`, `packages/terminals/wt|zellij/spec.md`, `packages/agents/claude|opencode/spec.md`); the root file (this document) holds the structure and the host technology choices.
