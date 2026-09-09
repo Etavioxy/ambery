@@ -9,6 +9,7 @@ import { Store } from "../store";
 import { t, wireI18n } from "../i18n";
 import { wireTheme } from "../theme";
 import * as actions from "../tauri_runtime_actions";
+import { escapeHtml } from "../utils/text";
 
 type ConfigNode = ConfigSchemaNode;
 type SchemaResp = ConfigSchemaResp;
@@ -188,8 +189,4 @@ async function apply(path: string, value: unknown, control: HTMLElement) {
     status.textContent = `✗ ${e}`;
     status.className = "err";
   }
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 }

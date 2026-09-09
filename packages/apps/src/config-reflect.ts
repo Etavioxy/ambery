@@ -8,6 +8,7 @@
 import type { Bridge, ConfigSchemaNode } from "./bridge";
 import { createCustomSelect, type CustomSelectOpts } from "./components/custom-select";
 import { t } from "./i18n";
+import { escapeHtml } from "./utils/text";
 
 export type ConfigNode = ConfigSchemaNode;
 
@@ -125,10 +126,6 @@ export function renderConfigNode(n: ConfigNode, opts: RenderNodeOpts): HTMLEleme
   row.appendChild(line);
   if (hint) row.insertAdjacentHTML("beforeend", hint);
   return row;
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
 export interface ApiKeyRowOpts {

@@ -6,6 +6,7 @@
 import type { RestoredCard } from "../bridge";
 import { flattenSpec } from "../components/component-spec";
 import { t } from "../i18n";
+import { escapeHtml } from "../utils/text";
 
 /** 类型图标（五类 Component） */
 const TYPE_ICON: Record<string, string> = {
@@ -68,8 +69,4 @@ export class ShelfPanel {
       this.body.appendChild(row);
     }
   }
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"]/g, (ch) => `&#${ch.charCodeAt(0)};`);
 }
