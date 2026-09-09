@@ -65,7 +65,7 @@ Shelf 不当 Card 布局：不进 engine 占区、不跟随 pet、不可拖拽�
 
 #### ⟡ 一致性剖析
 
-pet 是用户进入 Surface 世界的锚点，而非它自身的一员：左键拖拽表达空间位置，右键进入 Chat，中键进入 Cards Shelf。Chat 是对话内容的 Surface，Card 是持久工作产物的 Surface；两者共享显示、隐藏与恢复语义（engine 占区、持久空间布局与跟随）。Cards Shelf 与 Menu 都不是 Surface——它们是 pet / shell 锚定的瞬时弹出层（失焦即关、不进 engine 占区、无布局记忆与持久可见性）：Menu 是设置入口，Cards Shelf 是 Card 管理入口，其真相分别在 Config 与 `.card.json`，不在弹出层自身。
+pet 是 Surface，也是用户进入其余 Surface 的锚点：左键拖拽表达空间位置，右键进入 Chat，中键进入 Cards Shelf。Chat 是对话内容的 Surface，Card 是持久工作产物的 Surface；两者共享显示、隐藏与恢复语义（engine 占区、持久空间布局与跟随）。Cards Shelf 与 Menu 都不是 Surface——它们是 pet / shell 锚定的瞬时弹出层（失焦即关、不进 engine 占区、无布局记忆与持久可见性）：Menu 是设置入口，Cards Shelf 是 Card 管理入口，其真相分别在 Config 与 `.card.json`，不在弹出层自身。
 
 ## 事件
 

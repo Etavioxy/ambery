@@ -58,7 +58,7 @@ type ComponentContent = {
 
 #### ⟡ 一致性剖析
 
-Component、Card、Surface 与 OS Window 不是同一层概念：Component 是 Agent 可调用的结构化内容；Card 是该内容作为持续工作产物的持久对象；Surface 是用户可见、可隐藏、可恢复的逻辑界面；OS Window 只是 Surface 在当前进程中的物理投影。把四者分开，Card 才能跨重启存在而 window 句柄不必持久化，effect 也只审计动作而不反推当前 Card。除 pet 外的 Chat 与 Card 统一为 Managed Surface（显示 / 隐藏 / 恢复语义统一，进 engine 占区）；pet 自身是锚点与交互入口，不属于 Surface。Cards Shelf 也不是 Surface——它是 pet 锚定的瞬时管理弹出层（同 Menu 一类：失焦即关、不进 engine 占区、无持久状态），其真相在被管理的 `.card.json` 集合。
+Component、Card、Surface 与 OS Window 不是同一层概念：Component 是 Agent 可调用的结构化内容；Card 是该内容作为持续工作产物的持久对象；Surface 是用户可见、可隐藏、可恢复的逻辑界面；OS Window 是宿主的物理容器，Surface 与瞬时弹出层都投影进它。把四者分开，Card 才能跨重启存在而 window 句柄不必持久化，effect 也只审计动作而不反推当前 Card。Chat 与 Card 统一为 Managed Surface（显示 / 隐藏 / 恢复语义统一，进 engine 占区），pet 自身也是 Managed Surface 兼锚点——其余 Surface 的偏移以它为原点度量，它的可见性统辖整组。Cards Shelf 也不是 Surface——它是 pet 锚定的瞬时管理弹出层（同 Menu 一类：失焦即关、不进 engine 占区、无持久状态），其真相在被管理的 `.card.json` 集合。
 
 Card 文件以完整 JSON 持久化：`component` 是 Agent 正常读取与更新的 Component spec；`_meta` 是本地 Surface 管理状态（schema 版本、创建时刻、显示选择与布局），不进入 Agent 投影，也不会被普通同 id 更新覆盖。这样用户隐藏 Card 后，Agent 仍可更新其内容，却不能借一次普通更新偷偷覆盖用户的显示选择。
 

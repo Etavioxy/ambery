@@ -56,6 +56,8 @@ The Card content is measured block by block, because a Card body is a sequence o
 
 Inline content (emphasis, strong, inline code, links) changes a line's width but not the block model. The Card's chrome — header, padding and border — is added once on top of the block total.
 
+A Card body is assembled from a small, closed set of block types. Each type has one layout and one height rule and is computed on its own; a block does not mix layout kinds. Every block's height is derivable from its content and the layout constants — never from an element whose size the computation cannot predict. The rendering inside a block may use flex, grid or absolute positioning as long as that type's rule models the geometry. A block whose size comes from media declares that size — width with height, or width with aspect ratio — so the computation derives it without waiting for the load.
+
 The Card body is capped at a fixed height — the same layout constant as its width cap — and content beyond the cap scrolls inside the Card. The cap does not depend on the display: a display-dependent cap would make the projection display-dependent, which this contract forbids.
 
 Width is bounded, not derived freely: the Card's width is the widest of its blocks and its header, clamped between a minimum and a maximum width layout constant. Content narrower than the minimum still yields the minimum width; content wider than the maximum wraps at the maximum. The header title is a single non-wrapping line clipped with an ellipsis, so a long title never widens the Card past the maximum and always contributes exactly one line of height. There is no minimum height: a Card is as tall as its chrome plus its blocks.

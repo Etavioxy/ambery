@@ -37,7 +37,7 @@ engine 内部 **pet 固定 (0,0)**，所有窗口只存「相对 pet 中心的�
 
 #### ⟡ 一致性剖析
 
-除 pet 外的 Chat 与 Card 统一是 Managed Surface（显示 / 隐藏 / 恢复语义统一）。Managed Surface 的持久真相只分四组：身份、内容、Surface 意图（生命周期与显示选择）、空间布局（direction 与 auto / manual offset）；OS 窗口句柄、creating / closing 与系统临时隐藏均属运行期，不进入 Surface。定位占区不是 `hide()` 的隐式副作用，而由持久意图现算：用户隐藏释放占区但保留布局记忆，系统临时隐藏保留占区，dismiss 结束 Surface 并忘记其布局。窗口种类只能以内容来源和生命周期 policy 区分，不能各自发明 hide / close / placement 语义。Cards Shelf 不属于 Managed Surface：它是 pet 锚定的瞬时管理弹出层（与 Menu 同类——失焦即关、pet 拖拽连坐关、不进 engine 占区、无持久空间布局与显示选择），其持久真相不在窗口，而在它管理的 `.card.json` 集合。
+pet、Chat 与 Card 统一是 Managed Surface（显示 / 隐藏 / 恢复语义统一）；pet 的布局是绝对的——它自己的屏幕位置——它也是其余 Surface 偏移所参照的原点。Managed Surface 的持久真相只分四组：身份、内容、Surface 意图（生命周期与显示选择）、空间布局（direction 与 auto / manual offset）；OS 窗口句柄、creating / closing 与系统临时隐藏均属运行期，不进入 Surface。定位占区不是 `hide()` 的隐式副作用，而由持久意图现算：用户隐藏释放占区但保留布局记忆，系统临时隐藏保留占区，dismiss 结束 Surface 并忘记其布局。窗口种类只能以内容来源和生命周期 policy 区分，不能各自发明 hide / close / placement 语义。Cards Shelf 不属于 Managed Surface：它是 pet 锚定的瞬时管理弹出层（与 Menu 同类——失焦即关、pet 拖拽连坐关、不进 engine 占区、无持久空间布局与显示选择），其持久真相不在窗口，而在它管理的 `.card.json` 集合。
 
 ## 恢复：现算，无快照
 

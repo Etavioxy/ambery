@@ -65,7 +65,7 @@ Shelf does not participate in Card layout: it does not enter the engine occupied
 
 #### ⟡ Consistency analysis
 
-pet is the anchor through which users enter the Surface world, not a member of it: left-click drag expresses spatial position, right-click enters Chat, middle-click enters Cards Shelf. Chat is the Surface for conversation content, Card is the Surface for persistent work artifacts; both share display, hide, and restore semantics (engine occupied area, persistent spatial layout, and following). Neither Cards Shelf nor Menu is a Surface — they are transient popovers anchored to pet / shell (close on blur, do not enter the engine occupied area, no layout memory or persistent visibility): Menu is the settings entry, Cards Shelf is the Card management entry, and their truths live in Config and `.card.json` respectively, not in the popover itself.
+pet is a Surface and the anchor through which users enter the others: left-click drag expresses spatial position, right-click enters Chat, middle-click enters Cards Shelf. Chat is the Surface for conversation content, Card is the Surface for persistent work artifacts; both share display, hide, and restore semantics (engine occupied area, persistent spatial layout, and following). Neither Cards Shelf nor Menu is a Surface — they are transient popovers anchored to pet / shell (close on blur, do not enter the engine occupied area, no layout memory or persistent visibility): Menu is the settings entry, Cards Shelf is the Card management entry, and their truths live in Config and `.card.json` respectively, not in the popover itself.
 
 ## Events
 

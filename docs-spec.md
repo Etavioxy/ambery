@@ -65,6 +65,7 @@ Each `docs/*.md` has one responsibility. The grouping is reading organization, n
 - `pet-window-size.md` — pet window size formula and principles
 - `card-window-size.md` — Card window size: single source, projection into the Card file, and window creation
 - `theme.md` — theme/color table and its Config facility
+- `ui-composition.md` — UI code layering and composition: host / Surface / widget layers, widget tiers, style composition, component principles
 
 ### Internationalization
 
@@ -115,6 +116,15 @@ The following content is **forbidden** in ordinary `docs/*.md`; each has its own
 - **Future capabilities** — new capabilities after 0.1.0 are uniformly written into `docs/post-0.1.0.md`, only as a roadmap, one short statement per item; a separate document is split off when formal design starts.
 
 The above general principles also constrain `concepts.md` (the domain concept document).
+
+## Principles section
+
+A contract document states its standing rules in a `## Principles` section, placed after the document's scope note and before the mechanism sections. The section is not mandatory: a document whose rules are already carried by its own data model, field list, interface or diagram — a format, a coordinate contract, a flow diagram — omits it, and an absent section is not a gap.
+
+- One principle per blockquote paragraph, in the form `> **<name>** — <rule>`; a blank line separates principles.
+- The first principle is the document's scope: what this document defines, and which document owns what it leaves out.
+- A principle states a standing rule or a boundary, never a mechanism step; a principle that needs detail points at the section or document that owns it.
+- A principle is named by its rule, never by a number, a version, or a status.
 
 ## Concept document spec (concepts.md)
 
