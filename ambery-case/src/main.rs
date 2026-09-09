@@ -343,7 +343,7 @@ async fn run_frontend(brain: Option<String>, silent: bool) {
             std::process::exit(1);
         }
     });
-    let app_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../app");
+    let app_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../packages/apps");
     let mut cmd = tokio::process::Command::new(if cfg!(windows) { "cmd" } else { "npx" });
     if cfg!(windows) {
         cmd.args(["/c", "npx", "vitest", "run"]);

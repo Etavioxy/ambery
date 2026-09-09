@@ -22,4 +22,4 @@ ambery-case/cases/
 *.bak
 .vite/
 # tauri externalBin 构建产物（CI 生成）
-app/src-tauri/binaries/
+packages/apps/tauri/src-tauri/binaries/

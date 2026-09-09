@@ -15,7 +15,7 @@ import type {
 } from "./bridge";
 
 // 端口：默认 47600（生产/浏览器调试）；case-runner 拉起 TS 测试进程时经
-// __AMBERY_PORT__ 注入独立端口避让生产（该全局必须在导入本模块前设置——app/test/shim.ts 顶部）
+// __AMBERY_PORT__ 注入独立端口避让生产（该全局必须在导入本模块前设置——前端 case 的 shim 顶部）
 const PORT =
   (globalThis as Record<string, unknown>).__AMBERY_PORT__ ?? "47600";
 const BASE = `http://127.0.0.1:${PORT}`;

@@ -5,7 +5,7 @@ import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = join(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
+const root = join(fileURLToPath(new URL(".", import.meta.url)), "..", "..", "..");
 const exe = process.platform === "win32" ? "ambery-case.exe" : "ambery-case";
 const bin = join(root, "target", "debug", exe);
 
