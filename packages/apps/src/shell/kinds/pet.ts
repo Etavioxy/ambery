@@ -54,6 +54,7 @@ export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<
   const adapter: WindowAdapter = isTauri
     ? await createTauriAdapter(viewEl, window.devicePixelRatio || 1)
     : await createBrowserAdapter(mount, viewEl, dom.dragTarget);
+  shell.setAdapter(adapter);
 
   // ── 尺寸控制器（纯函数，不读当前 OS 窗口大小） ──
   // dpr 现读（多屏不同 DPI：拖到别的显示器后换算不失真，#19 坐标契约）

@@ -48,8 +48,8 @@ export async function wireShelfWindow(shell: WindowShell): Promise<void> {
   const { listen } = await import("@tauri-apps/api/event");
   const { getCurrentWindow, currentMonitor } = await import("@tauri-apps/api/window");
   const win = getCurrentWindow();
-  const winLike = actions.tauriWindowLike(win);
-  const close = () => void actions.hideWindow(winLike);
+  const adapter = shell.adapter!; // 壳已按 Tauri 模式建好（document.body + dpr 1 足够）
+  const close = () => void adapter.hide();
 
   // 中键 toggle（pet 或 shelf 任意位置中键都直接关闭）：pet 发来中心与物理宽高——
   // 尺寸 = pet ×3（钳制），左下角落在 pet 中心、向右上延伸（屏边界钳制）
@@ -60,14 +60,14 @@ export async function wireShelfWindow(shell: WindowShell): Promise<void> {
     }
     const w = clamp(Math.round(ev.payload.w * 3), MIN_W, MAX_W);
     const h = clamp(Math.round(ev.payload.h * 3), MIN_H, MAX_H);
-    await actions.resizeWindow(winLike, w, h);
+    await adapter.setSize(w, h);
     const mon = await currentMonitor();
     const sx = mon ? mon.position.x + mon.size.width : Infinity;
     const x = Math.min(Math.round(ev.payload.x), sx - w - 8);
     const y = Math.max(8, Math.round(ev.payload.y) - h);
-    await actions.moveWindow(winLike, x, y);
+    await adapter.setPosition(x, y);
     shownAt = Date.now();
-    await actions.showWindow(winLike);
+    await adapter.show();
     shell.invalidate();
   });
   // 系统藏（pet 拖拽/托盘连坐）：瞬时面板直接关

@@ -16,6 +16,8 @@ export interface WindowShell {
   store: Store;
   /** 宿主窗口动作；浏览器模式为 null（没有 OS 窗口） */
   adapter: WindowAdapter | null;
+  /** kind 接线换用按自身 DOM 构造的 adapter（如 pet 需要 view 元素做偏移） */
+  setAdapter(adapter: WindowAdapter | null): void;
   /** 内容需要重读数据/重绘（宿主事件、语言切换）；组件挂载时注册 */
   onInvalidate(cb: () => void): void;
   /** 请求内容重读（宿主接线调用） */
@@ -44,6 +46,9 @@ export async function createWindowShell(kind: WindowKind): Promise<WindowShell> 
     bridge,
     store,
     adapter: isHost ? await createTauriAdapter(document.body, 1) : null,
+    setAdapter(adapter) {
+      shell.adapter = adapter;
+    },
     onInvalidate(cb) {
       invalidators.add(cb);
     },
