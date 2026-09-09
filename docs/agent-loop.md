@@ -2,7 +2,7 @@
 
 English | [中文](agent-loop.zh.md)
 
-> Concept definitions: see concepts.md §1 (pet) / §4a (Tool Set). This document fixes the LLM abstraction, the Tool Set protocol, and the mock hook contract.
+> Concept definitions: see concepts.md §pet / §Tool Set. This document fixes the LLM abstraction, the Tool Set protocol, and the mock hook contract.
 
 
 ## Principles
@@ -35,7 +35,7 @@ Implementation and assembly (`LlmBackend::from_config`):
 
 > **Progressive disclosure; query on demand** — Config is deeply nested; the LLM discovers paths and types layer by layer through tool call-feedback, not by relying on injected external Schema.
 
-## Tool Set Protocol (concepts §4a)
+## Tool Set Protocol (concepts §Tool Set)
 
 Nine function definitions, CLI-style names; after execution AmberyBackend appends the result as a `tool` role message:
 
@@ -51,14 +51,14 @@ Nine function definitions, CLI-style names; after execution AmberyBackend append
 | `cron_delete` | `{...}` | deletes one persistent plan | `{ok, ...}` |
 | `sleep` | `{...}` | waits via the same Harness scheduler, then continues the planned tool sequence | `{ok}` |
 
-Permission boundary: the Tool Set is the entire capability set; there is no tool that modifies code files (the ❌ item in concepts §4a does not exist in the definition table).
+Permission boundary: the Tool Set is the entire capability set; there is no tool that modifies code files (the ❌ item in concepts §Tool Set does not exist in the definition table).
 
 ## Full turn for one Queue input (the executor of docs/harness.md §trigger model)
 
-A turn is driven by Queue releasing one input, executed serially — while the current turn is unfinished, the next input is not released (concepts §4c-1, no parallelism):
+A turn is driven by Queue releasing one input, executed serially — while the current turn is unfinished, the next input is not released (concepts §Queue, no parallelism):
 
 1. Queue releases one input (with merge Event Buffer → merged into one, if present) → Context writes the input
-2. Assemble the system prompt request header on the fly (base_prompt + AGENTS.md + system kaomoji pool, not written to Context; user kaomoji pool queried on demand via `edit_config`; concepts §7)
+2. Assemble the system prompt request header on the fly (base_prompt + AGENTS.md + system kaomoji pool, not written to Context; user kaomoji pool queried on demand via `edit_config`; concepts §Config)
 3. Compression check (auto-compact: Context over threshold → dedicated summary + shaking + reset and re-diff)
 4. LLM (request = request header + all Context messages) → with tool_calls: append assistant(tool_calls) + execute in declared order + append the corresponding tool results → call again; without tool_calls: append the assistant message only if content is non-empty, then end. Tool-call budget below.
 5. Side effects (Effects) are broadcast to the frontend via Tauri events; the turn ends and Queue releases the next input
@@ -76,7 +76,7 @@ Tool calls are still executed serially in the declared order in the response. Ca
 
 When this turn's budget is exhausted, the tool results of executed and unexecuted calls are written to Context as usual; the backend then makes one normal LLM request with empty tools so that it generates a final text reply based on those results. This closing request appends no special system record and cannot initiate another tool call; after the reply, the turn ends normally.
 
-**Silence semantics** (design decision): the LLM returning empty content and no tool_calls = it decided to be silent — Context appends no assistant message ("pet can wake, read, feel no need to disturb, and be silent" — concepts, pet §1).
+**Silence semantics** (design decision): the LLM returning empty content and no tool_calls = it decided to be silent — Context appends no assistant message ("pet can wake, read, feel no need to disturb, and be silent" — concepts, pet).
 
 ## Mock Hook Contract (HTTP)
 

@@ -2,7 +2,7 @@
 
 English | [中文](hook.zh.md)
 
-> Concept definition: see concepts.md §5a-1a (Hook). This document fixes the real hook contract: event layering, marker positioning, startup scan, installation.
+> Concept definition: see concepts.md §Hook. This document fixes the real hook contract: event layering, marker positioning, startup scan, installation.
 > The mock contract (docs/agent-loop.md §Mock Hook Contract) is retained as a debug tool.
 > **Design principle: no technical restrictions, the more open the better** — full capabilities (the agent can switch desktops, the three modes are configurable), conservative defaults, and all choices are left to the user.
 

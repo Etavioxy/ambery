@@ -2,7 +2,7 @@
 
 English | [中文](timer.zh.md)
 
-> Timer concept: concepts.md §4e. The fallback patrol scan is the default entry shape of a Watch Schedule (concepts §5a-4). This document defines the scheduling mechanism, the stagger algorithm, and where the scan action applies.
+> Timer concept: concepts.md §Timer. The fallback patrol scan is the default entry shape of a Watch Schedule (concepts §Watch Schedule). This document defines the scheduling mechanism, the stagger algorithm, and where the scan action applies.
 
 ## Positioning
 
@@ -51,7 +51,7 @@ tick (server background task, default 60s (config `timer.tick_ms`; case-runner c
   → raw text archived to terminal-content.jsonl → Filter.digest normalization
   → detect_change against the in-memory prev baseline (normalized full text is not persisted; prev lives in memory, lost on restart)
   → Substantive: inject "{instance} fallback scan detected changes, Context updated ({len} chars). Evaluate whether to notify." into Queue (source=timer_scan) → run_trigger (the normalized full text itself does not enter Context)
-  → Minor / Unchanged: raw archive + prev update, no disturbance (consistent with the concepts §9b silence spirit)
+  → Minor / Unchanged: raw archive + prev update, no disturbance (consistent with pet's silence, concepts §pet)
 ```
 
 The injected message is isomorphic to the stop hook (`…，Context 已更新（N 字）。评估是否通知。`) — the notification/silence decision path is identical.

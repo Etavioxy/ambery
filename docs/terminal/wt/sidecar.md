@@ -41,7 +41,7 @@ English | [中文](sidecar.zh.md)
 Unified error: {"ok":false,"error":"..."}
 ```
 
-- `read_tab` really switches the user's tab (concept §7: 200ms cost) — the semantics of Timer fallback scanning / fetch_terminal is precisely "switch over and read"; `read_active_tab` is reserved for non-invasive scenarios (debugging, quick read of the current window).
+- `read_tab` really switches the user's tab (200ms cost) — the semantics of Timer fallback scanning / fetch_terminal is precisely "switch over and read"; `read_active_tab` is reserved for non-invasive scenarios (debugging, quick read of the current window).
 - The response text is the raw UIA grid text (right-padded, spinner included); Filter processes it on the Rust side (docs/agents/filter.md) — sidecar does not filter; its responsibility is single.
 
 ## Read Path Wiring (Terminal Adapter, docs/terminal/terminal-adapter.md)
@@ -52,7 +52,7 @@ fetch_terminal / Timer scan (instance name = Tab name)
   → read_tab(hwnd, index) → text
 ```
 
-The monitored session (identified by sid8) ↔ Tab is a 1:1 relationship resolved by evidence (concepts §5a-2 Context Slot). **hook→Tab location is solved**: sessionTitle marker (the `<project>·<sid8>` prefix invariant, docs/agents/claude/hook.md §marker location); find_tab hits it exactly by marker; the location result is cached in the registry (lazy retry, frozen once found).
+The monitored session (identified by sid8) ↔ Tab is a 1:1 relationship resolved by evidence (concepts §Context Slot). **hook→Tab location is solved**: sessionTitle marker (the `<project>·<sid8>` prefix invariant, docs/agents/claude/hook.md §marker location); find_tab hits it exactly by marker; the location result is cached in the registry (lazy retry, frozen once found).
 
 ## Visibility Model
 

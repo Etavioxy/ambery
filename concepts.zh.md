@@ -4,25 +4,31 @@
 
 ## Concept List
 
-### 1. pet（宠物）— ui
-Ambery 的人机界面，内置 LLM，住在自己的浮动窗口中——窗内只有颜文字。通过颜文字表达状态，通过 Component 展示信息。用户可与之打字聊天——纯自然语言，无指令。pet 理解用户意图、分析 Context、决定表达方式与何时值得打扰用户。不修改代码文件，权限边界由 Harness 的 Tool Set 限定。
+### 1. pet（宠物）— agent
+Ambery 的人机界面，内置 LLM，住在自己的浮动窗口中——窗内只有颜文字。通过颜文字表达状态，通过 Component 展示信息。用户可与之打字聊天——纯自然语言，无指令。pet 理解用户意图、分析 Context、决定表达方式与何时值得打扰用户。不修改代码文件，权限边界由 Harness 的 Tool Set 限定。pet 是 agent；它呈现给用户的那一面是 pet Surface（见 Surface），同时也是锚点：其余每个 Surface 的布局都以它为原点度量。
 
 #### 1a. Autonomy（自主行为层）— 子概念
 pet 的自主行为引擎：面部表情切换与 pet 窗口的漂浮移动。两路控制——system prompt 定义的默认颜文字映射（不经 LLM），与 pet 经 `set_autonomy` tool call 的主动覆盖。其状态是表情与动画，以 key 表示（如 `[face: idle, motion: still]`），附加进每轮请求、持久于 Context。
 
 > **Autonomy 是自有引擎**——状态绕过 Queue——且**不读取被监控会话**：key 的切换（Processing → Idle 等）由 AmberyBackend 依据外部输入驱动，Autonomy 只按当前 key 输出对应的表情与动作。
 
-### 2. Surface（表达界面）— ui
-表达与界面层：用户可见、可隐藏、可恢复的逻辑界面。pet 自身是锚点与交互入口，不属于 Surface；OS Window 只是 Surface 的物理投影；Menu 是瞬时弹出层，不属于 Surface。Surface 之下有三个家族：Chat Panel（对话）、Card（被渲染的信息单元）、Cards Shelf（卡的全景）。
+### 2. Window（窗口）— ui
+宿主的物理容器：壳负责创建、定尺寸、摆放、显示、隐藏与销毁，它自己不携带持久真相——它显示的东西的持久状态住在那个界面自己的记录里（Card 文件、Config）。每个 Surface 都投影进一个窗口，而 Surface 可以比窗口活得久：隐藏的 Card 就没有窗口。有两个窗口背后没有 Surface——Menu 与 Cards Shelf——因为它们不持有自己的状态。
 
-#### 2a. Chat Panel（聊天面板）— 子概念
+#### 2a. Surface（表达界面）— 子概念
+被管理的界面：它有**自己的**持久显示选择与**自己的**持久空间布局，以及宿主无关的身份。Surface 之下有三个家族：pet（锚点）、Chat Panel（对话）与 Card（被渲染的信息单元）。锚点的布局是绝对的——它自己的屏幕位置；其余每个 Surface 的布局都是相对锚点的方向与偏移，进引擎占区；锚点的可见性统辖整组。
+
+##### 2a-1. Chat Panel（聊天面板）— 子概念
 用户与 pet 打字聊天的界面。由 pet 右键唤出，不是 Component。包括输入框和对话历史（从 Context 读取）。用户输入写入 Queue，放行后作为 `user` role 消息入 Context；assistant 回复边生成边流式给用户——显示优化——完整回复最后写入 Context。
 
-#### 2b. Card（卡片）— 子概念
+##### 2a-2. Card（卡片）— 子概念
 Card 是被渲染信息的 Surface 侧身份：一块 Managed Surface（显示 / 隐藏 / 恢复语义统一），Component 的内容在其上变为用户可见。用户在卡上的交互事件（关闭、跳转、勾选等）不写 `user` role、不经 Queue，写 Harness 的 Event Buffer。Card 的持久与状态身份——它的文件、稳定 id、跨重启的生命周期——住在 Component State；两者是一体两面。
 
+#### 2b. Menu（设置面板）— 子概念
+从托盘打开的设置入口：schema 驱动的 Config 编辑器。
+
 #### 2c. Cards Shelf（卡片架）— 子概念
-从 pet 唤出的卡全景管理面：列出、显示、隐藏、恢复所有卡。其真相源是持久化的卡集合（见 Component State），不持有自己的持久状态；Shelf 失焦即关。
+从 pet 唤出的卡全景管理面：列出、显示、隐藏、恢复所有卡。其真相源是持久化的卡集合（见 Component State），不持有自己的持久状态。
 
 ### 3. Component（组件）— ui
 agent 可调用的结构化内容：预定义的前端卡片类型，用于信息展示。Component 是数据面，不是界面本身；被渲染时，其内容以 Card 的形态出现在 Surface 上。
@@ -101,7 +107,6 @@ AmberyBackend 和 pet 的持久化配置（LLM profiles、外观、语言、工�
 ### 9. Session（会话）— system
 pet 自己的生命周期单元：一次 AmberyBackend 启动打开一个 session，该次运行产生的一切记录都归属它——边界标记存在 Storage。日志神圣不可改写；session 因此也是回放单元——重建一段运行就是在两个 session 标记之间切片。重启后的状态恢复跨边界读取（Memory、卡、实例清单），但新记录属于新 session；旧 session 的日志原样保留。
 
-
 ### 10. Platform Primitives（平台原语）— system
 Ambery 自身的平台能力层——与 Tauri 强相关，不属于协议的外部抽象：Ambery 自己的窗口与环境的一切（自身 Surface 的定位、尺寸、聚焦、桌面切换），需要壳层按平台实现。这个概念正是壳层做多平台处理的原因：Windows / macOS / Web 各有实现与能力边界（Web 受限）。对外部来源的接入（定位与读取别的软件）不在这里——它属于 Ambery Protocol 侧。
 
@@ -111,7 +116,7 @@ Ambery 自身的平台能力层——与 Tauri 强相关，不属于协议的外
 
 ### Example A: 一个 Claude Code 会话收工——终端玩法
 
-Claude Code 跑在终端 pane 里；pane 的窗口是 **Source Host**，会话本身是一个 **Source**，以稳定会话 id 占有一个 **Context Slot**。会话干完活，宿主的 **Hook**（Stop）触发，把事件推给 **AmberyBackend**。**Perception** 接收交付，对该会话的更新流启动 **Digest**：理解落袋为 Memory 沉淀，消化后的更新进入 **Queue**。**Agent Loop** 放行它——一个 **Turn**：请求从 **Context** 拼装，LLM 判断值得说，经 **Tool Set** 发出 tool call；**pet** 的 **Autonomy** 翻成跳动表情，回复渲染为 **Surface** 上的 **Card**——一个 **Component**，其稳定 id 意味着后续更新原位落地，**Component State**（含用户的显示选择）完好。用户在 **Chat Panel** 追问；交互事件进 **Event Buffer**，下次放行时附带。
+Claude Code 跑在终端 pane 里；pane 的窗口是 **Source Host**，会话本身是一个 **Source**，以稳定会话 id 占有一个 **Context Slot**。会话干完活，宿主的 **Hook**（Stop）触发，把事件推给 **AmberyBackend**。**Perception** 接收交付，对该会话的更新流启动 **Digest**：理解落袋为 Memory 沉淀，消化后的更新进入 **Queue**。**Agent Loop** 放行它——一个 **Turn**：请求从 **Context** 拼装，LLM 判断值得说，经 **Tool Set** 发出 tool call；**pet** 的 **Autonomy** 翻成跳动表情，回复渲染为 **Surface** 上的 **Card**：pet 旁边新开一个 **Window**，它承载的 **Component** 有稳定 id，后续更新原位落地，**Component State**（含用户的显示选择）完好。用户在 **Chat Panel** 追问；交互事件进 **Event Buffer**，下次放行时附带。
 
 ### Example B: 一本书记住读到哪——读书玩法
 
@@ -119,7 +124,7 @@ Claude Code 跑在终端 pane 里；pane 的窗口是 **Source Host**，会话�
 
 ### Example C: 没有 hook 的播放器——巡逻只是计划条目
 
-一个视频播放器是**不提供 Hook** 的 **Source Host**；接入协议只能轮询。agent 的 **Watch Schedule** 里因此有一条巡逻条目——每五分钟检查一次进度——由 **Timer** 在 tick 上执行。这条条目存在，恰恰因为宿主的 hook 沉默；会推送的宿主不需要巡逻。每次扫描是一个 **Turn**：进度更新落到这部电影的 **Context Slot** 上；到了值得说的节点，**pet** 决定打扰——**Autonomy** 跳动，**Card** 带着时间偏移弹出。
+一个视频播放器是**不提供 Hook** 的 **Source Host**；接入协议只能轮询。agent 的 **Watch Schedule** 里因此有一条巡逻条目——每五分钟检查一次进度——由 **Timer** 在 tick 上执行。这条条目存在，恰恰因为宿主的 hook 沉默；会推送的宿主不需要巡逻。每次扫描是一个 **Turn**：进度更新落到这部电影的 **Context Slot** 上；到了值得说的节点，**pet** 决定打扰——**Autonomy** 跳动，**Card** 带着时间偏移在自己的 **Window** 里弹出。
 
 ### Example D: 压缩与消化分工
 
@@ -127,7 +132,7 @@ Claude Code 跑在终端 pane 里；pane 的窗口是 **Source Host**，会话�
 
 ### Example E: 启动——跨重启的状态
 
-**AmberyBackend** 启动，加载 **Config**，从 **Storage** 恢复：**Memory** workspace（notes 与索引）、实例清单、以及每一张 **Card** 文件——内容与 **Component State** 同位，用户做过的显示选择（隐藏的卡、拖过的位置）跨重启留存。**Cards Shelf** 从卡文件重建全景；坏文件被跳过，一张卡坏了不拖垮其余。
+**AmberyBackend** 启动，加载 **Config**，从 **Storage** 恢复：**Memory** workspace（notes 与索引）、实例清单、以及每一张 **Card** 文件——内容与 **Component State** 同位，用户做过的显示选择（隐藏的卡、拖过的位置）跨重启留存。壳重建 pet、**Chat Panel** 与每张可见 **Card** 的 **Window**；**Cards Shelf** 从卡文件重建全景；坏文件被跳过，一张卡坏了不拖垮其余。
 
 ### Example F: pet 的一次 session——这个词用在哪
 
@@ -141,9 +146,11 @@ Claude Code 跑在终端 pane 里；pane 的窗口是 **Source Host**，会话�
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | pet | ✅ | ✅ | ✅ | ✅ | — | ✅ |
 | Autonomy | ✅ | — | ✅ | — | — | — |
+| Window | ✅ | — | ✅ | — | ✅ | — |
 | Surface | ✅ | — | ✅ | — | ✅ | ✅ |
 | Chat Panel | ✅ | ✅ | — | ✅ | — | — |
 | Card | ✅ | — | ✅ | — | ✅ | ✅ |
+| Menu | — | — | — | — | — | — |
 | Cards Shelf | — | — | — | — | ✅ | — |
 | Component | ✅ | — | ✅ | — | — | ✅ |
 | Component State | ✅ | — | — | — | ✅ | — |

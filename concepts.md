@@ -4,25 +4,31 @@ English | [中文](concepts.zh.md)
 
 ## Concept List
 
-### 1. pet — ui
-Ambery's human-machine interface, with a built-in LLM, living in its own floating window that shows only kaomoji. It expresses state through kaomoji and presents information through Components. The user can type-chat with it — pure natural language, no commands. pet understands user intent, analyzes Context, and decides how to express itself and when the user is worth disturbing. It does not modify code files; its permission boundary is defined by Harness's Tool Set.
+### 1. pet — agent
+Ambery's human-machine interface, with a built-in LLM, living in its own floating window that shows only kaomoji. It expresses state through kaomoji and presents information through Components. The user can type-chat with it — pure natural language, no commands. pet understands user intent, analyzes Context, and decides how to express itself and when the user is worth disturbing. It does not modify code files; its permission boundary is defined by Harness's Tool Set. pet is the agent; how it appears to the user is the pet Surface (see Surface), which is also the anchor: it is the origin every other Surface's layout is measured from.
 
 #### 1a. Autonomy — subconcept
 pet's autonomous behavior engine: facial expression switching and the floating movement of the pet window. Two control paths — the default kaomoji mapping defined in the system prompt (no LLM involved), and pet's active override via the `set_autonomy` tool call. Its state is expression and animation, keyed (e.g. `[face: idle, motion: still]`), appended to each request and persisted in Context.
 
 > **Autonomy is its own engine** — its state bypasses Queue — and **it does not read monitored sessions**: key transitions (Processing → Idle, etc.) are driven by AmberyBackend from external inputs; Autonomy only outputs the expression and motion matching the current key.
 
-### 2. Surface — ui
-The expression-and-interface layer: a user-visible, hideable, restorable logical interface. pet itself is the anchor and interaction entry, not a Surface; an OS Window is only the physical projection of a Surface; Menu is a transient popup, not a Surface. Three families live under Surface: the Chat Panel (conversation), the Card (a rendered unit of information), and the Cards Shelf (the panorama over all Cards).
+### 2. Window — ui
+The host's physical container: the shell creates, sizes, places, shows, hides and destroys it, and it carries no persistent truth of its own — the persistent state of whatever it shows lives in that interface's own record (a Card file, the Config). Every Surface is projected into one, and a Surface may outlive its window: a hidden Card has none. Two windows have no Surface behind them — the Menu and the Cards Shelf — because they hold no state of their own.
 
-#### 2a. Chat Panel — subconcept
+#### 2a. Surface — subconcept
+A managed interface: it carries its own persistent display choice and its own persistent spatial layout, plus a host-independent identity. Three families live under Surface: pet (the anchor), the Chat Panel (conversation) and the Card (a rendered unit of information). The anchor's layout is absolute — its own screen position — while every other Surface's layout is a direction and an offset relative to the anchor, entering the engine's occupied area; the anchor's visibility governs the group.
+
+##### 2a-1. Chat Panel — subconcept
 The interface where the user type-chats with pet. Summoned by pet right-click, not a Component. It includes an input box and conversation history (read from Context). User input is written into Queue and, after release, enters Context as a `user` role message; assistant replies stream to the user as they are generated — a display optimization — with the full reply written to Context at the end.
 
-#### 2b. Card — subconcept
+##### 2a-2. Card — subconcept
 A Card is the Surface-side identity of rendered information: a Managed Surface (unified show / hide / restore semantics) on which a Component's content becomes visible to the user. User interactions on a Card (close, jump, check, etc.) do not write a `user` role and do not go through Queue; they write to Harness's Event Buffer. The Card's persistence and state identity — its file, its stable id, its lifetime across restarts — lives in Component State; the two are the two faces of one thing.
 
+#### 2b. Menu — subconcept
+The settings entry, opened from the tray: the schema-driven Config editor.
+
 #### 2c. Cards Shelf — subconcept
-The management panorama over all Cards, opened from pet: it lists, shows, hides, and restores Cards. Its truth source is the persisted Card collection (see Component State), not its own state; the Shelf itself holds no persistent state and closes on focus loss.
+The management panorama over all Cards, opened from pet: it lists, shows, hides, and restores Cards. Its truth source is the persisted Card collection (see Component State), not its own state.
 
 ### 3. Component — ui
 The structured content the agent can call: predefined frontend card types used for information display. Component is the data plane, not the interface itself; when rendered, its content appears as a Card on the Surface.
@@ -102,6 +108,7 @@ The persistence layer for runtime data. It is the same type as Config (persisten
 pet's own lifetime unit: one AmberyBackend startup opens one session, and every record produced during that run belongs to it — the boundary marker lives in Storage. Logs are sacred and never rewritten; a session is therefore also the replay unit — reconstructing a run means slicing between two session markers. Restoring state after a restart reads across the boundary (Memory, cards, instance list), but the new records belong to the new session; the old session's logs stay intact.
 
 ### 10. Platform Primitives — system
+Ambery's own platform-capability layer — Tauri-specific, not an external abstraction of the protocol: everything about Ambery's own windows and environment (positioning, sizing, focus and desktop switching of its own Surfaces) must be implemented per platform by the shell. This concept is why the shell does multi-platform work: Windows / macOS / Web each have their own implementations and capability boundaries (Web is limited). Access to external sources — locating and reading other software — is not here; it belongs to the Ambery Protocol side.
 
 ---
 
@@ -109,7 +116,7 @@ pet's own lifetime unit: one AmberyBackend startup opens one session, and every 
 
 ### Example A: a Claude Code session finishes — the terminal play
 
-Claude Code runs in a terminal pane; the pane's window is the **Source Host**, and the session itself is a **Source** holding a **Context Slot** under its stable session id. The session finishes its work; the host's **Hook** (Stop) fires and pushes the event to **AmberyBackend**. **Perception** takes the delivery and starts **Digest** on the session's update stream: the understanding lands as a Memory deposit, and the digested update enters the **Queue**. The **Agent Loop** releases it — one **Turn**: the request is assembled from **Context**, the LLM judges the news worth telling, and emits a tool call through the **Tool Set**; **pet**'s **Autonomy** flips to the bouncing face, and the reply renders as a **Card** on the **Surface** — a **Component** whose stable id means a later update lands in place, its **Component State** (including the user's display choice) preserved. The user follows up in the **Chat Panel**; the interaction events go to the **Event Buffer** and attach at the next release.
+Claude Code runs in a terminal pane; the pane's window is the **Source Host**, and the session itself is a **Source** holding a **Context Slot** under its stable session id. The session finishes its work; the host's **Hook** (Stop) fires and pushes the event to **AmberyBackend**. **Perception** takes the delivery and starts **Digest** on the session's update stream: the understanding lands as a Memory deposit, and the digested update enters the **Queue**. The **Agent Loop** releases it — one **Turn**: the request is assembled from **Context**, the LLM judges the news worth telling, and emits a tool call through the **Tool Set**; **pet**'s **Autonomy** flips to the bouncing face, and the reply renders as a **Card** on the **Surface**: a new **Window** opens beside pet's, and the **Component** it carries has a stable id, so a later update lands in place with its **Component State** (including the user's display choice) preserved. The user follows up in the **Chat Panel**; the interaction events go to the **Event Buffer** and attach at the next release.
 
 ### Example B: a book keeps its place — the reading play
 
@@ -117,7 +124,7 @@ The user reads a novel in a library app; the app is the **Source Host**, and the
 
 ### Example C: a player with no hook — patrol as a plan entry
 
-A video player is a **Source Host** that offers no **Hook**; the access contract can only poll. The agent's **Watch Schedule** therefore holds a patrol entry — check progress every five minutes — and the **Timer** executes it on its tick. This entry exists precisely because the host's hook is silent; a host that pushes needs no patrol. Each scan is one **Turn**: the progress update lands on the film's **Context Slot**; at the scene worth telling, **pet** decides to disturb — **Autonomy** bounces, and a **Card** pops with the time offset.
+A video player is a **Source Host** that offers no **Hook**; the access contract can only poll. The agent's **Watch Schedule** therefore holds a patrol entry — check progress every five minutes — and the **Timer** executes it on its tick. This entry exists precisely because the host's hook is silent; a host that pushes needs no patrol. Each scan is one **Turn**: the progress update lands on the film's **Context Slot**; at the scene worth telling, **pet** decides to disturb — **Autonomy** bounces, and a **Card** pops with the time offset in its own **Window**.
 
 ### Example D: compression and digest divide the labor
 
@@ -125,7 +132,7 @@ A long session: **Context** has grown until the usage truth crosses the budget, 
 
 ### Example E: bootstrap — the state that survives a restart
 
-**AmberyBackend** starts, loads **Config**, and restores from **Storage**: the **Memory** workspace (notes and index), the instance list, and every **Card** file — content and **Component State** colocated, so the display choices the user made (hidden cards, dragged layouts) survive the restart. The **Cards Shelf** rebuilds its panorama from the card files; a sick file is skipped, one broken card does not take down the rest.
+**AmberyBackend** starts, loads **Config**, and restores from **Storage**: the **Memory** workspace (notes and index), the instance list, and every **Card** file — content and **Component State** colocated, so the display choices the user made (hidden cards, dragged layouts) survive the restart. The shell rebuilds the **Windows** for pet, the **Chat Panel** and every visible **Card**; the **Cards Shelf** rebuilds its panorama from the card files; a sick file is skipped, one broken card does not take down the rest.
 
 ### Example F: one pet session — where the word applies
 
@@ -139,9 +146,11 @@ The user starts Ambery; **AmberyBackend** opens **session** #42: one line in Sto
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | pet | ✅ | ✅ | ✅ | ✅ | — | ✅ |
 | Autonomy | ✅ | — | ✅ | — | — | — |
+| Window | ✅ | — | ✅ | — | ✅ | — |
 | Surface | ✅ | — | ✅ | — | ✅ | ✅ |
 | Chat Panel | ✅ | ✅ | — | ✅ | — | — |
 | Card | ✅ | — | ✅ | — | ✅ | ✅ |
+| Menu | — | — | — | — | — | — |
 | Cards Shelf | — | — | — | — | ✅ | — |
 | Component | ✅ | — | ✅ | — | — | ✅ |
 | Component State | ✅ | — | — | — | ✅ | — |

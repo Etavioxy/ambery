@@ -74,7 +74,7 @@ TUI 交互界面（`ratatui`）。核心交互：
 
 ### Trajectory 形态（`--trajectory`）
 
-平铺 JSONL 投影为 **turn-centric 轨迹账本**：顶层单位是本系统 LLM 的一次完整处理回合——**turn** = Queue 放行一轮（concepts §4c-1；`queue.jsonl` 每行一个 turn）。该轮产生的全部内容——context 写入、effect、终端读取、agent 记录、cron 动作——按 ts 归属到最近的 turn，缩进一级渲染其下。
+平铺 JSONL 投影为 **turn-centric 轨迹账本**：顶层单位是本系统 LLM 的一次完整处理回合——**turn** = Queue 放行一轮（concepts §Queue；`queue.jsonl` 每行一个 turn）。该轮产生的全部内容——context 写入、effect、终端读取、agent 记录、cron 动作——按 ts 归属到最近的 turn，缩进一级渲染其下。
 
 - `queue.jsonl` 每行 = 一个 turn 边界。无 queue 数据时（case 快照常见），`context.jsonl` 的 user message 退化为 turn 边界。
 - **被监管的 agent 实例不是本系统 LLM**：被监管的外部会话只以普通 `◇` 行出现，从不构成层级。

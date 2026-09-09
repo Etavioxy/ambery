@@ -41,7 +41,7 @@
 错误统一：{"ok":false,"error":"..."}
 ```
 
-- `read_tab` 会真实切换用户的标签页（概念 §7：200ms 成本）——Timer 兜底扫描/fetch_terminal 的语义就是「切过去读」；`read_active_tab` 留给非侵入场景（调试、当前窗口快读）。
+- `read_tab` 会真实切换用户的标签页（200ms 成本）——Timer 兜底扫描/fetch_terminal 的语义就是「切过去读」；`read_active_tab` 留给非侵入场景（调试、当前窗口快读）。
 - 响应 text 是 UIA 网格原文（右填充、含 spinner），Filter 在 Rust 侧处理（docs/agents/filter.md）——sidecar 不过滤，职责单一。
 
 ## 读通道接线（Terminal Adapter，docs/terminal/terminal-adapter.md）
@@ -52,7 +52,7 @@ fetch_terminal / Timer scan（instance 名 = Tab 名）
   → read_tab(hwnd, index) → text
 ```
 
-被监控会话（以 sid8 标识）↔ Tab 的 1:1 关系由证据解析（concepts §5a-2 Context Slot）。**Hook→Tab 定位已解决**：sessionTitle marker（`<project>·<sid8>` 前缀不变量，docs/agents/claude/hook.md §marker 定位），find_tab 按 marker 精确命中；定位结果缓存进注册表（惰性重试，找到即冻结）。
+被监控会话（以 sid8 标识）↔ Tab 的 1:1 关系由证据解析（concepts §Context Slot）。**Hook→Tab 定位已解决**：sessionTitle marker（`<project>·<sid8>` 前缀不变量，docs/agents/claude/hook.md §marker 定位），find_tab 按 marker 精确命中；定位结果缓存进注册表（惰性重试，找到即冻结）。
 
 ## 视野模型
 

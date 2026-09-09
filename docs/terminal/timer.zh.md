@@ -2,7 +2,7 @@
 
 [English](timer.md) | 中文
 
-> Timer 概念：concepts.md §4e。兜底巡逻扫描是 Watch Schedule（concepts §5a-4）的默认条目形态。本文档定调度机制、错峰算法与扫描动作的应用点。
+> Timer 概念：concepts.md §Timer。兜底巡逻扫描是 Watch Schedule（concepts §Watch Schedule）的默认条目形态。本文档定调度机制、错峰算法与扫描动作的应用点。
 
 ## 定位
 
@@ -51,7 +51,7 @@ tick（server 后台任务，默认 60s（config `timer.tick_ms`；case-runner �
   → 原文存 terminal-content.jsonl → Filter.digest 归一
   → 与内存 prev 基准 detect_change（归一全文不持久化，prev 存内存重启丢）
   → Substantive：注入「{instance} 兜底扫描发现变化，Context 已更新（{len} 字）。评估是否通知。」进 Queue（source=timer_scan）→ run_trigger（归一全文本身不进 Context）
-  → Minor / Unchanged：原文存档 + prev 更新，不打扰（与 pet 的沉默语义一致，concepts §1）
+  → Minor / Unchanged：原文存档 + prev 更新，不打扰（与 pet 的沉默语义一致，concepts §pet）
 ```
 
 注入消息与 stop hook 同构（`…，Context 已更新（N 字）。评估是否通知。`）——通知/沉默决策路径一致。

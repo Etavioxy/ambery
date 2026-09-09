@@ -24,7 +24,7 @@ packages/
 ```
 
 - Spec 分布：每个有 crate 的包在自己的目录下带 spec（`packages/case/spec.md`、`packages/terminal-lib/spec.md`、`packages/apps/spec.md`、`packages/terminals/wt|zellij/spec.md`、`packages/agents/claude|opencode/spec.md`）；根文件（本文件）承载结构与本体的技术选型。
-- 依赖：`core` → `terminal-lib` 仅此；`terminals/*` 与 `agents/*` → `terminal-lib` 仅此；终端/agent 包之间互不依赖、也不依赖 core；`apps/*` → `core`；`case` → 全部（只读服务）。激活的终端/agent 包的组装发生在二进制/配置层，因此二进制（`apps/*`、`case`、core 自带的 bins）可以为接线额外依赖终端/agent crate。协议（concepts §5，Ambery Protocol）是跨包共享的契约。
+- 依赖：`core` → `terminal-lib` 仅此；`terminals/*` 与 `agents/*` → `terminal-lib` 仅此；终端/agent 包之间互不依赖、也不依赖 core；`apps/*` → `core`；`case` → 全部（只读服务）。激活的终端/agent 包的组装发生在二进制/配置层，因此二进制（`apps/*`、`case`、core 自带的 bins）可以为接线额外依赖终端/agent crate。协议（concepts §Ambery Protocol）是跨包共享的契约。
 
 ## 技术选型（本体）
 

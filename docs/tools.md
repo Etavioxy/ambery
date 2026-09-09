@@ -74,7 +74,7 @@ A row opens and closes the detail pane. `→` / `l` on any row (except the `[pre
 
 ### Trajectory form (`--trajectory`)
 
-Projects the flat JSONL into a **turn-centric trajectory ledger**: the top-level unit is one complete processing round of this system's LLM — a **turn** = one Queue release (concepts §4c-1; one `queue.jsonl` line per turn). Everything the round produced — context writes, effects, terminal reads, agent records, cron actions — is attributed to the nearest turn by ts and rendered one level indented under it.
+Projects the flat JSONL into a **turn-centric trajectory ledger**: the top-level unit is one complete processing round of this system's LLM — a **turn** = one Queue release (concepts §Queue; one `queue.jsonl` line per turn). Everything the round produced — context writes, effects, terminal reads, agent records, cron actions — is attributed to the nearest turn by ts and rendered one level indented under it.
 
 - Each `queue.jsonl` line = one turn boundary. When there is no queue data (common in case snapshots), a `context.jsonl` user message degrades into a turn boundary.
 - **Monitored agent instances are not this system's LLM**: supervised external sessions appear only as ordinary `◇` rows, never as hierarchy levels.
