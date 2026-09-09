@@ -4,7 +4,7 @@
 // browser = mock bridge + DOM 卡片显隐。
 
 import type { RestoredCard } from "../bridge";
-import { flattenSpec } from "../components/component-spec";
+import { flattenSpec } from "./component-spec";
 import { t } from "../i18n";
 import { escapeHtml } from "../utils/text";
 

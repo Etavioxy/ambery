@@ -386,7 +386,7 @@ export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<
     // Cards Shelf（browser 与 Tauri 共享 ShelfPanel）：中键 toggle——瞬时 overlay，
     // 尺寸 = pet ×3、左下角落在 pet 中心向右上延伸；中键点 pet 或 shelf 任意位置 /
     // 点面板外（失焦等价）/ pet 拖拽关闭
-    const { ShelfPanel } = await import("../../windows/shelf-panel");
+    const { ShelfPanel } = await import("../../components/shelf-panel");
     const shelfMount = document.createElement("div");
     shelfMount.id = "shelf-overlay";
     shelfMount.style.display = "none";

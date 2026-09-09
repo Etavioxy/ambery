@@ -2,7 +2,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Window from "./Window.svelte";
-  import { ShelfPanel } from "./shelf-panel";
+  import { ShelfPanel } from "../components/shelf-panel";
   import { createShelfActions, wireShelfWindow } from "../shell/kinds/shelf";
   import type { WindowShell } from "../shell/context";
 
