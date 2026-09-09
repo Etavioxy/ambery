@@ -836,3 +836,34 @@ html.browser body {
   line-height: 1;
 }
 #btn-close:hover { color: var(--ov-error); }
+
+/* ===== 文本选择：chrome 不可选、内容可选（docs/ui-composition.md §Style composition） =====
+   chrome = 标题 / 按钮 / 标签；内容 = 消息正文、Card 文本、代码。 */
+button,
+.chat-header,
+.cmp-header,
+.setup-head,
+#panel-head,
+.map-head,
+.cfg-line .name,
+.shelf-type,
+.shelf-title,
+.chat-queue-status,
+#panel-status,
+.setup-test-status,
+.api-key-hint,
+.desc,
+.dim,
+.readonly {
+  user-select: none;
+}
+
+.cmp-body,
+.chat-history,
+.think-card pre,
+.cmp-body pre,
+input,
+textarea,
+select {
+  user-select: text;
+}
