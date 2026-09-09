@@ -925,7 +925,7 @@ html.browser body {
 }
 #btn-close:hover { color: var(--ov-error); }
 
-/* ===== 文本选择：chrome 不可选、内容可选（docs/ui-composition.md §Style composition） =====
+/* ===== 文本选择：chrome 不可选、内容可选 =====
    chrome = 标题 / 按钮 / 标签；内容 = 消息正文、Card 文本、代码。 */
 button,
 .chat-header,

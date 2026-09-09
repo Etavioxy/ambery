@@ -1,5 +1,5 @@
-// Component spec 的形态适配：v2 信封把类型专属字段收在 content 里（docs/components.md §Tool schema）。
-// 渲染层当前按扁平字段读取；注册表（T70）落地前，这里在入口做一次归一，两种形态都吃。
+// Component spec 的形态适配：v2 信封把类型专属字段收在 content 里。
+// 渲染层当前按扁平字段读取；注册表落地前，这里在入口做一次归一，两种形态都吃。
 
 import type { ComponentSpec } from "../bridge";
 

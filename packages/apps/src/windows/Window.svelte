@@ -1,5 +1,5 @@
 <!-- 窗口组件：渲染本窗口的外框，并把窗口壳发布到 context。
-     不创建服务、不定尺寸、不移动/显隐窗口——窗口是宿主对象（docs/ui-composition.md §Window assembly）。 -->
+     不创建服务、不定尺寸、不移动/显隐窗口——窗口是宿主对象。 -->
 <script lang="ts">
   import { setContext, type Snippet } from "svelte";
   import { shellContext, type WindowShell } from "../shell/context";
