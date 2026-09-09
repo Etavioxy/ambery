@@ -38,8 +38,8 @@
     <span id="face" bind:this={faceEl}>{petFace.text}</span>
     <div
       id="pet-badge"
-      class={petFace.badgeClass}
-      style:display={petFace.badgeVisible ? "block" : "none"}
-      style:font-size={petFace.badgeFontSize}>{petFace.badgeText}</div>
+      class={`badge-${petFace.badge.style} side-${petFace.badge.side}`}
+      style:display={petFace.badge.visible ? "block" : "none"}
+      style:font-size={petFace.badge.fontSize}>{petFace.badge.text}</div>
   </div>
 </Window>

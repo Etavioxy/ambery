@@ -15,6 +15,6 @@
   setContext(shellContext, shell);
 </script>
 
-<div class="window" data-kind={kind}>
+<div class="window flex h-full flex-col" data-kind={kind}>
   {@render children()}
 </div>

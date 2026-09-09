@@ -3,6 +3,16 @@
 
 import type { Motion } from "../../bridge";
 
+/** 未读角标：形态与方位是语义，类名由组件拼 */
+export interface PetBadgeState {
+  style: "number" | "bubble";
+  side: "left" | "right";
+  text: string;
+  /** 字号由 viewScale 现算（非主题 token） */
+  fontSize: string;
+  visible: boolean;
+}
+
 export interface PetFaceState {
   /** 颜文字文本 */
   text: string;
@@ -10,18 +20,18 @@ export interface PetFaceState {
   motion: Motion;
   /** 缩放（--view-scale） */
   scale: number;
-  badgeText: string;
-  badgeClass: string;
-  badgeFontSize: string;
-  badgeVisible: boolean;
+  badge: PetBadgeState;
 }
 
 export const petFace = $state<PetFaceState>({
   text: "",
   motion: "still",
   scale: 1,
-  badgeText: "",
-  badgeClass: "badge-number side-right",
-  badgeFontSize: "5px",
-  badgeVisible: false,
+  badge: {
+    style: "number",
+    side: "right",
+    text: "",
+    fontSize: "5px",
+    visible: false,
+  },
 });

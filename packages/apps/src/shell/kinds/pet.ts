@@ -33,11 +33,12 @@ export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<
 
   // #5 pet 未读角标（默认纯数字、容器内右上；样式/方位走 Config，视觉在 styles.css 类）
   const applyBadgeStyle = (style: string, side: string) => {
-    petFace.badgeClass = `badge-${style === "bubble" ? "bubble" : "number"} side-${side === "left" ? "left" : "right"}`;
+    petFace.badge.style = style === "bubble" ? "bubble" : "number";
+    petFace.badge.side = side === "left" ? "left" : "right";
   };
   // 角标字号：固有基线 5px（12px 的 40%）× viewScale；CSS 默认灰 --ov-text
   const applyBadgeScale = () => {
-    petFace.badgeFontSize = `${Math.max(3, Math.round(5 * scale))}px`;
+    petFace.badge.fontSize = `${Math.max(3, Math.round(5 * scale))}px`;
   };
   let unreadCount = 0;
   store.onContext((msgs) => {
@@ -45,8 +46,8 @@ export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<
     const prev = unreadCount > 0 ? unreadCount : userMsgs;
     const newAssist = msgs.filter(m => m.role === "assistant").length;
     unreadCount = Math.max(0, newAssist - prev);
-    petFace.badgeText = String(unreadCount);
-    petFace.badgeVisible = unreadCount > 0;
+    petFace.badge.text = String(unreadCount);
+    petFace.badge.visible = unreadCount > 0;
   });
 
   // ── 适配模式 ──
