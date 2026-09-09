@@ -48,6 +48,7 @@
   --ov-divider-soft: rgba(255, 255, 255, 0.06);
   --ov-control-radius: 6px;
   --ov-input-radius: 8px;
+  --ov-popup-shadow: 0 4px 14px rgba(0, 0, 0, 0.35); /* 浮层（下拉 / 新增 popup）投影 */
 
   /* chat 气泡 */
   --ov-bubble-user: rgba(137, 180, 250, 0.2);
@@ -782,7 +783,7 @@ html.browser body {
   background: var(--ov-panel-bg);
   border: 1px solid var(--ov-input-border);
   border-radius: 5px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--ov-popup-shadow);
   overflow-y: auto;
   /* 列表 append 到 body，不继承 .cfg-line 的主题色/字体——显式补上（迁移组件时丢失） */
   color: var(--ov-text-strong);
@@ -823,7 +824,7 @@ html.browser body {
   background: var(--ov-panel-bg);
   border: 1px solid var(--ov-input-border);
   border-radius: 5px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--ov-popup-shadow);
   color: var(--ov-text-strong);
   padding: 2px;
 }

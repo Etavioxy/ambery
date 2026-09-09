@@ -74,6 +74,52 @@ for (const f of tsFiles) {
   }
 }
 
+// 4. 类名里的任意值只允许引用 token：bg-[#fff] / p-[12px] 违规，bg-[var(--ov-panel-bg)] 合规。
+const ARBITRARY_RE = /-\[([^\]]+)\]/g;
+const LITERAL_IN_VALUE = /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\d+(?:\.\d+)?(?:px|rem|em|%|vh|vw|pt)\b/;
+
+/** 返回首个违规描述；空串 = 合规 */
+function arbitraryViolation(text) {
+  for (const m of text.matchAll(ARBITRARY_RE)) {
+    const value = m[1];
+    if (value.includes("var(--")) continue;
+    if (!LITERAL_IN_VALUE.test(value)) continue;
+    return `${m[0]} 裸值（任意值只允许 var(--ov-*)）`;
+  }
+  return "";
+}
+
+// 自检：规则必须能抓到裸值、放过 token（守卫静默失效比漏报更危险）
+for (const [sample, shouldFail] of [
+  ["class=\"p-2 bg-[#fff]\"", true],
+  ["class=\"p-[12px]\"", true],
+  ["class=\"w-[calc(100%-8px)]\"", true],
+  ["class=\"bg-[var(--ov-panel-bg)] text-muted\"", false],
+  ["class=\"flex gap-2 rounded-panel\"", false],
+]) {
+  const caught = arbitraryViolation(sample) !== "";
+  if (caught !== shouldFail) fail(`守卫自检失败：${sample}（期望 ${shouldFail ? "违规" : "合规"}）`);
+}
+
+const classFiles = [];
+(function walk(dir) {
+  for (const name of readdirSync(dir)) {
+    const p = join(dir, name);
+    if (statSync(p).isDirectory()) walk(p);
+    else if (/\.(ts|svelte|html)$/.test(p)) classFiles.push(p);
+  }
+})(srcDir);
+for (const f of classFiles) {
+  if (f.includes("debug-vite-panel")) continue; // debug 专用，豁免
+  const content = readFileSync(f, "utf8").split("\n");
+  for (let i = 0; i < content.length; i++) {
+    const t = content[i].trim();
+    if (t.startsWith("//") || t.startsWith("*") || t.startsWith("/*")) continue;
+    const bad = arbitraryViolation(content[i]);
+    if (bad) fail(`${f.split(/[\\/]src[\\/]/)[1]}:${i + 1} 类名${bad} — ${t.slice(0, 80)}`);
+  }
+}
+
 // 3. theme.ts KNOWN_TOKENS 与 :root 定义双向一致（主题应用的写表面 = token 表）
 const themeTs = readFileSync(join(srcDir, "theme.ts"), "utf8");
 const ktMatch = themeTs.match(/KNOWN_TOKENS\s*=\s*\[([\s\S]*?)\]/);

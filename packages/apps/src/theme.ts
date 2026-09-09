@@ -40,6 +40,7 @@ export const KNOWN_TOKENS = [
   "divider-soft",
   "control-radius",
   "input-radius",
+  "popup-shadow",
   "bubble-user",
   "bubble-assistant",
   "bubble-system",
