@@ -18,7 +18,7 @@ async function route() {
   } else if (key === "menu") {
     import("./windows/menu").then((m) => m.main());
   } else if (key === "shelf") {
-    import("./windows/shelf").then((m) => m.main());
+    import("./entry/shelf").then((m) => m.main());
   } else {
     import("./windows/pet").then((m) => m.main());
   }

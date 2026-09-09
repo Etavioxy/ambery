@@ -144,6 +144,19 @@ button {
    自然尺寸型：pet 由窗口尺寸公式 +BORDER_PX 补偿（pet-size.ts）；
      card 按 offsetWidth/offsetHeight 测量（已含 border），窗口恰好包裹内容。 */
 
+/* ── 窗口组件根：填满窗口，内容子元素拉伸 ──
+   面板自身声明 width/height:100%，需要祖先链有确定高度；窗口组件是这条链的第一环。 */
+.window {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.window > * {
+  flex: 1;
+  min-height: 0;
+}
+
 html,
 body {
   margin: 0;
@@ -633,7 +646,7 @@ html.browser body {
 }
 
 
-/* ===== Cards Shelf（windows/shelf.ts） ===== */
+/* ===== Cards Shelf（ShelfWindow + shelf-panel） ===== */
 #shelf-panel {
   display: flex;
   flex-direction: column;
