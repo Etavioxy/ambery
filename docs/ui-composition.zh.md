@@ -21,18 +21,32 @@ DOM                rendering   用户看到的东西
 ```
 
 - 窗口是宿主对象。组件从不创建、定尺寸、移动或显示窗口；那是窗口层的事（`docs/module-storage-flow.md`）。
-- Window 组件是窗口的外观与挂载约定：渲染外框、声明该窗口的尺寸模型（`fill` 或 `intrinsic`）、渲染恰好一个 Surface 的内容。它是组件世界的入口；窗口管理在它之外。标题栏是可选 chrome，不是窗口属性——有标题栏的窗口用 `Panel` 包住内容；pet 与 Cards Shelf 都没有，Card 的标题来自它的内容。
+- Window 组件是窗口的外观与挂载约定：渲染外框、渲染恰好一个 Surface 的内容。窗口尺寸由宿主决定（`docs/pet-window-size.zh.md`、`docs/card-window-size.zh.md`、`docs/multi-window.zh.md`）；组件从不请求尺寸。标题栏是可选 chrome，不是窗口属性——有标题栏的窗口用 `Panel` 包住内容；pet 与 Cards Shelf 都没有，Card 的标题来自它的内容。
 - 同一张 Card 只有一个组件：无论渲染在自己的窗口里，还是渲染在容器 Surface 里。
 
+## 窗口装配
+
+一个窗口只挂载一个组件。窗口需要的服务——bridge、store、主题、i18n、窗口 adapter——由它的入口在组件树之外创建；没有任何组件创建服务。
+
+### 入口
+
 ```ts
-// 窗口入口 src/windows/chat.ts —— 只挂载 Window 组件，别的什么都不做
-mount(ChatWindow, { target: document.getElementById("app")! });
+// 窗口入口 —— 唯一创建服务的地方
+const shell = await createWindowShell("chat"); // bridge、store、theme、i18n、adapter、Tauri 监听
+mount(ChatWindow, { target: document.getElementById("app")!, props: { shell } });
 ```
 
+### 窗口组件
+
 ```svelte
-<!-- ChatWindow.svelte —— 外框来自 Window，标题栏来自 Panel -->
+<!-- ChatWindow.svelte —— 发布 shell、渲染，自己不算任何东西 -->
+<script lang="ts">
+  let { shell }: { shell: WindowShell } = $props();
+  setContext(shellContext, shell);
+</script>
+
 <Window kind="chat">
-  <Panel title={t("chat.title")} onClose={closeChat}>
+  <Panel title={t("chat.title")} onClose={shell.actions.hide}>
     <ChatPanel />
   </Panel>
 </Window>
@@ -48,12 +62,18 @@ mount(ChatWindow, { target: document.getElementById("app")! });
 </Window>
 ```
 
+### 宿主
+
 ```rust
 // 宿主：壳按投影尺寸创建窗口；页面从不改窗口尺寸
 WebviewWindowBuilder::new(&app, &label, WebviewUrl::App("index.html#chat".into()))
     .inner_size(size.w, size.h)
     .build()?;
 ```
+
+- `createWindowShell(kind)` 是模块不是组件：它拥有 IPC、store、主题与 i18n 的应用、窗口适配器与 Tauri 监听。窗口的数据逻辑只住在这里。
+- Window 组件通过 Svelte context 发布 shell——这是它唯一不是渲染的动作——自己不计算任何东西。
+- widget 从 props 或 context 读数据，经传入的回调上报事件；它从不创建服务。
 
 ## widget 各层
 
@@ -68,6 +88,7 @@ WebviewWindowBuilder::new(&app, &label, WebviewUrl::App("index.html#chat".into()
 - 变体属于第 1 层。第 2 层只组合与摆放，不定义自己的外观规则。
 - widget 的高度是声明的布局常量，绝不由内容撑开（`docs/card-window-size.md` §内容块）。
 - 出现于两处以上、或带有行为/无障碍契约的东西才做成 widget；一次性布局内联。
+- `Panel` 渲染标题栏与关闭按钮；关闭意味着什么由调用方回调决定——隐藏窗口、dismiss 卡片——不是 widget 的决定。
 
 ## 样式组合
 

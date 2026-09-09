@@ -21,18 +21,32 @@ DOM                rendering   what the user sees
 ```
 
 - A window is a host object. A component never creates, sizes, moves or shows a window; that belongs to the window layer (`docs/module-storage-flow.md`).
-- The window component is the window's frame and mount convention: it renders the frame, declares the window's sizing model (`fill` or `intrinsic`), and renders exactly one Surface's content. It is the entry of the component world; window management stays outside it. A title bar is optional chrome, not a window property — a window that has one wraps its content in `Panel`; pet and the Cards Shelf have none, and a Card's title comes from its content.
+- The window component is the window's frame and mount convention: it renders the frame and exactly one Surface's content. The window's size is the host's decision (`docs/pet-window-size.md`, `docs/card-window-size.md`, `docs/multi-window.md`); the component never asks for a size. A title bar is optional chrome, not a window property — a window that has one wraps its content in `Panel`; pet and the Cards Shelf have none, and a Card's title comes from its content.
 - One Card component serves every container: the same Card renders inside its own window and inside a container surface.
 
+## Window assembly
+
+A window mounts exactly one component. Its services — bridge, store, theme, i18n, window adapter — are created by the entry, outside the component tree; no component creates one.
+
+### Entry
+
 ```ts
-// window entry, src/windows/chat.ts — mounts the window component and does nothing else
-mount(ChatWindow, { target: document.getElementById("app")! });
+// window entry — the only place that creates services
+const shell = await createWindowShell("chat"); // bridge, store, theme, i18n, adapter, Tauri listeners
+mount(ChatWindow, { target: document.getElementById("app")!, props: { shell } });
 ```
 
+### Window component
+
 ```svelte
-<!-- ChatWindow.svelte — frame from Window, header from Panel -->
+<!-- ChatWindow.svelte — publishes the shell, renders, computes nothing -->
+<script lang="ts">
+  let { shell }: { shell: WindowShell } = $props();
+  setContext(shellContext, shell);
+</script>
+
 <Window kind="chat">
-  <Panel title={t("chat.title")} onClose={closeChat}>
+  <Panel title={t("chat.title")} onClose={shell.actions.hide}>
     <ChatPanel />
   </Panel>
 </Window>
@@ -48,12 +62,18 @@ mount(ChatWindow, { target: document.getElementById("app")! });
 </Window>
 ```
 
+### Host
+
 ```rust
 // host: the shell creates the window at the projected size; the page never resizes it
 WebviewWindowBuilder::new(&app, &label, WebviewUrl::App("index.html#chat".into()))
     .inner_size(size.w, size.h)
     .build()?;
 ```
+
+- `createWindowShell(kind)` is a module, not a component: it owns IPC, the store, theme and i18n application, the window adapter, and the Tauri listeners. It is the only place a window's data logic lives.
+- The window component publishes the shell through Svelte context — its one act that is not rendering — and computes nothing itself.
+- A widget reads data from a prop or from the context and reports events through the callback it was given; it never creates a service.
 
 ## Widget tiers
 
@@ -68,6 +88,7 @@ WebviewWindowBuilder::new(&app, &label, WebviewUrl::App("index.html#chat".into()
 - Variants belong to tier 1. A tier-2 component composes and places; it defines no appearance rule of its own.
 - A widget's height is a declared layout constant, never content-driven (`docs/card-window-size.md` §Content blocks).
 - Something becomes a widget when it appears in more than one place or carries a behaviour or accessibility contract; a one-off layout stays inline.
+- `Panel` renders a title bar and a close button; what closing means is the caller's callback — hiding a window, dismissing a Card — not the widget's decision.
 
 ## Style composition
 
