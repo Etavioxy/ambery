@@ -433,9 +433,9 @@ Server API：`GET /config/schema` 返回节点列表、`readOnly` 与 version；
 
 ## 原则
 
-> **当前结构与字段语义共位**——Config 字段是类型、说明、default、迁移 metadata 与消费者访问 metadata 的声明源。
-
 > **本文档范围**——本文只解释 Config 的通用机制：持久化、版本/迁移、default、null、validation、反射、访问投影与统一修改管道；由具体字段触发的业务行为和工具交替流程，分别在其行为文档中定义。
+
+> **当前结构与字段语义共位**——Config 字段是类型、说明、default、迁移 metadata 与消费者访问 metadata 的声明源。
 
 > **版本范围决定迁移**——显式 `Default / Rename / Func / RenameWithFunc` 处理偏离同路径保留的历史区间；未命中才是唯一、明确的隐式 `Current`。
 

@@ -433,9 +433,9 @@ Loading has no single update target, so all validators run; all errors are aggre
 
 ## Principles
 
-> **Current structure and field semantics colocated** — a Config field is the declaration source for type, description, default, migration metadata, and consumer access metadata.
-
 > **Scope of this document** — this document only explains Config's general mechanisms: persistence, version/migration, default, null, validation, reflection, access projection, and the unified modification pipeline; business behavior triggered by concrete fields and tool alternation flows are defined in their respective behavior documents.
+
+> **Current structure and field semantics colocated** — a Config field is the declaration source for type, description, default, migration metadata, and consumer access metadata.
 
 > **Version range determines migration** — explicit `Default / Rename / Func / RenameWithFunc` handles historical intervals that deviate from same-path preservation; only a miss is the unique, explicit implicit `Current`.
 
