@@ -7,8 +7,9 @@
 
 ## 原则
 
-> **不提供不必要存在的代码逻辑**——预算耗尽后仍沿用既有的 tool result → LLM 收尾链路：以空 tools 正常请求一次最终文字回复；不额外注入终止 system 记录，不自动开启新 turn。
 > **本文档范围**——本文定义触发生命周期、LLM 请求、工具调用预算及耗尽收尾；Config 的 migration、map reconcile 与 descriptor 机制见 `docs/config.md`。
+
+> **不提供不必要存在的代码逻辑**——预算耗尽后仍沿用既有的 tool result → LLM 收尾链路：以空 tools 正常请求一次最终文字回复；不额外注入终止 system 记录，不自动开启新 turn。
 
 ## LLM 抽象
 

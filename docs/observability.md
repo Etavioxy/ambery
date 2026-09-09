@@ -8,6 +8,8 @@ English | [中文](observability.zh.md)
 
 ## Principles
 
+> **Scope of this document** — this document defines the mechanism: the trait, the derive, coverage assertions and skip declarations; the observe output shape belongs to `docs/case-runner.md` and the evaluation system to `docs/case-eval-system.md`.
+
 > **Every module observable, enforced at compile time** — when adding a concept module, its observability must be declared, otherwise compilation fails; coverage does not rely on manual spot checks (effects once slipped through because of this).
 
 > **Wholly mounted in an optional compilation unit** — the observability mechanism is enabled only under the observation build configuration; production builds are unaffected.

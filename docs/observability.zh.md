@@ -8,6 +8,8 @@
 
 ## 原则
 
+> **本文档范围**——本文定义机制：trait、derive、覆盖断言与 skip 声明；observe 输出形态归 `docs/case-runner.md`，求值系统归 `docs/case-eval-system.md`。
+
 > **所有模块可观测，编译期强制**——新增概念模块时必须声明其可观测性，否则编译失败；
 > 覆盖不靠手写抽查（effects 曾因此漏网）。
 

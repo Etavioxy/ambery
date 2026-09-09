@@ -7,8 +7,9 @@ English | [中文](agent-loop.zh.md)
 
 ## Principles
 
-> **No code logic that need not exist** — after the budget is exhausted, still use the existing tool result → LLM closing chain: make one final text-reply request normally with empty tools; do not inject an extra terminating system record and do not automatically start a new turn.
 > **Scope of this document** — this document defines the trigger lifecycle, LLM requests, tool-call budgets, and post-exhaustion closing; for Config migration, map reconcile, and descriptor mechanisms, see `docs/config.md`.
+
+> **No code logic that need not exist** — after the budget is exhausted, still use the existing tool result → LLM closing chain: make one final text-reply request normally with empty tools; do not inject an extra terminating system record and do not automatically start a new turn.
 
 ## LLM Abstraction
 

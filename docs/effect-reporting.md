@@ -7,6 +7,8 @@ English | [中文](effect-reporting.zh.md)
 
 ## Principles
 
+> **Scope of this document** — this document defines the runtime action layer, its channels, `kind`/`payload`, the packing rules, and the instrumentation checklist; the action-stream format and record points belong to `docs/storage.md`, and the observability requirement itself to `docs/case-runner.md`.
+
 > **Every non-readonly action enters, readonly actions never enter** — side-effecting Tauri runtime actions are uniformly reported into the action stream; pure read calls do not enter.
 
 > **One action, one record** — each non-readonly Tauri runtime action has its own effect; when one call causes several actions, record each separately, and do not merge them under a coarse call name.
