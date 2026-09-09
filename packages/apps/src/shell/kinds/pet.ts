@@ -1,27 +1,19 @@
-// Pet 窗口入口：pet + Autonomy + 位置广播 + 动画窗口自适应
-// 窗口尺寸走 ：纯函数公式 + 六入口 + 中心锚定（钉基准中心，非窗口几何中心）
-import { Autonomy } from "../autonomy";
-import { BrowserMockBridge, createBridge, type AppConfig, type Motion } from "../bridge";
-import { reportEffect } from "../effects";
-import { motionDef } from "../motions";
-import { contextSize, MAX_FACE_MARGIN, MIN_FACE_W, obstacleSize, windowSize } from "../pet-size";
-import { engine, setupServer } from "../positioning/tauri-server";
-import { Store } from "../store";
-import { wireI18n } from "../i18n";
-import { wireTheme } from "../theme";
-import { View } from "../view";
-import { createBrowserAdapter, createTauriAdapter, type WindowAdapter } from "../window-adapter";
+// Pet 窗口接线：pet 内容 + Autonomy + 位置广播 + 动画窗口自适应。
+// 尺寸走 pet 公式（纯函数 + 六入口 + 中心锚定，钉基准中心，非窗口几何中心）。
+// 本模块由窗口组件在挂载后启动——尺寸控制器要测量已渲染的 #face。
+import { Autonomy } from "../../autonomy";
+import { BrowserMockBridge, type AppConfig, type Motion } from "../../bridge";
+import { reportEffect } from "../../effects";
+import { motionDef } from "../../motions";
+import { contextSize, MAX_FACE_MARGIN, MIN_FACE_W, obstacleSize, windowSize } from "../../pet-size";
+import { engine, setupServer } from "../../positioning/tauri-server";
+import { View } from "../../view";
+import { createBrowserAdapter, createTauriAdapter, type WindowAdapter } from "../../window-adapter";
+import type { WindowShell } from "../window-shell";
 
-export async function main() {
-  if (!("__TAURI_INTERNALS__" in window)) document.documentElement.classList.add("browser");
-
-  const bridge = await createBridge();
-  // 前端 store：core 可读状态集中持有，读取走 store
-  const store = await Store.create(bridge);
-  wireTheme(store); // 基线即应用 + 切换即全窗口生效
-  wireI18n(store); // UI 语言基线（本页组件各自订阅重渲染）
-
-  const mount = document.getElementById("app")!;
+export async function startPetWindow(shell: WindowShell, host: HTMLElement) {
+  const { bridge, store } = shell;
+  const mount = host;
   const view = new View(mount);
   const faceEl = document.getElementById("face")!;
 
@@ -232,14 +224,14 @@ export async function main() {
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
     // 非只读 Tauri 运行时动作只经动作层执行：
     // 动作层执行真实 API 成功后自记 effect；业务只编排语义化动作，不拼 kind/payload
-    const actions = await import("../tauri_runtime_actions");
+    const actions = await import("../../tauri_runtime_actions");
     const emitR = (event: string, payload?: unknown) => { void actions.emitEvent(event, payload); };
     const emitToR = (target: string, event: string, payload?: unknown) => { void actions.emitEvent(event, payload, target); };
     const win = getCurrentWindow();
     setupServer(bridge);
     view.tauriStartDrag = () => { void actions.startDragging(actions.tauriWindowLike(win)); };
 
-    const { dragDebounce } = await import("../utils/debounce");
+    const { dragDebounce } = await import("../../utils/debounce");
 
     async function broadcastPosition() {
       petCenter = await derivePetCenter(); // 入口 4：drag 结束测 center
@@ -356,8 +348,8 @@ export async function main() {
     }
   } else if (!import.meta.env.PROD) {
     // 浏览器模式（仅 Vite dev / preview，prod build tree-shaking 剔除）
-    const { ChatPanel } = await import("./chat");
-    const { ComponentManager } = await import("../components/component-manager");
+    const { ChatPanel } = await import("../../windows/chat");
+    const { ComponentManager } = await import("../../components/component-manager");
     const mgr = new ComponentManager(mount, bridge, () => view.center(), false, engine);
     const chatPanel = new ChatPanel(mount, bridge, store, engine);
 
@@ -366,13 +358,13 @@ export async function main() {
     view.el.addEventListener("chat:toggle", () => chatPanel.toggle());
 
     // debug：positioning 面板（α/β 滑块 + 窗口注册）
-    const { DebugPositioningPanel } = await import("../positioning/debug-vite-panel");
+    const { DebugPositioningPanel } = await import("../../positioning/debug-vite-panel");
     const panel = new DebugPositioningPanel(engine);
 
     // Cards Shelf（browser 与 Tauri 共享 ShelfPanel）：中键 toggle——瞬时 overlay，
     // 尺寸 = pet ×3、左下角落在 pet 中心向右上延伸；中键点 pet 或 shelf 任意位置 /
     // 点面板外（失焦等价）/ pet 拖拽关闭
-    const { ShelfPanel } = await import("./shelf-panel");
+    const { ShelfPanel } = await import("../../windows/shelf-panel");
     const shelfMount = document.createElement("div");
     shelfMount.id = "shelf-overlay";
     shelfMount.style.display = "none";
