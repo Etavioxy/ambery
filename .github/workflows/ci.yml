@@ -40,6 +40,9 @@ jobs:
       - name: TypeScript check
         working-directory: packages/apps
         run: npx tsc --noEmit
+      - name: Svelte check
+        working-directory: packages/apps
+        run: npm run check
       - name: Design token guard
         working-directory: packages/apps
         run: node scripts/lint-tokens.mjs
