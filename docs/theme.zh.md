@@ -13,7 +13,7 @@ theme   当前使用的主题名
 themes  主题名 → 主题 value 的 Map
 ```
 
-每个主题 value 表达该主题的配色表与常见样式修改。具体字段清单、命名和校验规则应从现有界面视觉需求中收敛，本文不预设。收敛的物理落点是 `app/src/styles.css` `:root` 的 `--ov-*` token 表——主题 value 的字段与该表一一对应，应用主题即覆写这张表。
+每个主题 value 表达该主题的配色表与常见样式修改。具体字段清单、命名和校验规则应从现有界面视觉需求中收敛，本文不预设。收敛的物理落点是 `packages/apps/src/styles.css` `:root` 的 `--ov-*` token 表——主题 value 的字段与该表一一对应，应用主题即覆写这张表。
 
 ## 作用范围
 
@@ -40,7 +40,7 @@ themes  主题名 → 主题 value 的 Map
 
 主题导出是自包含的：它只能依赖自己的完整 value，不得引用、继承、覆盖或要求导入方的其他主题、当前主题、任何外部 Config 字段或机器环境。导入结果在任意兼容应用中只由导出文件自身与声明的版本决定。
 
-物理入口：设置面板（menu）底部 theme 区块提供「导出当前主题 / 按文件名导入」；导入经 `import_theme` command → 版本检查 → 兼容变换 → 校验 → 统一修改管道写入 `themes.<name>`（原子拒绝 + config_changed 广播，全部窗口即切）。token 名与校验规则见 `core/src/config.rs` `validate_theme_table`；前端应用面见 `app/src/theme.ts`。
+物理入口：设置面板（menu）底部 theme 区块提供「导出当前主题 / 按文件名导入」；导入经 `import_theme` command → 版本检查 → 兼容变换 → 校验 → 统一修改管道写入 `themes.<name>`（原子拒绝 + config_changed 广播，全部窗口即切）。token 名与校验规则见 `core/src/config.rs` `validate_theme_table`；前端应用面见 `packages/apps/src/theme.ts`。
 
 ## 配置访问
 

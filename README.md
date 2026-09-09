@@ -1,4 +1,4 @@
-# <img src="app/src-tauri/icons/icon.png" width="52" height="52" alt="ambery icon"> Ambery
+# <img src="packages/apps/tauri/src-tauri/icons/icon.png" width="52" height="52" alt="ambery icon"> Ambery
 
 English | [中文](README.zh.md)
 
@@ -63,7 +63,7 @@ Config and session data live under your user config directory (created automatic
 
 - `core/` — Rust core: Harness, backend, server, storage, filters, TUI activity viewer
 - `ambery-case/` — storage snapshot replay and concept-observation runner
-- `app/` — vanilla TypeScript frontend; `app/src-tauri/` Tauri shell
+- `packages/apps/` — vanilla TypeScript frontend; `packages/apps/tauri/src-tauri/` Tauri shell
 - `packages/terminal-lib/` — terminal access contract crate (adapter trait / envelope / composite)
 - `packages/terminals/wt/` — Windows Terminal package: C# UIA sidecar + Rust client
 - `packages/terminals/zellij/` — zellij package: in-process CLI adapter

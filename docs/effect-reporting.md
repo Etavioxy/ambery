@@ -22,8 +22,8 @@ English | [中文](effect-reporting.zh.md)
 The only exit for non-readonly Tauri runtime actions is the same-named action layer on both sides:
 
 ```text
-app/src/tauri_runtime_actions.ts       ← WebView `@tauri-apps/api` 的写动作
-app/src-tauri/src/tauri_runtime_actions.rs
+packages/apps/src/tauri_runtime_actions.ts       ← WebView `@tauri-apps/api` 的写动作
+packages/apps/tauri/src-tauri/src/tauri_runtime_actions.rs
                                         ← Rust 壳 `tauri` API 的写动作
 ```
 
@@ -101,7 +101,7 @@ The same runtime action is recorded exactly once, at the place where it is actua
 | WebView | start_dragging | `windows/pet.ts`, `windows/card-window.ts`, `windows/chat-window.ts`; corresponds to window_drag |
 | WebView | emit_event | emit / emitTo in `windows/pet.ts`, `positioning/tauri-server.ts`; corresponds to event_emit |
 | WebView | hide_window | menu hide in `windows/menu.ts`; corresponds to window_hidden |
-| Rust shell | show_window / hide_window / close_window / emit_event | toggle, tray close, and other equivalent WebviewWindow / AppHandle actions in `app/src-tauri`; each corresponds to window_visible / window_hidden / window_closed / event_emit |
+| Rust shell | show_window / hide_window / close_window / emit_event | toggle, tray close, and other equivalent WebviewWindow / AppHandle actions in `packages/apps/tauri/src-tauri`; each corresponds to window_visible / window_hidden / window_closed / event_emit |
 | Browser simulation | — | browser adapter / drag.ts / component-manager.ts **do not enter the action layer and are not instrumented** (DOM simulation, not Tauri runtime actions) |
 
 ## Explicitly Out of Scope

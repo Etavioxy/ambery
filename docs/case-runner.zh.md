@@ -12,7 +12,7 @@ Storage 快照驱动的回归测试与概念观测工具；兼承接 CLI 决策�
 
 > **边界隔离**——一次性沙盒（生产永不写）+ headless（不启动真实 OS 界面）；细节见 §边界隔离。
 
-> **前端 headless 观测**——观测边界与接入形态（headless JS + RemoteBridge 连 case-runner 内嵌 core + mock 窗口层，即 `app/test/` vitest 套件）；细节见 §前端 headless 观测。
+> **前端 headless 观测**——观测边界与接入形态（headless JS + RemoteBridge 连 case-runner 内嵌 core + mock 窗口层，即 `packages/apps/test/` vitest 套件）；细节见 §前端 headless 观测。
 
 > **壳类比**——case-runner 类比 Tauri 壳：进程主体内嵌 core（run_core 同款），按需拉起 TS 测试进程，TS 走 RemoteBridge 连内嵌 core——与「壳内嵌 core + 壳驱动 WebView」同构。对应 Tauri 多窗口（每窗口一个独立 Renderer），一个 TS 测试进程模拟一个窗口的 JS 运行时；多窗口场景用多个 TS 测试进程（多 node），各自经 RemoteBridge 连共享的内嵌 core。TS 不是常驻环境，是 case-runner 流程的一环。
 
@@ -42,7 +42,7 @@ case-runner 的观测范围覆盖前端 TS 能力：headless JS runtime 跑真�
 | effect | 观测方式 |
 |---|---|
 | `render_component` / `close_component`（后端） | 沙盒 effect.jsonl |
-| `window_opened` / `window_closed` / `window_visible` / `window_hidden` / `window_moved` / `window_resized`（前端窗口层） | 已实现：headless/browser 窗口层经 `tauri_runtime_actions` 产生 window_* effect，经 RemoteBridge `POST /effect` 入动作流（`app/test/window-case.test.ts`） |
+| `window_opened` / `window_closed` / `window_visible` / `window_hidden` / `window_moved` / `window_resized`（前端窗口层） | 已实现：headless/browser 窗口层经 `tauri_runtime_actions` 产生 window_* effect，经 RemoteBridge `POST /effect` 入动作流（`packages/apps/test/window-case.test.ts`） |
 | `window`（observe target） | 已实现：打印窗口动作序列，并断言不变量——已关闭窗口的 `render_component` 必须伴随新的 `window_opened`，违反即 FAIL |
 | 前端非窗口逻辑（store / 窗口接线） | `frontend-case.test.ts`（headless JS + mock 窗口层） |
 
@@ -50,7 +50,7 @@ case-runner 的观测范围覆盖前端 TS 能力：headless JS runtime 跑真�
 
 ### 前端读取架构（store 收敛 + invoke 规则）
 
-**store 机制**（`app/src/store.ts`）：
+**store 机制**（`packages/apps/src/store.ts`）：
 - 一个前端 store 持有 core 拥有的可读状态：`config` / `top_state` / `context` / `cards`；
 - store 由 bridge 读方法刷新（基线拉一次 + 事件提示时按需重拉/直写），组件只 `store.<getter>` 取基线 + `store.onX(cb)` 订阅变化，不直接调 Tauri API；
 - store 边界判据：**core 拥有 + 多窗口/组件读 + 变化驱动 UI + 体积可控**；前端局部瞬态（面板开关/输入框/拖拽中位置）与意图（invoke 写指令）不进 store。判据反例：设置面板 schema（menu 单消费者、体积大）不进 store，经 bridge `getConfigSchema()` 直读；
@@ -89,7 +89,7 @@ webview 必须挂真实窗口，Tauri/wry 无 headless webview（见 wry discuss
 
 ## 布局
 
-workspace 根 `Cargo.toml`（members：core / observe-derive / ambery-case；exclude app/src-tauri 壳独立构建）：
+workspace 根 `Cargo.toml`（members：core / observe-derive / ambery-case；exclude packages/apps/tauri/src-tauri 壳独立构建）：
 
 ```
 ambery-case/                    ← workspace member

@@ -1,4 +1,4 @@
-# <img src="app/src-tauri/icons/icon.png" width="52" height="52" alt="ambery icon"> Ambery
+# <img src="packages/apps/tauri/src-tauri/icons/icon.png" width="52" height="52" alt="ambery icon"> Ambery
 
 [English](README.md) | 中文
 
@@ -63,7 +63,7 @@ cd app && npm install && npm run dev
 
 - `core/` — Rust 核心：Harness、backend、server、storage、filter、TUI activity viewer
 - `ambery-case/` — storage 快照回放与概念观测 runner
-- `app/` — vanilla TypeScript 前端；`app/src-tauri/` 为 Tauri 壳
+- `packages/apps/` — vanilla TypeScript 前端；`packages/apps/tauri/src-tauri/` 为 Tauri 壳
 - `packages/terminal-lib/` — 终端访问契约 crate（adapter trait / 信封 / composite）
 - `packages/terminals/wt/` — Windows Terminal 包：C# UIA sidecar + Rust 客户端
 - `packages/terminals/zellij/` — zellij 包：进程内 CLI adapter

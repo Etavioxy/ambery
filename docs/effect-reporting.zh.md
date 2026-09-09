@@ -22,8 +22,8 @@
 非只读 Tauri runtime action 的唯一出口是同名的两侧动作层：
 
 ```text
-app/src/tauri_runtime_actions.ts       ← WebView `@tauri-apps/api` 的写动作
-app/src-tauri/src/tauri_runtime_actions.rs
+packages/apps/src/tauri_runtime_actions.ts       ← WebView `@tauri-apps/api` 的写动作
+packages/apps/tauri/src-tauri/src/tauri_runtime_actions.rs
                                         ← Rust 壳 `tauri` API 的写动作
 ```
 
@@ -101,7 +101,7 @@ Tauri 运行时动作分两类，通道不同：
 | WebView | start_dragging | `windows/pet.ts`、`windows/card-window.ts`、`windows/chat-window.ts`；对应 window_drag |
 | WebView | emit_event | `windows/pet.ts`、`positioning/tauri-server.ts` 的 emit / emitTo；对应 event_emit |
 | WebView | hide_window | `windows/menu.ts` 的 menu hide；对应 window_hidden |
-| Rust 壳 | show_window / hide_window / close_window / emit_event | `app/src-tauri` 的 toggle、托盘关闭及其他 WebviewWindow / AppHandle 等价动作；逐个对应 window_visible / window_hidden / window_closed / event_emit |
+| Rust 壳 | show_window / hide_window / close_window / emit_event | `packages/apps/tauri/src-tauri` 的 toggle、托盘关闭及其他 WebviewWindow / AppHandle 等价动作；逐个对应 window_visible / window_hidden / window_closed / event_emit |
 | 浏览器模拟 | — | browser adapter / drag.ts / component-manager.ts **不进入动作层、不埋点**（DOM 模拟，非 Tauri 运行时动作） |
 
 ## 明确不做

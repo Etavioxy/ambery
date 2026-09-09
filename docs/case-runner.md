@@ -12,7 +12,7 @@ Storage snapshot-driven regression testing and concept observation tool; also ho
 
 > **Boundary isolation** — one-shot sandbox (production is never written) + headless (never starts a real OS UI); details in §Boundary isolation.
 
-> **Frontend headless observation** — observation boundary and integration shape (headless JS + RemoteBridge connecting to the case-runner's embedded core + mock window layer, i.e. the `app/test/` vitest suite); details in §Frontend headless observation.
+> **Frontend headless observation** — observation boundary and integration shape (headless JS + RemoteBridge connecting to the case-runner's embedded core + mock window layer, i.e. the `packages/apps/test/` vitest suite); details in §Frontend headless observation.
 
 > **Shell analogy** — the case-runner is analogous to the Tauri shell: the process body embeds core (the same run_core), spawns a TS test process on demand, and TS connects to the embedded core via RemoteBridge — the same shape as "shell embeds core + shell drives WebView". Corresponding to Tauri multi-window (each window an independent Renderer), one TS test process simulates one window's JS runtime; multi-window scenarios use multiple TS test processes (multiple nodes), each connecting to the shared embedded core via RemoteBridge. TS is not a resident environment; it is one link in the case-runner flow.
 
@@ -42,7 +42,7 @@ The case-runner's observation scope covers frontend TS capabilities: a headless 
 | effect | observation method |
 |---|---|
 | `render_component` / `close_component` (backend) | sandbox effect.jsonl |
-| `window_opened` / `window_closed` / `window_visible` / `window_hidden` / `window_moved` / `window_resized` (frontend window layer) | implemented: the headless/browser window layer produces window_* effects via `tauri_runtime_actions`, entering the action stream via RemoteBridge `POST /effect` (`app/test/window-case.test.ts`) |
+| `window_opened` / `window_closed` / `window_visible` / `window_hidden` / `window_moved` / `window_resized` (frontend window layer) | implemented: the headless/browser window layer produces window_* effects via `tauri_runtime_actions`, entering the action stream via RemoteBridge `POST /effect` (`packages/apps/test/window-case.test.ts`) |
 | `window` (observe target) | implemented: prints the window action sequence and asserts invariants — a `render_component` for a closed window must be accompanied by a new `window_opened`; violation = FAIL |
 | frontend non-window logic (store / window wiring) | `frontend-case.test.ts` (headless JS + mock window layer) |
 
@@ -50,7 +50,7 @@ The case-runner's observation scope covers frontend TS capabilities: a headless 
 
 ### Frontend read architecture (store convergence + invoke rules)
 
-**store mechanism** (`app/src/store.ts`):
+**store mechanism** (`packages/apps/src/store.ts`):
 - one frontend store holds readable state owned by core: `config` / `top_state` / `context` / `cards`;
 - the store is refreshed by bridge read methods (baseline pulled once + event-triggered on-demand re-pull/direct write); components only take the baseline via `store.<getter>` and subscribe to changes via `store.onX(cb)`, never calling Tauri APIs directly;
 - store boundary criterion: **owned by core + read by multiple windows/components + changes drive UI + size manageable**; frontend-local transient state (panel toggles/input boxes/dragging positions) and intents (invoke write commands) do not enter the store. Counterexample: the settings panel schema (single menu consumer, large) does not enter the store; it is read directly via bridge `getConfigSchema()`;
@@ -89,7 +89,7 @@ A webview must be attached to a real window; Tauri/wry has no headless webview (
 
 ## Layout
 
-Workspace root `Cargo.toml` (members: core / observe-derive / ambery-case; exclude app/src-tauri shell built independently):
+Workspace root `Cargo.toml` (members: core / observe-derive / ambery-case; exclude packages/apps/tauri/src-tauri shell built independently):
 
 ```
 ambery-case/                    ← workspace member

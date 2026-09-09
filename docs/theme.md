@@ -13,7 +13,7 @@ theme   当前使用的主题名
 themes  主题名 → 主题 value 的 Map
 ```
 
-Each theme value expresses the theme's color table and common style modifications. The concrete field list, naming, and validation rules should be converged from the actual visual needs of the current UI; this document does not prescribe them. The converged physical landing point is the `app/src/styles.css` `:root` `--ov-*` token table — theme value fields correspond one-to-one with that table, and applying a theme overwrites that table.
+Each theme value expresses the theme's color table and common style modifications. The concrete field list, naming, and validation rules should be converged from the actual visual needs of the current UI; this document does not prescribe them. The converged physical landing point is the `packages/apps/src/styles.css` `:root` `--ov-*` token table — theme value fields correspond one-to-one with that table, and applying a theme overwrites that table.
 
 ## Scope
 
@@ -40,7 +40,7 @@ Compatibility only promises evolution from known old versions to the current ver
 
 Theme export is self-contained: it may only depend on its own complete value, and must not reference, inherit from, override, or require the importer's other themes, the current theme, any external Config fields, or the machine environment. The import result in any compatible app is determined only by the export file itself and its declared version.
 
-Physical entry: the theme section at the bottom of the settings panel (menu) provides "export current theme / import by filename"; import goes through the `import_theme` command → version check → compatibility transform → validation → unified modification pipeline, writing `themes.<name>` (atomic rejection + config_changed broadcast, all windows switch immediately). For token names and validation rules see `core/src/config.rs` `validate_theme_table`; for the frontend application side see `app/src/theme.ts`.
+Physical entry: the theme section at the bottom of the settings panel (menu) provides "export current theme / import by filename"; import goes through the `import_theme` command → version check → compatibility transform → validation → unified modification pipeline, writing `themes.<name>` (atomic rejection + config_changed broadcast, all windows switch immediately). For token names and validation rules see `core/src/config.rs` `validate_theme_table`; for the frontend application side see `packages/apps/src/theme.ts`.
 
 ## Config access
 

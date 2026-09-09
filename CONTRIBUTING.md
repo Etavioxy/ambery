@@ -18,8 +18,8 @@ ambery-case/      case-runner: snapshot replay, concept observation, frontend he
 packages/terminal-lib/      terminal access contract crate (trait / envelope / composite / test stub)
 packages/terminals/wt/      Windows Terminal package: C# UIA sidecar + Rust client (Windows-only)
 packages/terminals/zellij/  zellij package: in-process CLI adapter
-app/              frontend vanilla TypeScript (pet / chat / cards / positioning)
-app/src-tauri/    Tauri shell (static window + card windows + /hook thin server)
+packages/apps/              frontend vanilla TypeScript (pet / chat / cards / positioning)
+packages/apps/tauri/        Tauri form: shell + host layer (static window + card windows + /hook thin server)
 scripts/          development scripts
 tools/            diagnostic tools
 ```
@@ -28,12 +28,12 @@ tools/            diagnostic tools
 
 - **One thing per commit**: behavior, tests, and docs are committed separately.
 - **English subject line** summarizing the behavior change; body explains why.
-- Behavior changes come with tests: Rust unit tests in the module, frontend tests in `app/test/*.test.ts`.
+- Behavior changes come with tests: Rust unit tests in the module, frontend tests in `packages/apps/test/*.test.ts`.
 - No internal project/example names in commits or comments — the repo is public.
 
 ## Code rules
 
-- Frontend reads go through the store (`app/src/store.ts`), writes through the action layer (`app/src/tauri_runtime_actions.ts`); no scattered `invoke` calls.
+- Frontend reads go through the store (`packages/apps/src/store.ts`), writes through the action layer (`packages/apps/src/tauri_runtime_actions.ts`); no scattered `invoke` calls.
 - Non-readonly Tauri actions enter the effect stream (`docs/effect-reporting.md`); new `Effect` variants sync `effect_kind_payload` and the bridge dispatch.
 - Storage is append-only JSONL: logs are sacred, views are ephemeral; never rewrite historical lines.
 - Path resolution goes only through `core/src/paths.rs`; platform differences are gated with `cfg(windows)`, non-Windows code must not depend on UIA.

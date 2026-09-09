@@ -14,7 +14,7 @@ English | [中文](sidecar.zh.md)
 
 - **self-contained win-x64, not single-file**: `sidecar.csproj` pins `RuntimeIdentifier=win-x64` / `SelfContained=true` / `PublishSingleFile=false`; the user's machine does not need the .NET 9 Desktop Runtime.
 - Publish command: `dotnet publish sidecar/sidecar.csproj -c Release` → `sidecar/bin/Release/net9.0-windows/win-x64/publish/ambery-uia-sidecar.exe`.
-- Tauri side: `bundle.active` is currently false (enabled in the release round). When Windows packaging is enabled, add `../../sidecar/bin/Release/net9.0-windows/win-x64/publish/ambery-uia-sidecar.exe` to `bundle.externalBin` in `app/src-tauri/tauri.conf.json`; do not keep this configuration resident in non-Windows builds — the Tauri build script resolves externalBin paths according to the current platform.
+- Tauri side: `bundle.active` is currently false (enabled in the release round). When Windows packaging is enabled, add `../../sidecar/bin/Release/net9.0-windows/win-x64/publish/ambery-uia-sidecar.exe` to `bundle.externalBin` in `packages/apps/tauri/src-tauri/tauri.conf.json`; do not keep this configuration resident in non-Windows builds — the Tauri build script resolves externalBin paths according to the current platform.
 - Path discovery priority (`core/src/paths.rs`): `AMBERY_SIDECAR` env > next to the current exe > `sidecar/` next to the current exe > Release publish > Debug. Before real-machine Windows verification, the publish layout has not been tested by the packaging pipeline.
 
 ## Command Set
