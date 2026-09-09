@@ -49,7 +49,7 @@ DOM                rendering   用户看到的东西
 | 动效 | Svelte transition | `transition:`、`animate:flip` |
 | 实例覆盖 | 调用方传入的 `class` | 局部调整 |
 
-纪律：工具类只读 token，绝不写字面值；变体只用工具类与原语状态；实例覆盖只调整、不重定义；主题层不携带尺寸（`docs/card-window-size.md` §重算触发）。
+纪律：工具类只读 token，绝不写字面值；变体只用工具类与原语状态；实例覆盖只调整、不重定义；主题层不携带尺寸（`docs/card-window-size.md` §重算触发）。文本选中遵循 chrome 与内容的划分：chrome——标题、按钮、标签——不可选；内容——消息正文、Card 正文、代码——可选。
 
 ## 组件原则
 

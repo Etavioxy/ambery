@@ -6,9 +6,11 @@ English | [中文](errors.zh.md)
 
 ## Principles
 
-- **Errors are intercepted by the backend** — detection and judgment live in core; the frontend renders per contract and never infers or detects errors itself.
-- **The frontend routes by retention, never by source** — the source is not part of the contract; adding a source changes backend emission only.
-- **No dedup state in the frontend** — to avoid redundant complexity: repeat suppression is the backend's emission discipline (emit only at state-change points), not a frontend feature; the frontend keeps no tracking state, it renders events and dismisses.
+> **Errors are intercepted by the backend** — detection and judgment live in core; the frontend renders per contract and never infers or detects errors itself.
+
+> **The frontend routes by retention, never by source** — the source is not part of the contract; adding a source changes backend emission only.
+
+> **No dedup state in the frontend** — to avoid redundant complexity: repeat suppression is the backend's emission discipline (emit only at state-change points), not a frontend feature; the frontend keeps no tracking state, it renders events and dismisses.
 
 ## Model
 

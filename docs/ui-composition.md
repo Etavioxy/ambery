@@ -49,7 +49,7 @@ DOM                rendering   what the user sees
 | motion | Svelte transitions | `transition:`, `animate:flip` |
 | instance override | the caller's `class` | a local adjustment |
 
-Discipline: a utility reads tokens and never a literal value; a variant uses utilities and primitive state; an instance override adjusts and never redefines; the theme layer carries no size (`docs/card-window-size.md` §Recompute triggers).
+Discipline: a utility reads tokens and never a literal value; a variant uses utilities and primitive state; an instance override adjusts and never redefines; the theme layer carries no size (`docs/card-window-size.md` §Recompute triggers). Text selection follows the chrome/content split: chrome — titles, buttons, labels — is not selectable; content — message bodies, Card text, code — is.
 
 ## Component principles
 

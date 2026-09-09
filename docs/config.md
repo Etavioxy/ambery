@@ -433,16 +433,28 @@ Loading has no single update target, so all validators run; all errors are aggre
 
 ## Principles
 
-- **Current structure and field semantics colocated**: a Config field is the declaration source for type, description, default, migration metadata, and consumer access metadata.
-- **Scope of this document**: this document only explains Config's general mechanisms: persistence, version/migration, default, null, validation, reflection, access projection, and the unified modification pipeline; business behavior triggered by concrete fields and tool alternation flows are defined in their respective behavior documents.
-- **Version range determines migration**: explicit `Default / Rename / Func / RenameWithFunc` handles historical intervals that deviate from same-path preservation; only a miss is the unique, explicit implicit `Current`.
-- **Parent-child rules de-conflict by version**: parent and child may each have metadata; only intersecting explicit source-version ranges are rejected, avoiding execution-order and coverage guessing.
-- **Failures default locally**: any migration or validation failure only defaults the sick node, reports item by item, and continues; one child problem must not take down the entire Config.
-- **null has no second semantic**: an object's `key:null` is equivalent to missing; use an explicit enum when a third state is needed.
-- **Objects construct downward, leaves and maps carry their own default**: a static object's default shape comes from its children; map defaults do not merge dynamic keys back just because the map already exists.
-- **No special rules; use semantics to make behavior explicit**: `edit_config` behavior is fully expressed by the schema's `action` branches; do not silently switch semantics via missing parameters, null values, or failed writes.
-- **Progressive disclosure, query as needed**: the LLM first greps to locate, then queries to read the exact current structure and value, and finally updates; walk the hierarchy as needed rather than guessing paths or injecting the complete schema.
-- **Prefer modifiable, restrict exceptions**: Config allows agent modification by default; mark `no_llm_visible` only when (1) it has major impact on the agent, or (2) it is irreversible and easy to break.
-- **Access projection does not change truth**: `no_llm_visible` only restricts the read/write projection of the LLM tool; it does not change local Config, persistence, or local management capabilities.
-- **Report truthfully**: hot application takes effect immediately; restart requirements, migration fallback, unknown-path removal, and response-size rejections must all be explicitly returned and auditable.
-- **Single lock, single truth**: all Config entry points and external auto-load are serialized through the same lock; only a complete old state or a complete new state is observable; no entry-point-private drafts are kept, eliminating visible state forks and read/write races.
+> **Current structure and field semantics colocated** — a Config field is the declaration source for type, description, default, migration metadata, and consumer access metadata.
+
+> **Scope of this document** — this document only explains Config's general mechanisms: persistence, version/migration, default, null, validation, reflection, access projection, and the unified modification pipeline; business behavior triggered by concrete fields and tool alternation flows are defined in their respective behavior documents.
+
+> **Version range determines migration** — explicit `Default / Rename / Func / RenameWithFunc` handles historical intervals that deviate from same-path preservation; only a miss is the unique, explicit implicit `Current`.
+
+> **Parent-child rules de-conflict by version** — parent and child may each have metadata; only intersecting explicit source-version ranges are rejected, avoiding execution-order and coverage guessing.
+
+> **Failures default locally** — any migration or validation failure only defaults the sick node, reports item by item, and continues; one child problem must not take down the entire Config.
+
+> **null has no second semantic** — an object's `key:null` is equivalent to missing; use an explicit enum when a third state is needed.
+
+> **Objects construct downward, leaves and maps carry their own default** — a static object's default shape comes from its children; map defaults do not merge dynamic keys back just because the map already exists.
+
+> **No special rules; use semantics to make behavior explicit** — `edit_config` behavior is fully expressed by the schema's `action` branches; do not silently switch semantics via missing parameters, null values, or failed writes.
+
+> **Progressive disclosure, query as needed** — the LLM first greps to locate, then queries to read the exact current structure and value, and finally updates; walk the hierarchy as needed rather than guessing paths or injecting the complete schema.
+
+> **Prefer modifiable, restrict exceptions** — Config allows agent modification by default; mark `no_llm_visible` only when (1) it has major impact on the agent, or (2) it is irreversible and easy to break.
+
+> **Access projection does not change truth** — `no_llm_visible` only restricts the read/write projection of the LLM tool; it does not change local Config, persistence, or local management capabilities.
+
+> **Report truthfully** — hot application takes effect immediately; restart requirements, migration fallback, unknown-path removal, and response-size rejections must all be explicitly returned and auditable.
+
+> **Single lock, single truth** — all Config entry points and external auto-load are serialized through the same lock; only a complete old state or a complete new state is observable; no entry-point-private drafts are kept, eliminating visible state forks and read/write races.

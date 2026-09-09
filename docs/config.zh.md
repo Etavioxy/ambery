@@ -433,16 +433,28 @@ Server API：`GET /config/schema` 返回节点列表、`readOnly` 与 version；
 
 ## 原则
 
-- **当前结构与字段语义共位**：Config 字段是类型、说明、default、迁移 metadata 与消费者访问 metadata 的声明源。
-- **本文档范围**：本文只解释 Config 的通用机制：持久化、版本/迁移、default、null、validation、反射、访问投影与统一修改管道；由具体字段触发的业务行为和工具交替流程，分别在其行为文档中定义。
-- **版本范围决定迁移**：显式 `Default / Rename / Func / RenameWithFunc` 处理偏离同路径保留的历史区间；未命中才是唯一、明确的隐式 `Current`。
-- **父子规则按版本去冲突**：父子可各有 metadata；只有显式 source-version range 相交才拒绝，避免函数执行顺序与覆盖猜测。
-- **失败局部 default 化**：任何 migration 或校验失败只 default 化病灶节点、逐项上报并继续；不让一个 child 病灶带倒整个 Config。
-- **null 没有第二语义**：object 的 `key:null` 等价于缺失；需要三态时用显式 enum。
-- **object 向下构造，叶子与 map 自带 default**：静态 object 的默认形态来自 child；map default 不因已存在 map 而合并动态 key。
-- **不做特殊规则，用语义明确行为**：`edit_config` 的行为完全由 schema 的 `action` 分支表达；不以缺参、空值或失败写入偷偷切换语义。
-- **渐进披露，按需查**：LLM 先 grep 定位，再 query 读取确切当前结构和值，最后 update；按需要走层级，而不是猜 path 或注入完整 schema。
-- **可改优先，限制例外**：Config 默认允许 agent 修改；仅在（1）对 agent 有重大影响，或（2）不可逆且容易改坏时，标记 `no_llm_visible` 限制其访问。
-- **访问投影不改真值**：`no_llm_visible` 只限制 LLM tool 的读写投影，不改变本地 Config、持久化或本地管理能力。
-- **如实回报**：热应用立即生效；需要重启、迁移回退、未知 path 剔除和响应体积拒绝都必须明确返回并可审计。
-- **单锁单真相**：所有 Config 入口与外部自动载入经同一把锁串行处理，只可观察完整旧状态或完整新状态；不保留入口私有草稿，消灭可见状态分叉与读写竞态。
+> **当前结构与字段语义共位**——Config 字段是类型、说明、default、迁移 metadata 与消费者访问 metadata 的声明源。
+
+> **本文档范围**——本文只解释 Config 的通用机制：持久化、版本/迁移、default、null、validation、反射、访问投影与统一修改管道；由具体字段触发的业务行为和工具交替流程，分别在其行为文档中定义。
+
+> **版本范围决定迁移**——显式 `Default / Rename / Func / RenameWithFunc` 处理偏离同路径保留的历史区间；未命中才是唯一、明确的隐式 `Current`。
+
+> **父子规则按版本去冲突**——父子可各有 metadata；只有显式 source-version range 相交才拒绝，避免函数执行顺序与覆盖猜测。
+
+> **失败局部 default 化**——任何 migration 或校验失败只 default 化病灶节点、逐项上报并继续；不让一个 child 病灶带倒整个 Config。
+
+> **null 没有第二语义**——object 的 `key:null` 等价于缺失；需要三态时用显式 enum。
+
+> **object 向下构造，叶子与 map 自带 default**——静态 object 的默认形态来自 child；map default 不因已存在 map 而合并动态 key。
+
+> **不做特殊规则，用语义明确行为**——`edit_config` 的行为完全由 schema 的 `action` 分支表达；不以缺参、空值或失败写入偷偷切换语义。
+
+> **渐进披露，按需查**——LLM 先 grep 定位，再 query 读取确切当前结构和值，最后 update；按需要走层级，而不是猜 path 或注入完整 schema。
+
+> **可改优先，限制例外**——Config 默认允许 agent 修改；仅在（1）对 agent 有重大影响，或（2）不可逆且容易改坏时，标记 `no_llm_visible` 限制其访问。
+
+> **访问投影不改真值**——`no_llm_visible` 只限制 LLM tool 的读写投影，不改变本地 Config、持久化或本地管理能力。
+
+> **如实回报**——热应用立即生效；需要重启、迁移回退、未知 path 剔除和响应体积拒绝都必须明确返回并可审计。
+
+> **单锁单真相**——所有 Config 入口与外部自动载入经同一把锁串行处理，只可观察完整旧状态或完整新状态；不保留入口私有草稿，消灭可见状态分叉与读写竞态。
