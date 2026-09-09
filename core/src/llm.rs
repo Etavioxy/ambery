@@ -41,52 +41,82 @@ pub fn tool_set(lang: crate::i18n::Lang) -> Vec<ToolDef> {
                             {
                                 "properties": {
                                     "type": { "enum": ["text_card"] },
-                                    "title": { "type": "string", "description": t(lang, "tool.field.title") },
-                                    "text": { "type": "string", "description": t(lang, "tool.field.text") }
+                                    "content": {
+                                        "type": "object",
+                                        "properties": {
+                                            "title": { "type": "string", "description": t(lang, "tool.field.title") },
+                                            "text": { "type": "string", "description": t(lang, "tool.field.text") }
+                                        },
+                                        "required": ["title", "text"]
+                                    }
                                 },
-                                "required": ["type", "title", "text"]
+                                "required": ["type", "content"]
                             },
                             {
                                 "properties": {
                                     "type": { "enum": ["quick_jump"] },
-                                    "label": { "type": "string", "description": t(lang, "tool.field.label") },
-                                    "target": { "type": "string", "description": t(lang, "tool.field.target") }
+                                    "content": {
+                                        "type": "object",
+                                        "properties": {
+                                            "label": { "type": "string", "description": t(lang, "tool.field.label") },
+                                            "target": { "type": "string", "description": t(lang, "tool.field.target") }
+                                        },
+                                        "required": ["label", "target"]
+                                    }
                                 },
-                                "required": ["type", "label", "target"]
+                                "required": ["type", "content"]
                             },
                             {
                                 "properties": {
                                     "type": { "enum": ["git_display"] },
-                                    "title": { "type": "string", "description": t(lang, "tool.field.title") },
-                                    "entries": { "type": "array", "description": t(lang, "tool.field.entries"), "items": { "type": "object", "properties": { "hash": { "type": "string" }, "msg": { "type": "string" }, "time": { "type": "string" } } } },
-                                    "diff": { "type": "string", "description": t(lang, "tool.field.diff") }
+                                    "content": {
+                                        "type": "object",
+                                        "properties": {
+                                            "title": { "type": "string", "description": t(lang, "tool.field.title") },
+                                            "entries": { "type": "array", "description": t(lang, "tool.field.entries"), "items": { "type": "object", "properties": { "hash": { "type": "string" }, "msg": { "type": "string" }, "time": { "type": "string" } } } },
+                                            "diff": { "type": "string", "description": t(lang, "tool.field.diff") }
+                                        },
+                                        "required": ["title", "entries"]
+                                    }
                                 },
-                                "required": ["type", "title", "entries"]
+                                "required": ["type", "content"]
                             },
                             {
                                 "properties": {
                                     "type": { "enum": ["data_chart"] },
-                                    "title": { "type": "string", "description": t(lang, "tool.field.title") },
-                                    "chart": {
+                                    "content": {
                                         "type": "object",
-                                        "description": t(lang, "tool.field.chart"),
                                         "properties": {
-                                            "kind": { "enum": ["line", "bar", "pie"] },
-                                            "labels": { "type": "array", "items": { "type": "string" } },
-                                            "series": { "type": "array", "items": { "type": "object", "properties": { "name": { "type": "string" }, "data": { "type": "array", "items": { "type": "number" } } } } }
+                                            "title": { "type": "string", "description": t(lang, "tool.field.title") },
+                                            "chart": {
+                                                "type": "object",
+                                                "description": t(lang, "tool.field.chart"),
+                                                "properties": {
+                                                    "kind": { "enum": ["line", "bar", "pie"] },
+                                                    "labels": { "type": "array", "items": { "type": "string" } },
+                                                    "series": { "type": "array", "items": { "type": "object", "properties": { "name": { "type": "string" }, "data": { "type": "array", "items": { "type": "number" } } } } }
+                                                },
+                                                "required": ["kind", "labels", "series"]
+                                            }
                                         },
-                                        "required": ["kind", "labels", "series"]
+                                        "required": ["title", "chart"]
                                     }
                                 },
-                                "required": ["type", "title", "chart"]
+                                "required": ["type", "content"]
                             },
                             {
                                 "properties": {
                                     "type": { "enum": ["todobox"] },
-                                    "title": { "type": "string", "description": t(lang, "tool.field.title") },
-                                    "items": { "type": "array", "description": t(lang, "tool.field.items"), "items": { "type": "object", "properties": { "text": { "type": "string" }, "done": { "type": "boolean" } } } }
+                                    "content": {
+                                        "type": "object",
+                                        "properties": {
+                                            "title": { "type": "string", "description": t(lang, "tool.field.title") },
+                                            "items": { "type": "array", "description": t(lang, "tool.field.items"), "items": { "type": "object", "properties": { "text": { "type": "string" }, "done": { "type": "boolean" } } } }
+                                        },
+                                        "required": ["title", "items"]
+                                    }
                                 },
-                                "required": ["type", "title", "items"]
+                                "required": ["type", "content"]
                             }
                         ]
                     }
