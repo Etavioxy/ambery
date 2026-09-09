@@ -88,6 +88,7 @@ keys(system) ∩ keys(user) = ∅
 ```rust
 struct UiConfig {
     pub topmost: TopmostConfig,
+    pub font: String,
 }
 
 struct TopmostConfig {

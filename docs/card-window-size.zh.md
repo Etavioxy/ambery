@@ -10,9 +10,9 @@
 
 ## 唯一来源
 
-窗口尺寸由一个尺寸计算产出，输入是 Card 内容、生效的字体标识，以及该 Card 渲染的布局常量（字号、行高、内边距、chrome）。该计算由 `@chenglou/pretext` 承担：文本测量与折行在 canvas 上完成，`prepare()` 对内容块做一次性的分段与测量、按（文本, 字体）缓存，`layout()` 在给定宽度与行高下推出行数；块高叠加 chrome 常量即窗口尺寸。
+窗口尺寸由一个尺寸计算产出，输入是 Card 内容、生效的字体标识，以及该 Card 渲染的布局常量（字号、行高、内边距、chrome）。该计算由 `@chenglou/pretext` 承担：`prepareWithSegments()` 对内容块做一次性的分段与 canvas 测量、按（字体, 分段）缓存宽度，`measureNaturalWidth()` 给出该块的本征宽度（不折行，硬换行仍分段），`layout()` 行走分段 advance、在给定宽度与行高下推出行数，且 `height = lineCount × lineHeight`；块高叠加 chrome 常量即窗口尺寸。
 
-该计算不读 Card 已渲染布局的任何几何——不读 Card 及其后代的 `getBoundingClientRect`、`offsetWidth`、`offsetHeight`、`scrollHeight`——因此结果不取决于当前是否有窗口在显示这张 Card，也不取决于窗口多大。唯一的 DOM 访问是 canvas 测量所需的一次性字体度量探针：一个插入 `body` 的隐藏绝对定位元素，每个字体测一次并缓存，它从不读 Card。
+该计算不读 Card 已渲染布局的任何几何——不读 Card 及其后代的 `getBoundingClientRect`、`offsetWidth`、`offsetHeight`、`scrollHeight`——因此结果不取决于当前是否有窗口在显示这张 Card，也不取决于窗口多大。唯一的 DOM 访问是 pretext 的 emoji 宽度修正：文本可能含 emoji 时，它把 canvas 测出的 emoji 宽度与一个隐藏 inline-block span 的宽度比较，每个字体算一次并缓存差值。它从不读 Card。
 
 渲染消费尺寸，绝不产出尺寸。产者只有一个，所以 Card 窗口只有一个尺寸定义，而不是一个算出来的加一个量出来的。
 
@@ -38,6 +38,8 @@ Card 字体是用户选择，所以尺寸计算不假定任何字体栈。由此
 | app 打包字体 | 是 | 是 |
 | 平台已有的命名字体 | 是 | 否——同一张 Card 在另一平台可算出不同尺寸 |
 | 远程字体、泛型族、或加载失败的用户自带字体 | 否 | 否 |
+
+量出的度量属于解析后的那个字面，不属于字体列表：列表在测量前解析，第一个存在的族胜出。列表里排第一的族缺失时，度量会静默来自下一个族，所以同一份配置在两台机器上可以算出两个尺寸（docs/concrete-insight.zh.md §Card 尺寸推导）。
 
 跨机器可复现是**性质**，不是每张卡片的警告：字体未随 app 打包的 Card 在另一台机器上可以算出不同尺寸，这是预期行为。选字体的设置界面提示一次；单张卡片不告警。
 
@@ -95,4 +97,4 @@ pet 尺寸是对脸宽、缩放与动作的闭式公式（`docs/pet-window-size.
 
 ## 验收
 
-尺寸推导属于渲染侧逻辑，因此 case-runner 不测它：该 harness 观测的是前端逻辑——store、动作层与窗口接线（`docs/case-runner.zh.md` §观测边界）。本契约改以真实渲染为准验收：把一张 Card 的推导尺寸与同一张 Card 实际渲染后占据的尺寸逐类型对比，覆盖会给块模型施压的各种内容形态。
+尺寸推导属于渲染侧逻辑，因此 case-runner 不测它：该 harness 观测的是前端逻辑——store、动作层与窗口接线（`docs/case-runner.zh.md` §观测边界）。本契约改以真实渲染为准验收：把一张 Card 的推导尺寸与同一张 Card 实际渲染后占据的尺寸逐类型对比，覆盖会给块模型施压的各种内容形态。对比在卡片实际渲染的引擎里跑——折行的容差与若干断行行为按引擎校准——所以容差取该引擎自己的，而不是所有平台共用一个数。

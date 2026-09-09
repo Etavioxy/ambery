@@ -134,3 +134,56 @@ Queue admits: "ambery·0a41f6ea finished. Evaluate whether to notify."
   Context: [+ system "ambery·0a41f6ea finished. Evaluate whether to notify."]
   LLM:     → silence
 ```
+
+## Card Size Derivation
+
+A Card's window size is three geometric quantities stacked: line boxes inside a block, block heights, and the chrome around them. Canvas answers one question only — how wide a run of text is — and the rest is arithmetic. Sample: one 175-character English paragraph in the Card font at 13px, card width cap 480px, line height 19.5px.
+
+```
+① canvas measures every segment once, cached by (font, segment); the Card's DOM is not involved
+
+      "The"  " "   "card"  " "   "window"  " "   "is"   " "   "sized"  " "
+     22.49  4.33  26.74  4.33   45.46   4.33  9.89   4.33  31.06   4.33   px
+
+② the line walk accumulates advances and breaks at the last break opportunity that fits
+
+   natural width (unwrapped) 1070.42 px   >   width cap 480 px
+   → card width 480, content width 458 = 480 − 2×1 border − 2×10 padding
+
+   ├──────────────────────── 458 px ────────────────────────┤
+   │The card window is sized before it is created: canvas…  │ 418.11
+   │segment once, the line walk packs segments into lines…  │ 419.73
+   │heights stack into the projected size.                  │ 223.92
+   └────────────────────────────────────────────────────────┘
+   3 line boxes × 19.5 = 58.5 px   (a DOM box of the same width and line height measures 58.50 px)
+   break opportunities come from word and grapheme segmentation; a trailing space does not
+   count toward the line's width
+
+③ block heights + chrome = the projected window size
+
+   ┌──────────────────────── 480 ───────────────────────────┐   ↑
+   │ border-top                                             │   1
+   │ ↕ header padding-top                                   │   8
+   │ title (nowrap + ellipsis, always one line)             │  19.5
+   │ ↕ header padding-bottom                                │   4
+   │ ↕ body padding-top                                     │   4
+   │ paragraph 58.5 (3 × 19.5)                              │  58.5
+   │ ↕ body padding-bottom                                  │  10
+   │ border-bottom                                          │   1
+   └────────────────────────────────────────────────────────┘   ↓
+                                            window = 480 × 106
+```
+
+④ the same paragraph, same content width, same line height — only the font changes
+
+```
+   font                     natural width   line boxes   height
+   "PingFang SC"               1070.42          3         58.5
+   Helvetica                   1010.92          3         58.5
+   "Times New Roman"            905.37          2         39.0
+   "Courier New"               1365.22          4         78.0
+```
+
+The metrics belong to the resolved face, not to the family list: the app's default stack measures exactly like `"PingFang SC"` on macOS, because the leading `"Segoe UI"` is absent and the metrics come from the next family; on Windows the same stack resolves to Segoe UI and the same Card sizes differently. That is why the font must be named (docs/card-window-size.md §Font identity). On a CJK sample the Latin families fall back to the same CJK face, so only the Latin runs change width — a family list does not make CJK metrics portable.
+
+The chrome constants are the Card's current style constants; a change to any of them, or to the font identity, changes `layoutVersion` and recomputes every projection. The result lands in `_meta.layout.size` (docs/card-window-size.md), which the shell reads before creating the window.

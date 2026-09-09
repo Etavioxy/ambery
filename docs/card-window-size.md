@@ -10,9 +10,9 @@ A Card window renders exactly one Card (`docs/multi-window.md`). Its size is the
 
 ## Single source
 
-The window size is produced by a size computation whose inputs are the Card content, the font identity in effect, and the layout constants of the Card's rendering (font size, line height, padding, chrome). The computation is carried by `@chenglou/pretext`: text measurement and line breaking run on a canvas, `prepare()` performs the one-time segmentation and measurement of a content block and is cached by (text, font), and `layout()` derives the line count for a given width and line height. Block heights plus the chrome constants give the window size.
+The window size is produced by a size computation whose inputs are the Card content, the font identity in effect, and the layout constants of the Card's rendering (font size, line height, padding, chrome). The computation is carried by `@chenglou/pretext`: `prepareWithSegments()` segments a block once and measures every segment on a canvas, caching the widths by (font, segment); `measureNaturalWidth()` gives the block's intrinsic width (no wrapping, hard breaks still split); `layout()` walks the segment advances and returns the line count for a given width and line height, with `height = lineCount × lineHeight`. Block heights plus the chrome constants give the window size.
 
-The computation reads no geometry of the Card's rendered layout — no `getBoundingClientRect`, `offsetWidth`, `offsetHeight`, `scrollHeight` of the Card or its descendants — so its result does not depend on whether a window is currently showing the Card, or at what size. The only DOM access is the one-time font-metric probe a canvas measurement needs: a hidden absolutely positioned element inserted into `body`, measured once per font and cached. It never reads the Card.
+The computation reads no geometry of the Card's rendered layout — no `getBoundingClientRect`, `offsetWidth`, `offsetHeight`, `scrollHeight` of the Card or its descendants — so its result does not depend on whether a window is currently showing the Card, or at what size. The only DOM access is pretext's emoji-width correction: for text that may contain emoji it compares the canvas-measured emoji width with a hidden inline-block span's width, once per font, and caches the difference. It never reads the Card.
 
 Rendering consumes the size and never produces it. There is exactly one producer, so a Card window has one size definition instead of a computed one and a measured one.
 
@@ -38,6 +38,8 @@ The Card font is a user choice, so the size computation assumes no font stack. T
 | Bundled with the app | yes | yes |
 | Named system font present on the platform | yes | no — the same Card can size differently on another platform |
 | Remote font, generic family, or a user-provided file that fails to load | no | no |
+
+The measured metrics belong to the resolved face, not to the family list: the list is resolved before measuring and the first family present wins. A list whose leading family is absent silently measures with the next one, so one configuration can yield two different sizes on two machines (docs/concrete-insight.md §Card Size Derivation).
 
 Cross-machine reproducibility is a property, not a per-Card warning: a Card rendered in a font the app does not bundle can size differently on another machine, and that is expected. The settings surface where the font is chosen states this once; individual Cards do not warn.
 
@@ -95,4 +97,4 @@ Pet size is a closed formula over face width, scale and motion (`docs/pet-window
 
 ## Verification
 
-The size computation is rendering-side logic, so the case-runner does not exercise it: that harness observes frontend logic — the store, the action layer and window wiring (`docs/case-runner.md` §Observation boundary). This contract is verified against real rendering instead: a Card's derived size is compared with the size the same Card occupies when rendered, per type and across the content shapes that stress the block model.
+The size computation is rendering-side logic, so the case-runner does not exercise it: that harness observes frontend logic — the store, the action layer and window wiring (`docs/case-runner.md` §Observation boundary). This contract is verified against real rendering instead: a Card's derived size is compared with the size the same Card occupies when rendered, per type and across the content shapes that stress the block model. The comparison runs in the engine the Card renders in — the line walk's fit tolerance and a few break behaviours are calibrated per engine — so the tolerance is the engine's own rather than one number for every platform.

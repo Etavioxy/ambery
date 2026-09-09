@@ -88,6 +88,7 @@ Shell-level UI behaviour lives in the `ui` subtree; a field is per-window when t
 ```rust
 struct UiConfig {
     pub topmost: TopmostConfig,
+    pub font: String,
 }
 
 struct TopmostConfig {
