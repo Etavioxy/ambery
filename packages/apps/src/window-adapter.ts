@@ -49,11 +49,12 @@ export async function createTauriAdapter(
 
 /** 浏览器调试/headless 模式：wrapper 容器定位，内放 View + overlay 红绿框。
  *  写操作同样走动作层（WindowLike 包装 DOM）——window_* effect 在非 Tauri
- *  环境经 RemoteBridge POST /effect 入动作流，与 Tauri 模式同一观测面。 */
+ *  环境经 RemoteBridge POST /effect 入动作流，与 Tauri 模式同一观测面。
+ *  dragTarget：把 debug wrapper 写回调用方，供 DOM 拖拽使用。 */
 export async function createBrowserAdapter(
   mount: HTMLElement,
   viewEl: HTMLElement,
-  viewInstance?: { dragTarget: HTMLElement },
+  dragTarget?: { el: HTMLElement | null },
 ): Promise<WindowAdapter> {
   const actions = await import("./tauri_runtime_actions");
   const wrapper = document.createElement("div");
@@ -61,7 +62,7 @@ export async function createBrowserAdapter(
   wrapper.style.cssText = "position:fixed;";
   wrapper.appendChild(viewEl);
   viewEl.style.position = "absolute";
-  if (viewInstance) viewInstance.dragTarget = wrapper;
+  if (dragTarget) dragTarget.el = wrapper;
   // 同步 wrapper 初始位置到 View screen 坐标，View 偏移归零
   const vr0 = viewEl.getBoundingClientRect();
   wrapper.style.left = `${vr0.x}px`;

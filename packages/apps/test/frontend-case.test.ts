@@ -65,11 +65,10 @@ it("T2 用户消息回读：appendUserMessage → Queue 放行 → context_chang
 it("T3 #25 前端语义：同 id render 原地更新不重复，close 移除后可干净重建", async () => {
   // pet 浏览器分支在 jsdom 启动（ComponentManager DOM 模式）。
   // 不经窗口组件：case 环境不解析 .svelte，直接驱动接线（组件只做挂载）。
-  const { createWindowShell } = await import("../src/shell/window-shell");
-  const { startPetWindow } = await import("../src/shell/kinds/pet");
-  const host = document.createElement("div");
-  document.body.appendChild(host);
-  await startPetWindow(await createWindowShell("pet"), host);
+  const { main: petMain } = await import("../src/entry/pet");
+  await petMain(); // pet 浏览器分支在 jsdom 启动（ComponentManager DOM 模式）
+  // 挂载是异步的（接线在组件挂载后启动）：等就绪再注入事件
+  await poll(() => (window as unknown as Record<string, unknown>).__ambery, "pet 接线就绪");
   const spec = { id: "t1", type: "text_card", title: "T", text: "hello" };
 
   // render → DOM 建卡

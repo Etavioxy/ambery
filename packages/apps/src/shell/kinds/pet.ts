@@ -7,42 +7,53 @@ import { reportEffect } from "../../effects";
 import { motionDef } from "../../motions";
 import { contextSize, MAX_FACE_MARGIN, MIN_FACE_W, obstacleSize, windowSize } from "../../pet-size";
 import { engine, setupServer } from "../../positioning/tauri-server";
-import { View } from "../../view";
 import { createBrowserAdapter, createTauriAdapter, type WindowAdapter } from "../../window-adapter";
 import type { WindowShell } from "../window-shell";
+import { petFace } from "./pet-state.svelte";
 
-export async function startPetWindow(shell: WindowShell, host: HTMLElement) {
+/** 组件提供的 DOM 与拖拽目标（浏览器模式的 debug wrapper 由适配器写回） */
+export interface PetView {
+  view: HTMLElement;
+  face: HTMLElement;
+  dragTarget: { el: HTMLElement | null };
+}
+
+/** 手势：组件只上报，宿主差异由接线判断 */
+export interface PetGestures {
+  pointerDown(e: PointerEvent): void;
+  contextMenu(e: MouseEvent): void;
+  auxClick(e: MouseEvent): void;
+}
+
+export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<PetGestures> {
   const { bridge, store } = shell;
-  const mount = host;
-  const view = new View(mount);
-  const faceEl = document.getElementById("face")!;
+  const viewEl = dom.view;
+  const faceEl = dom.face;
+  const mount = viewEl.parentElement ?? document.body;
 
   // #5 pet 未读角标（spec：默认纯数字、容器内右上；样式/方位走 Config，视觉在 styles.css 类）
-  const badge = document.createElement("div");
-  badge.id = "pet-badge";
   const applyBadgeStyle = (style: string, side: string) => {
-    badge.className = `badge-${style === "bubble" ? "bubble" : "number"} side-${side === "left" ? "left" : "right"}`;
+    petFace.badgeClass = `badge-${style === "bubble" ? "bubble" : "number"} side-${side === "left" ? "left" : "right"}`;
   };
   // 角标字号：固有基线 5px（12px 的 40%）× viewScale；CSS 默认灰 --ov-text
   const applyBadgeScale = () => {
-    badge.style.fontSize = `${Math.max(3, Math.round(5 * scale))}px`;
+    petFace.badgeFontSize = `${Math.max(3, Math.round(5 * scale))}px`;
   };
-  view.el.appendChild(badge);
   let unreadCount = 0;
   store.onContext((msgs) => {
     const userMsgs = msgs.filter(m => m.role === "user").length;
     const prev = unreadCount > 0 ? unreadCount : userMsgs;
     const newAssist = msgs.filter(m => m.role === "assistant").length;
     unreadCount = Math.max(0, newAssist - prev);
-    badge.textContent = String(unreadCount);
-    badge.style.display = unreadCount > 0 ? "block" : "none";
+    petFace.badgeText = String(unreadCount);
+    petFace.badgeVisible = unreadCount > 0;
   });
 
   // ── 适配模式 ──
   const isTauri = "__TAURI_INTERNALS__" in window;
   const adapter: WindowAdapter = isTauri
-    ? await createTauriAdapter(view.el, window.devicePixelRatio || 1)
-    : await createBrowserAdapter(mount, view.el, view);
+    ? await createTauriAdapter(viewEl, window.devicePixelRatio || 1)
+    : await createBrowserAdapter(mount, viewEl, dom.dragTarget);
 
   // ── 尺寸控制器（纯函数，不读当前 OS 窗口大小） ──
   // dpr 现读（多屏不同 DPI：拖到别的显示器后换算不失真，#19 坐标契约）
@@ -57,6 +68,12 @@ export async function startPetWindow(shell: WindowShell, host: HTMLElement) {
 
   /** 入口 1 测量：#face 当前渲染宽度 ÷ scale 还原为未缩放值（公式输入是未缩放宽度） */
   const measureFaceW = () => faceEl.getBoundingClientRect().width / scale;
+
+  /** #view 的屏幕中心（CSS px）——锚点几何的统一取口 */
+  const center = () => {
+    const r = viewEl.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  };
 
   /** 系统池扫描取 max + 余量（maxFaceWidth 唯一来源；只扫系统池） */
   function scanMaxFaceW(cfg: AppConfig): number {
@@ -211,16 +228,22 @@ export async function startPetWindow(shell: WindowShell, host: HTMLElement) {
   applyBadgeStyle(cfg.badgeStyle ?? "number", cfg.badgeSide ?? "right");
   scale = cfg.viewScale ?? 1;
   applyBadgeScale();
-  view.el.style.setProperty("--view-scale", String(scale));
+  petFace.scale = scale;
   maxFaceW = scanMaxFaceW(cfg);
   faceW = measureFaceW(); // face 未渲染（空）→ 0 → minFaceW 兜底
   await applySize(false);
   petCenter = await derivePetCenter();
   syncObstacle();
 
+  // 手势动作：各分支按宿主装配（组件只上报事件）
+  let startDrag: () => void = () => {};
+  let endDrag: () => void = () => {};
+  let onChatToggle: () => void = () => {};
+  let onShelfToggle: () => void = () => {};
+
   // ── Tauri 特有 ──
   if (isTauri) {
-    view.el.dataset.tauriDragRegion = "";
+    viewEl.dataset.tauriDragRegion = "";
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
     // 非只读 Tauri 运行时动作只经动作层执行：
     // 动作层执行真实 API 成功后自记 effect；业务只编排语义化动作，不拼 kind/payload
@@ -229,7 +252,7 @@ export async function startPetWindow(shell: WindowShell, host: HTMLElement) {
     const emitToR = (target: string, event: string, payload?: unknown) => { void actions.emitEvent(event, payload, target); };
     const win = getCurrentWindow();
     setupServer(bridge);
-    view.tauriStartDrag = () => { void actions.startDragging(actions.tauriWindowLike(win)); };
+    startDrag = () => { void actions.startDragging(actions.tauriWindowLike(win)); };
 
     const { dragDebounce } = await import("../../utils/debounce");
 
@@ -283,14 +306,13 @@ export async function startPetWindow(shell: WindowShell, host: HTMLElement) {
     // Cards Shelf（瞬时管理弹出层，不属于 Surface）：中键唤出——
     // 发去 pet 中心与物理宽高，shelf 按 ×3 现算尺寸、遮挡 pet 向右上延伸；
     // 关闭走 中键/失焦/pet 拖拽
-    view.el.addEventListener("auxclick", async (e) => {
-      if ((e as MouseEvent).button === 1) {
-        e.preventDefault();
-        const c = petCenter ?? view.center();
+    onShelfToggle = () => {
+      void (async () => {
+        const c = petCenter ?? center();
         const size = await win.outerSize();
         void actions.emitEvent("shelf:toggle", { x: c.x, y: c.y, w: size.width, h: size.height }, "shelf");
-      }
-    });
+      })();
+    };
     listen<{ id: string; visible: boolean; spec?: any }>("shelf:visibility", async (ev) => {
       const { id, visible, spec } = ev.payload;
       const label = `card-${id}`;
@@ -329,9 +351,7 @@ export async function startPetWindow(shell: WindowShell, host: HTMLElement) {
 
     // 手势：右键 = 唤出/关闭 Chat（chat:toggle，
     // pet 原地不动——无吸附态）；chat 窗口位置经 engine.place 自定位（chat-window.ts）
-    view.el.addEventListener("chat:toggle", () => {
-      emitToR("chat", "chat:toggle");
-    });
+    onChatToggle = () => emitToR("chat", "chat:toggle");
 
     broadcastPosition();
     await win.onMoved(() => broadcastPosition());
@@ -350,12 +370,12 @@ export async function startPetWindow(shell: WindowShell, host: HTMLElement) {
     // 浏览器模式（仅 Vite dev / preview，prod build tree-shaking 剔除）
     const { ChatPanel } = await import("../../windows/chat");
     const { ComponentManager } = await import("../../components/component-manager");
-    const mgr = new ComponentManager(mount, bridge, () => view.center(), false, engine);
+    const mgr = new ComponentManager(mount, bridge, () => center(), false, engine);
     const chatPanel = new ChatPanel(mount, bridge, store, engine);
 
     // 手势（browser 与 Tauri 同一语义）：
     // 右键 = 唤出/关闭 Chat（chat:toggle；pet 原地不动，无吸附态）
-    view.el.addEventListener("chat:toggle", () => chatPanel.toggle());
+    onChatToggle = () => chatPanel.toggle();
 
     // debug：positioning 面板（α/β 滑块 + 窗口注册）
     const { DebugPositioningPanel } = await import("../../positioning/debug-vite-panel");
@@ -391,25 +411,22 @@ export async function startPetWindow(shell: WindowShell, host: HTMLElement) {
       },
       onCardsChanged: (cb) => store.onCards(cb),
     });
-    view.el.addEventListener("auxclick", (e) => {
-      if ((e as MouseEvent).button === 1) {
-        e.preventDefault();
-        if (shelfMount.style.display === "none") {
-          const r = view.el.getBoundingClientRect();
-          const w = clampN(Math.round(r.width * 3), 180, 480);
-          const h = clampN(Math.round(r.height * 3), 120, 240);
-          shelfMount.style.width = `${w}px`;
-          shelfMount.style.height = `${h}px`;
-          const c = view.center();
-          shelfMount.style.left = `${Math.min(Math.round(c.x), window.innerWidth - w - 8)}px`;
-          shelfMount.style.top = `${Math.max(8, Math.round(c.y) - h)}px`;
-          shelfMount.style.display = "";
-          void shelfPanel.refresh();
-        } else {
-          closeShelfOverlay();
-        }
+    onShelfToggle = () => {
+      if (shelfMount.style.display === "none") {
+        const r = viewEl.getBoundingClientRect();
+        const w = clampN(Math.round(r.width * 3), 180, 480);
+        const h = clampN(Math.round(r.height * 3), 120, 240);
+        shelfMount.style.width = `${w}px`;
+        shelfMount.style.height = `${h}px`;
+        const c = center();
+        shelfMount.style.left = `${Math.min(Math.round(c.x), window.innerWidth - w - 8)}px`;
+        shelfMount.style.top = `${Math.max(8, Math.round(c.y) - h)}px`;
+        shelfMount.style.display = "";
+        void shelfPanel.refresh();
+      } else {
+        closeShelfOverlay();
       }
-    });
+    };
     // 中键点 shelf 任意位置 = 关闭
     shelfMount.addEventListener("auxclick", (e) => {
       if ((e as MouseEvent).button === 1) {
@@ -424,18 +441,18 @@ export async function startPetWindow(shell: WindowShell, host: HTMLElement) {
         closeShelfOverlay();
       }
     });
-    view.el.addEventListener("view:drag-start", closeShelfOverlay);
     // 拖拽时隐藏所有附属窗口，结束后以相对偏移恢复
     let markOffsets: { dx: number; dy: number; css: string }[] = [];
     const syncPanel = () => {
-      const wr = view.el.parentElement!.getBoundingClientRect();
+      const wr = viewEl.parentElement!.getBoundingClientRect();
       const c = { x: wr.x + wr.width / 2, y: wr.y + wr.height / 2 };
       panel.setPet(c, { w: Math.round(wr.width), h: Math.round(wr.height) });
       syncObstacle();
     };
-    view.el.addEventListener("view:drag-start", () => {
+    startDrag = () => {
+      closeShelfOverlay();
       // 系统藏（统一 API，无快照，#12 定案）；debug marks 单独处理
-      const wr = view.el.parentElement!.getBoundingClientRect();
+      const wr = viewEl.parentElement!.getBoundingClientRect();
       const petX = wr.x + wr.width / 2;
       const petY = wr.y + wr.height / 2;
       markOffsets = [];
@@ -450,8 +467,8 @@ export async function startPetWindow(shell: WindowShell, host: HTMLElement) {
       });
       chatPanel.systemHide();
       mgr.systemHideAll();
-    });
-    view.el.addEventListener("view:moved", () => {
+    };
+    endDrag = () => {
       void (async () => {
         petCenter = await derivePetCenter();
         await settleDragEnd(); // 原则⑥：拖拽结束越界拉回
@@ -477,13 +494,14 @@ export async function startPetWindow(shell: WindowShell, host: HTMLElement) {
           document.body.appendChild(mark);
         }
       })();
-    });
+    };
     syncPanel();
   }
 
   // ── Autonomy：expression 变化驱动尺寸重算（入口 1/3） ──
   const autonomy = new Autonomy(store, (e, source) => {
-    view.setExpression(e);
+    petFace.text = e.face;
+    petFace.motion = e.motion;
     faceW = measureFaceW(); // 入口 1：face 变 → 重测自然宽度
     curMotion = e.motion; // 入口 3：motion 变 → 换当前四向溢出
     // #27：表情变化专用 effect（Tauri 模式；browser 为 no-op），覆盖/回落/推导语义显式
@@ -501,7 +519,7 @@ export async function startPetWindow(shell: WindowShell, host: HTMLElement) {
     if (ns !== scale) {
       scale = ns; // 入口 2/6：scale 变 → 重算 + 障碍区同步
       applyBadgeScale();
-      view.el.style.setProperty("--view-scale", String(scale));
+      petFace.scale = scale;
     }
     faceW = measureFaceW();
     void applySize(true).then(() => syncObstacle());
@@ -512,9 +530,9 @@ export async function startPetWindow(shell: WindowShell, host: HTMLElement) {
   const debug: Record<string, unknown> = {
     setAutonomy: (args: any) => autonomy.setAutonomy(args),
     viewState: () => ({
-      center: view.center(),
-      face: document.getElementById("face")?.textContent ?? null,
-      motion: view.el.dataset.motion ?? "still",
+      center: center(),
+      face: petFace.text,
+      motion: petFace.motion,
     }),
   };
   if (bridge instanceof BrowserMockBridge) {
@@ -528,4 +546,36 @@ export async function startPetWindow(shell: WindowShell, host: HTMLElement) {
     debug.appendMessage = (role: any, content: any) => bridge.debugAppendMessage(role, content);
   }
   window.__ambery = debug as any;
+
+  return {
+    pointerDown(e) {
+      if (e.button !== 0) return;
+      startDrag();
+      if (isTauri) return; // 原生拖拽：位置变化由窗口 onMoved 广播
+      // 浏览器：DOM 拖拽（指针会移出小窗口，故监听挂 window）
+      const target = dom.dragTarget.el ?? viewEl;
+      const r = target.getBoundingClientRect();
+      const grab = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+      const move = (ev: PointerEvent) => {
+        target.style.left = `${ev.clientX - grab.dx}px`;
+        target.style.top = `${ev.clientY - grab.dy}px`;
+      };
+      const up = () => {
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", up);
+        endDrag();
+      };
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", up);
+    },
+    contextMenu(e) {
+      e.preventDefault();
+      onChatToggle(); // 右键 = 唤出/关闭 Chat（pet 原地不动，无吸附态）
+    },
+    auxClick(e) {
+      if (e.button !== 1) return;
+      e.preventDefault();
+      onShelfToggle();
+    },
+  };
 }
