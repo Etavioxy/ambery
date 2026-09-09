@@ -1,9 +1,11 @@
-// vite 配置：dev server 固定端口 5174（与 tauri.conf.json devUrl 127.0.0.1:5174 对齐，
+// vite 配置：dev server 固定端口 3000（与 tauri.conf.json devUrl 127.0.0.1:3000 对齐，
 // strictPort 防端口漂移导致 tauri dev 等待错位端口）。
 
 import { defineConfig } from "vite";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
+  plugins: [tailwindcss()],
   server: {
     port: 3000,
     strictPort: true,

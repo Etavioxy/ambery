@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* ── 设计 token（主题 value 的字段收敛源——主题即写这张表）──
    收敛自既有界面视觉（值与原硬编码逐一对应，视觉零变化）；默认配色表 = 深色。 */
 :root {
@@ -61,6 +63,78 @@
   --ov-chart-2: #a6e3a1;
   --ov-chart-3: #f9e2af;
   --ov-chart-4: #f38ba8;
+}
+
+/* ── Tailwind 语义层：token → 工具类 ──
+   `@theme inline` 让工具类直接引用 `--ov-*`（不复制值），主题切换即生效；
+   token 表仍是唯一颜色源，此处不新增颜色。 */
+@theme inline {
+  --color-bg: var(--ov-bg);
+  --color-panel: var(--ov-panel-bg);
+  --color-panel-border: var(--ov-panel-border);
+  --color-panel-border-soft: var(--ov-panel-border-soft);
+  --color-overlay: var(--ov-overlay);
+  --color-card: var(--ov-card-bg);
+  --color-card-border: var(--ov-card-border);
+  --color-fg: var(--ov-text);
+  --color-fg-strong: var(--ov-text-strong);
+  --color-muted: var(--ov-muted);
+  --color-group: var(--ov-group);
+  --color-code-bg: var(--ov-code-bg);
+  --color-accent: var(--ov-accent);
+  --color-accent-bg: var(--ov-accent-bg);
+  --color-accent-border: var(--ov-accent-border);
+  --color-danger: var(--ov-danger);
+  --color-dismiss: var(--ov-dismiss);
+  --color-success: var(--ov-success);
+  --color-ok: var(--ov-ok);
+  --color-warn: var(--ov-warn);
+  --color-error: var(--ov-error);
+  --color-view: var(--ov-view-bg);
+  --color-view-border: var(--ov-view-border);
+  --color-input: var(--ov-input-bg);
+  --color-input-border: var(--ov-input-border);
+  --color-hover: var(--ov-hover-bg);
+  --color-divider: var(--ov-divider);
+  --color-divider-soft: var(--ov-divider-soft);
+  --color-bubble-user: var(--ov-bubble-user);
+  --color-bubble-assistant: var(--ov-bubble-assistant);
+  --color-bubble-system: var(--ov-bubble-system);
+  --color-thinking-border: var(--ov-thinking-border);
+  --color-overlay-bg: var(--ov-overlay-bg);
+  --color-modal: var(--ov-modal-bg);
+  --color-modal-text: var(--ov-modal-text);
+  --color-chart-1: var(--ov-chart-1);
+  --color-chart-2: var(--ov-chart-2);
+  --color-chart-3: var(--ov-chart-3);
+  --color-chart-4: var(--ov-chart-4);
+
+  --radius-panel: var(--ov-panel-radius);
+  --radius-card: var(--ov-card-radius);
+  --radius-control: var(--ov-control-radius);
+  --radius-input: var(--ov-input-radius);
+}
+
+/* ── preflight 钉子（Tailwind 引入不改变现有渲染；本仓 CSS 在 preflight 之后，故只在未显式声明处生效）──
+   接受：box-sizing:border-box（#view 已显式 content-box）、border 归零（边框全为显式声明）、
+         标题/图片/按钮默认样式（本仓无 h*，svg 与按钮均已显式声明）。 */
+html {
+  line-height: normal; /* preflight 设 1.5；本仓从不设全局行高，钉住默认 */
+}
+
+input,
+select,
+textarea,
+button {
+  font: revert; /* 表单控件保持 UA 默认字体；需继承的控件（.chat-input / .api-key-input）已显式 font: inherit */
+}
+
+::placeholder {
+  color: revert; /* preflight 改 currentColor 50%；钉住 UA 占位符色 */
+}
+
+.cmp-git-log {
+  list-style: disc; /* preflight 清空列表标记；git log 条目需要圆点 */
 }
 
 /* ── 透明窗口 chrome 规则（#17 定案，单一机制）──
@@ -867,3 +941,4 @@ textarea,
 select {
   user-select: text;
 }
+
