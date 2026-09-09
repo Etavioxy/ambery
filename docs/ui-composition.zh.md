@@ -26,14 +26,14 @@ DOM                rendering   用户看到的东西
 
 ## 窗口装配
 
-一个窗口只挂载一个组件。窗口需要的服务——bridge、store、主题、i18n、窗口 adapter——由它的入口在组件树之外创建；没有任何组件创建服务。
+一个窗口只挂载一个组件。窗口需要的服务——bridge、store、主题、i18n、窗口 adapter——由它的入口在组件树之外创建；没有任何组件创建服务。形态的宿主接线——它按自身 DOM 构造的 adapter、它的监听、它的手势动作——在 DOM 就位后由窗口组件启动。
 
 ### 入口
 
 ```ts
 // 窗口入口 —— 唯一创建服务的地方
-const shell = await createWindowShell("chat"); // bridge、store、theme、i18n、adapter、Tauri 监听
-mount(ChatWindow, { target: document.getElementById("app")!, props: { shell } });
+const shell = await createWindowShell("shelf"); // bridge、store、theme、i18n、adapter
+mount(ShelfWindow, { target: document.getElementById("app")!, props: { shell } });
 ```
 
 ### 窗口组件
@@ -45,20 +45,10 @@ mount(ChatWindow, { target: document.getElementById("app")!, props: { shell } })
   setContext(shellContext, shell);
 </script>
 
-<Window kind="chat">
-  <Panel title={t("chat.title")} onClose={shell.actions.hide}>
+<Window kind="chat" {shell}>
+  <Panel title={t("chat.title")} onClose={() => void shell.adapter?.hide()}>
     <ChatPanel />
   </Panel>
-</Window>
-
-<!-- PetWindow.svelte —— 完全没有 chrome -->
-<Window kind="pet">
-  <PetFace />
-</Window>
-
-<!-- ShelfWindow.svelte —— 没有标题栏的列表 -->
-<Window kind="shelf">
-  <ShelfList />
 </Window>
 ```
 
@@ -71,8 +61,9 @@ WebviewWindowBuilder::new(&app, &label, WebviewUrl::App("index.html#chat".into()
     .build()?;
 ```
 
-- `createWindowShell(kind)` 是模块不是组件：它拥有 IPC、store、主题与 i18n 的应用、窗口适配器与 Tauri 监听。窗口的数据逻辑只住在这里。
-- Window 组件通过 Svelte context 发布 shell——这是它唯一不是渲染的动作——自己不计算任何东西。
+- `createWindowShell(kind)` 是模块不是组件：它拥有 IPC、store、主题与 i18n 的应用，以及窗口 adapter。窗口的数据逻辑只住在这里。
+- 形态的宿主接线是壳层里的模块（`shell/kinds/<kind>`）：注册该窗口的监听、在需要自身 DOM 时换用自己构造的 adapter（pet 要测量已渲染的颜文字），并暴露窗口组件转发的手势。窗口组件在挂载后启动它。
+- Window 组件通过 Svelte context 发布 shell——这是它唯一不是渲染的动作——渲染外框与内容，自己不计算任何东西。
 - widget 从 props 或 context 读数据，经传入的回调上报事件；它从不创建服务。
 
 ## widget 各层

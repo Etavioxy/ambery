@@ -26,14 +26,14 @@ DOM                rendering   what the user sees
 
 ## Window assembly
 
-A window mounts exactly one component. Its services — bridge, store, theme, i18n, window adapter — are created by the entry, outside the component tree; no component creates one.
+A window mounts exactly one component. Its services — bridge, store, theme, i18n, window adapter — are created by the entry, outside the component tree; no component creates one. A kind's host wiring — the adapter it may build on its own DOM, its Tauri listeners, its gesture actions — runs once the DOM exists and is started by the window component.
 
 ### Entry
 
 ```ts
 // window entry — the only place that creates services
-const shell = await createWindowShell("chat"); // bridge, store, theme, i18n, adapter, Tauri listeners
-mount(ChatWindow, { target: document.getElementById("app")!, props: { shell } });
+const shell = await createWindowShell("shelf"); // bridge, store, theme, i18n, adapter
+mount(ShelfWindow, { target: document.getElementById("app")!, props: { shell } });
 ```
 
 ### Window component
@@ -45,20 +45,10 @@ mount(ChatWindow, { target: document.getElementById("app")!, props: { shell } })
   setContext(shellContext, shell);
 </script>
 
-<Window kind="chat">
-  <Panel title={t("chat.title")} onClose={shell.actions.hide}>
+<Window kind="chat" {shell}>
+  <Panel title={t("chat.title")} onClose={() => void shell.adapter?.hide()}>
     <ChatPanel />
   </Panel>
-</Window>
-
-<!-- PetWindow.svelte — no chrome at all -->
-<Window kind="pet">
-  <PetFace />
-</Window>
-
-<!-- ShelfWindow.svelte — a list with no title bar -->
-<Window kind="shelf">
-  <ShelfList />
 </Window>
 ```
 
@@ -71,8 +61,9 @@ WebviewWindowBuilder::new(&app, &label, WebviewUrl::App("index.html#chat".into()
     .build()?;
 ```
 
-- `createWindowShell(kind)` is a module, not a component: it owns IPC, the store, theme and i18n application, the window adapter, and the Tauri listeners. It is the only place a window's data logic lives.
-- The window component publishes the shell through Svelte context — its one act that is not rendering — and computes nothing itself.
+- `createWindowShell(kind)` is a module, not a component: it owns IPC, the store, theme and i18n application, and the window adapter. It is the only place a window's data logic lives.
+- A kind's host wiring is a module in the shell layer (`shell/kinds/<kind>`): it registers the window's listeners, replaces the adapter when it needs its own DOM (the pet measures its rendered face), and exposes the gestures the window component forwards. The window component starts it after mount.
+- The window component publishes the shell through Svelte context — its one act that is not rendering — renders the frame and the content, and computes nothing itself.
 - A widget reads data from a prop or from the context and reports events through the callback it was given; it never creates a service.
 
 ## Widget tiers
