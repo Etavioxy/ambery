@@ -24,11 +24,6 @@ export interface WindowShell {
   invalidate(): void;
 }
 
-/** 各 kind 的宿主接线（监听 + 窗口动作）；浏览器模式不接线 */
-const HOST_WIRING: Partial<Record<WindowKind, (shell: WindowShell) => Promise<void>>> = {
-  shelf: async (shell) => (await import("./kinds/shelf")).wireShelfWindow(shell),
-};
-
 export async function createWindowShell(kind: WindowKind): Promise<WindowShell> {
   const bridge = await createBridge();
   const store = await Store.create(bridge);
@@ -54,6 +49,5 @@ export async function createWindowShell(kind: WindowKind): Promise<WindowShell> 
     },
     invalidate,
   };
-  if (isHost) await HOST_WIRING[kind]?.(shell);
   return shell;
 }

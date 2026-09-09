@@ -3,7 +3,7 @@
   import { onMount } from "svelte";
   import Window from "./Window.svelte";
   import { ShelfPanel } from "./shelf-panel";
-  import { createShelfActions } from "../shell/kinds/shelf";
+  import { createShelfActions, wireShelfWindow } from "../shell/kinds/shelf";
   import type { WindowShell } from "../shell/context";
 
   let { shell }: { shell: WindowShell } = $props();
@@ -14,6 +14,7 @@
     panel = new ShelfPanel(host, createShelfActions(shell));
     shell.onInvalidate(() => void panel?.refresh());
     void panel.refresh();
+    void wireShelfWindow(shell);
   });
 </script>
 

@@ -43,12 +43,13 @@ export function createShelfActions(shell: WindowShell): ShelfActions {
   };
 }
 
-/** 宿主接线：窗口动作 + 监听（浏览器模式不调用） */
+/** 宿主接线：窗口动作 + 监听（浏览器模式无 OS 窗口，直接返回） */
 export async function wireShelfWindow(shell: WindowShell): Promise<void> {
+  if (!("__TAURI_INTERNALS__" in window) || !shell.adapter) return;
   const { listen } = await import("@tauri-apps/api/event");
   const { getCurrentWindow, currentMonitor } = await import("@tauri-apps/api/window");
   const win = getCurrentWindow();
-  const adapter = shell.adapter!; // 壳已按 Tauri 模式建好（document.body + dpr 1 足够）
+  const adapter = shell.adapter;
   const close = () => void adapter.hide();
 
   // 中键 toggle（pet 或 shelf 任意位置中键都直接关闭）：pet 发来中心与物理宽高——
