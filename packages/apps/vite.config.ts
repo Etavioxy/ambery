@@ -12,8 +12,10 @@ export default defineConfig({
     strictPort: true,
     // tauri 重编译会锁定 src-tauri/target 下的 Rust 产物；vite 不盯它，
     // 否则 watcher 撞 EBUSY 崩溃（Windows 文件锁）。
+    // 编辑器的原子写会在项目根落下 `.<name>.<pid>.<uuid>.tmpdir/` 暂存目录，
+    // 扫到同样 EBUSY 崩；这些目录是编辑过程产物，不是源码。
     watch: {
-      ignored: ["**/src-tauri/target/**"],
+      ignored: ["**/src-tauri/target/**", "**/.*.tmpdir/**"],
     },
   },
 });
