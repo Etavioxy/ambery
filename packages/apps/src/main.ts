@@ -16,7 +16,7 @@ async function route() {
   } else if (key === "chat") {
     import("./entry/chat").then((m) => m.main());
   } else if (key === "menu") {
-    import("./windows/menu").then((m) => m.main());
+    import("./entry/menu").then((m) => m.main());
   } else if (key === "shelf") {
     import("./entry/shelf").then((m) => m.main());
   } else {

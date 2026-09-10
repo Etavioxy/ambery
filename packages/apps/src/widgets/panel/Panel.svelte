@@ -27,22 +27,32 @@
     title = null,
     onClose = null,
     tone = "panel",
+    headRight = null,
     children,
   }: {
     id?: string | null;
     title?: string | null;
     onClose?: (() => void) | null;
     tone?: PanelTone;
+    /** 标题栏右侧的额外内容（状态字等），排在关闭按钮之前 */
+    headRight?: Snippet | null;
     children: Snippet;
   } = $props();
 </script>
 
 <div id={id} data-tone={tone} class={panel({ tone })}>
-  {#if title !== null || onClose}
+  {#if title !== null || onClose || headRight}
     <div class="panel-head flex select-none items-center justify-between px-3 pt-2.5 pb-1.5 font-semibold">
       <span>{title ?? ""}</span>
-      {#if onClose}
-        <Button variant="close" class="panel-close" onclick={onClose}>×</Button>
+      {#if headRight || onClose}
+        <div class="flex items-center gap-2">
+          {#if headRight}
+            {@render headRight()}
+          {/if}
+          {#if onClose}
+            <Button variant="close" class="panel-close" onclick={onClose}>×</Button>
+          {/if}
+        </div>
       {/if}
     </div>
   {/if}
