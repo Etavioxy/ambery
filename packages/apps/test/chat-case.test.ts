@@ -1,13 +1,15 @@
 // chat 交互原则前端 case：
 // 滚动意图态机 / IME 守卫 / 自增长 / 发送按钮 / 失败保文重试 / 排队状态翻译 / 回应提示。
 // jsdom 无布局——滚动几何用 defineProperty 打桩（scrollHeight/clientHeight/scrollTop）。
+// 面板是组件：case 与两处宿主走同一路径——状态对象（chat-state）+ mount 组件。
 
 import { beforeAll, expect, it, vi } from "vitest";
+import { mount as mountComponent } from "svelte";
 import { waitCore, coreBase, readEffects } from "./shim";
 import { createBridge, type Bridge } from "../src/bridge";
 import { Store } from "../src/store";
-import { ChatPanel } from "../src/windows/chat";
-import type { PositioningEngine } from "../src/positioning/engine";
+import ChatPanel from "../src/components/chat-panel/ChatPanel.svelte";
+import { createChatState, type ChatState } from "../src/shell/kinds/chat-state.svelte";
 
 beforeAll(async () => {
   await waitCore();
@@ -15,26 +17,26 @@ beforeAll(async () => {
   document.body.innerHTML = '<div id="app"></div>';
 }, 60000);
 
-const fakeEngine = {
-  release: () => {},
-  remove: () => {},
-  place: () => ({ x: 100, y: 100 }),
-} as unknown as PositioningEngine;
-
 function stubScroll(el: HTMLElement, scrollHeight: number, clientHeight: number, scrollTop: number) {
   Object.defineProperty(el, "scrollHeight", { value: scrollHeight, configurable: true });
   Object.defineProperty(el, "clientHeight", { value: clientHeight, configurable: true });
   el.scrollTop = scrollTop;
 }
 
-async function makePanel(): Promise<{ panel: ChatPanel; mount: HTMLElement; bridge: Bridge; store: Store }> {
+async function makePanel(): Promise<{
+  state: ChatState;
+  mount: HTMLElement;
+  bridge: Bridge;
+  store: Store;
+}> {
   const bridge = await createBridge();
   const store = await Store.create(bridge);
   const mount = document.createElement("div");
   document.body.appendChild(mount);
-  const panel = new ChatPanel(mount, bridge, store, fakeEngine);
-  panel.open();
-  return { panel, mount, bridge, store };
+  const state = createChatState(bridge, store);
+  mountComponent(ChatPanel, { target: mount, props: { chat: state } });
+  state.show();
+  return { state, mount, bridge, store };
 }
 
 it("IME 组合输入中 Enter 只确认候选不误发送；Shift+Enter 换行；发送按钮与 Enter 同语义", async () => {
@@ -60,11 +62,11 @@ it("IME 组合输入中 Enter 只确认候选不误发送；Shift+Enter 换行�
     expect([...mount.querySelectorAll(".chat-user")].some((u) => u.textContent === "第一行")).toBe(true),
   );
   expect(input.value).toBe(""); // 发送后清空
-  // 发送按钮同语义：空白禁用
-  expect(sendBtn.disabled).toBe(true);
+  // 发送按钮同语义：空白禁用（DOM 更新是异步的，等一拍）
+  await vi.waitFor(() => expect(sendBtn.disabled).toBe(true));
   input.value = "第二行";
   input.dispatchEvent(new Event("input", { bubbles: true }));
-  expect(sendBtn.disabled).toBe(false);
+  await vi.waitFor(() => expect(sendBtn.disabled).toBe(false));
   sendBtn.click();
   await vi.waitFor(() => expect(bubbles()).toBe(base + 2));
 });
@@ -77,7 +79,9 @@ it("发送失败：文字退回输入框 + 错误行 + 重试路径", async () =
   bridge.appendUserMessage = async () => false;
   const mount = document.createElement("div");
   document.body.appendChild(mount);
-  new ChatPanel(mount, bridge, store, fakeEngine).open();
+  const state = createChatState(bridge, store);
+  mountComponent(ChatPanel, { target: mount, props: { chat: state } });
+  state.show();
   const input = mount.querySelector<HTMLTextAreaElement>(".chat-input")!;
   input.value = "会失败的消息";
   input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
@@ -106,12 +110,12 @@ it("滚动意图：跟随贴底；滚离后新消息只提示不抢视口；点�
     body: JSON.stringify({ path: "ui_language", value: "zh" }),
   });
   const { mount, store } = await makePanel();
-  // open() 的 scrollToBottom 把 suppressScroll 挂到下一宏任务——先越过，再模拟用户滚动
+  // 挂载期的贴底滚动把 suppressScroll 挂到下一宏任务——先越过，再模拟用户滚动
   await new Promise((r) => setTimeout(r, 20));
   const history = mount.querySelector<HTMLElement>(".chat-history")!;
   stubScroll(history, 1000, 300, 700); // 贴底
   history.dispatchEvent(new Event("scroll")); // 确认跟随
-  expect((mount.querySelector(".chat-pill") as HTMLElement).hidden).toBe(true);
+  expect(mount.querySelector(".chat-pill")).toBeNull();
 
   // 用户滚离底部 → 阅读历史
   stubScroll(history, 1000, 300, 200);
@@ -121,17 +125,17 @@ it("滚动意图：跟随贴底；滚离后新消息只提示不抢视口；点�
   const msgs = [...base, { role: "assistant", content: "新回复一", ts: Date.now() }, { role: "assistant", content: "新回复二", ts: Date.now() }];
   (store as unknown as { contextData: unknown }).contextData = msgs;
   for (const cb of (store as unknown as { contextListeners: Set<(m: unknown) => void> }).contextListeners) cb(msgs);
-  await vi.waitFor(() => expect((mount.querySelector(".chat-pill") as HTMLElement).hidden).toBe(false));
+  await vi.waitFor(() => expect(mount.querySelector(".chat-pill")).toBeTruthy());
   expect(mount.querySelector(".chat-pill")!.textContent).toMatch(/↓ 2 条新消息/);
   expect(history.scrollTop).toBe(200); // 视口不被抢
-  // 点击提示 → 回底 + 清零 + 恢复跟随
+  // 点击提示 → 回底 + 清零 + 恢复跟随（DOM 更新是异步的）
   (mount.querySelector(".chat-pill") as HTMLElement).click();
-  expect((mount.querySelector(".chat-pill") as HTMLElement).hidden).toBe(true);
+  await vi.waitFor(() => expect(mount.querySelector(".chat-pill")).toBeNull());
   expect(history.scrollTop).toBe(1000); // scrollToBottom 设 scrollTop=scrollHeight
 });
 
 it("回应提示：发送后出现「…」，delta 到达即消失；排队状态翻译", async () => {
-  const { mount, bridge } = await makePanel();
+  const { mount } = await makePanel();
   const input = mount.querySelector<HTMLTextAreaElement>(".chat-input")!;
   const sendOne = async (text: string) => {
     input.value = text;
@@ -142,11 +146,9 @@ it("回应提示：发送后出现「…」，delta 到达即消失；排队状�
   await sendOne("第一条");
   expect(mount.querySelector(".chat-replying")).toBeTruthy(); // 回应提示
   await sendOne("第二条");
-  await vi.waitFor(() => expect((mount.querySelector(".chat-queue-status") as HTMLElement).hidden).toBe(false));
+  await vi.waitFor(() => expect(mount.querySelector(".chat-queue-status")).toBeTruthy());
   expect(mount.querySelector(".chat-queue-status")!.textContent).toContain("1");
   // delta 到达：回应提示消失、streaming 开始
-  (bridge as unknown as { deltaListeners?: ((d: { content?: string }) => void)[] });
-  // 经 shim effect 总线注入 delta/done
   await fetch(`${coreBase()}/debug/effect`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -163,7 +165,7 @@ it("回应提示：发送后出现「…」，delta 到达即消失；排队状�
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ kind: "assistant_done" }),
   });
-  await vi.waitFor(() => expect((mount.querySelector(".chat-queue-status") as HTMLElement).hidden).toBe(true));
+  await vi.waitFor(() => expect(mount.querySelector(".chat-queue-status")).toBeNull());
 });
 
 it("UI 动作记录：渲染用户气泡/错误气泡/错误 banner 时 effect.jsonl 有对应记录", async () => {
@@ -182,8 +184,8 @@ it("UI 动作记录：渲染用户气泡/错误气泡/错误 banner 时 effect.j
 
   // 错误通知按 retention 路由（错误即通知模型）：transient → 气泡（不开 banner）；
   // persistent → banner（不开气泡）。经 shim effect 总线注入 error 事件驱动
-  const { panel } = await makePanel();
-  panel.onOpenSetup = () => {};
+  const { state } = await makePanel();
+  state.onOpenSetup = () => {};
   const baseErr = (readEffects().match(/"error_bubble"/g) ?? []).length;
   const baseBanner = (readEffects().match(/"setup_banner"/g) ?? []).length;
   const errMsg = "LLM 调用失败：连接超时";

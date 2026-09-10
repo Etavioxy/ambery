@@ -7,12 +7,13 @@
 // 本环境无 __TAURI_INTERNALS__，pet 跑浏览器分支——卡片经 ComponentManager DOM 模式。
 
 import { beforeAll, expect, it, vi } from "vitest";
+import { mount as mountComponent } from "svelte";
 import { waitCore, coreBase } from "./shim";
 import { createBridge } from "../src/bridge";
 import { Store } from "../src/store";
-import { ChatPanel } from "../src/windows/chat";
+import ChatPanel from "../src/components/chat-panel/ChatPanel.svelte";
+import { createChatState } from "../src/shell/kinds/chat-state.svelte";
 import { ComponentManager } from "../src/components/component-manager";
-import type { PositioningEngine } from "../src/positioning/engine";
 
 async function poll<T>(fn: () => T | null | undefined | false, what: string, ms = 8000): Promise<T> {
   const t0 = Date.now();
@@ -98,23 +99,26 @@ it("T4 #26：× 走 intentClose——userClosed + release（非 remove）+ 钩�
   document.body.appendChild(mount);
   const release = vi.fn();
   const remove = vi.fn();
-  const engine = {
-    release,
-    remove,
-    place: () => ({ x: 100, y: 100 }),
-  } as unknown as PositioningEngine;
-  const panel = new ChatPanel(mount, bridge, store, engine);
+  const chat = createChatState(bridge, store);
   const hook = vi.fn();
-  panel.onIntentClose = hook;
+  // browser 宿主接线：用户意图关 → 释放占区（release，不是 remove/dismiss）
+  chat.onIntentClose = () => {
+    release("chat-panel");
+    hook();
+  };
+  mountComponent(ChatPanel, {
+    target: mount,
+    props: { chat, onClose: () => chat.intentClose() },
+  });
 
-  panel.open(); // 唤出（engine.place 固定 sse）
-  expect(panel.isVisible()).toBe(true);
-  (mount.querySelector(".chat-close") as HTMLButtonElement).click(); // ×
-  expect(panel.userClosed).toBe(true);
-  expect(panel.isVisible()).toBe(false);
+  chat.show(); // 唤出
+  expect(chat.visible).toBe(true);
+  (mount.querySelector(".panel-close") as HTMLButtonElement).click(); // ×
+  expect(chat.userClosed).toBe(true);
+  expect(chat.visible).toBe(false);
   expect(release).toHaveBeenCalledWith("chat-panel");
   expect(remove).not.toHaveBeenCalled(); // 不是 dismiss 语义
-  expect(hook).toHaveBeenCalled(); // windowed 副作用钩子（requestRelease+adapter.hide）
+  expect(hook).toHaveBeenCalled(); // 宿主副作用钩子（release + hide）
 });
 
 it("T6 LLM 失败不再静音：error effect 在 chat 出错误气泡（非卡片）", async () => {

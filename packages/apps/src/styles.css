@@ -657,33 +657,6 @@ html.browser body {
   overflow: hidden;
 }
 #shelf-body { flex: 1; overflow-y: auto; padding: 4px 6px; }
-.shelf-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 2px;
-  border-bottom: 1px solid var(--ov-divider-soft);
-}
-.shelf-type { flex: none; width: 18px; text-align: center; }
-.shelf-title {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.shelf-title.closed { opacity: 0.45; text-decoration: line-through; }
-.shelf-vis, .shelf-dismiss {
-  flex: none;
-  background: none;
-  border: none;
-  color: var(--ov-text-strong);
-  padding: 2px 4px;
-  cursor: pointer;
-  font-size: 12px;
-}
-.shelf-vis:hover, .shelf-dismiss:hover { background: var(--ov-hover-bg); border-radius: 4px; }
-.shelf-dismiss { color: var(--ov-dismiss); }
 /* browser overlay 容器（pet 页内嵌的瞬时 Shelf 面板；尺寸由 pet×3 现算） */
 #shelf-overlay {
   position: fixed;
@@ -929,8 +902,6 @@ button,
 #panel-head,
 .map-head,
 .cfg-line .name,
-.shelf-type,
-.shelf-title,
 .chat-queue-status,
 #panel-status,
 .setup-test-status,

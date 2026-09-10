@@ -3,7 +3,7 @@
 // 系统藏、失焦即关、中键点任意位置关闭。数据逻辑只在这里与壳里，不在组件里。
 
 import type { WindowShell } from "../window-shell";
-import type { ShelfActions } from "../../components/shelf-panel";
+import type { ShelfActions } from "../../components/shelf-panel/shelf-actions";
 import * as actions from "../../tauri_runtime_actions";
 
 const MIN_W = 180;

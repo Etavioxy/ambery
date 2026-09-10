@@ -370,23 +370,68 @@ export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<
     }
   } else if (!import.meta.env.PROD) {
     // 浏览器模式（仅 Vite dev / preview，prod build tree-shaking 剔除）
-    const { ChatPanel } = await import("../../windows/chat");
+    const CHAT_W = 320;
+    const CHAT_H = 380;
+    const { Direction } = await import("../../positioning/types");
+    const { mount: mountChatComponent } = await import("svelte");
+    const { default: ChatPanel } = await import("../../components/chat-panel/ChatPanel.svelte");
+    const { createChatState } = await import("../../shell/kinds/chat-state.svelte");
     const { ComponentManager } = await import("../../components/component-manager");
     const mgr = new ComponentManager(mount, bridge, () => center(), false, engine);
-    const chatPanel = new ChatPanel(mount, bridge, store, engine);
+    // browser 与 Tauri 共享同一面板组件与同一份状态；这里只做宿主侧的事：
+    // 挂载、位置、拖拽、引导 modal、显示/隐藏
+    const chatState = createChatState(bridge, store);
+    const chatMount = document.createElement("div");
+    document.body.appendChild(chatMount);
+    mountChatComponent(ChatPanel, { target: chatMount, props: { chat: chatState } });
+    const chatEl = () => chatMount.querySelector<HTMLElement>("#chat-panel");
+    if (chatEl()) chatEl()!.hidden = true;
+    const { openSetupModal } = await import("../../setup");
+    let setupDismiss: (() => void) | null = null;
+    chatState.onOpenSetup = () => {
+      setupDismiss?.();
+      setupDismiss = openSetupModal(bridge);
+    };
+    chatState.onIntentClose = () => {
+      setupDismiss?.();
+      setupDismiss = null;
+      engine.release("chat-panel");
+      const el = chatEl();
+      if (el) el.hidden = true;
+    };
+    const { attachDrag } = await import("../../drag");
+    attachDrag(chatMount, ".panel-head", ".panel-close", (c) =>
+      engine.updateCenter("chat-panel", c),
+    );
 
     // 手势（browser 与 Tauri 同一语义）：
     // 右键 = 唤出/关闭 Chat（chat:toggle；pet 原地不动，无吸附态）
-    onChatToggle = () => chatPanel.toggle();
+    onChatToggle = () => {
+      if (chatState.visible) {
+        chatState.intentClose();
+        return;
+      }
+      const el = chatEl();
+      if (!el) return;
+      chatState.intentOpen();
+      const pos = engine.place({ id: "chat-panel", width: CHAT_W, height: CHAT_H }, Direction.sse);
+      // 不做 clamp（不压人 > 完全可见，部分出屏接受）
+      el.style.left = `${pos.x - CHAT_W / 2}px`;
+      el.style.top = `${pos.y - CHAT_H / 2}px`;
+      el.hidden = false;
+      chatState.show();
+    };
 
     // debug：positioning 面板（α/β 滑块 + 窗口注册）
     const { DebugPositioningPanel } = await import("../../positioning/debug-vite-panel");
     const panel = new DebugPositioningPanel(engine);
 
-    // Cards Shelf（browser 与 Tauri 共享 ShelfPanel）：中键 toggle——瞬时 overlay，
+    // Cards Shelf（browser 与 Tauri 共享同一面板组件与同一份数据状态）：中键 toggle——瞬时 overlay，
     // 尺寸 = pet ×3、左下角落在 pet 中心向右上延伸；中键点 pet 或 shelf 任意位置 /
     // 点面板外（失焦等价）/ pet 拖拽关闭
-    const { ShelfPanel } = await import("../../components/shelf-panel");
+    const { mount: mountComponent } = await import("svelte");
+    const { default: ShelfPanel } = await import("../../components/shelf-panel/ShelfPanel.svelte");
+    const { createShelfState } = await import("../../shell/kinds/shelf-state.svelte");
     const shelfMount = document.createElement("div");
     shelfMount.id = "shelf-overlay";
     shelfMount.style.display = "none";
@@ -395,13 +440,13 @@ export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<
     const closeShelfOverlay = () => {
       shelfMount.style.display = "none";
     };
-    const shelfPanel = new ShelfPanel(shelfMount, {
+    const shelfActions: import("../../components/shelf-panel/shelf-actions").ShelfActions = {
       list: async () => store.cards ?? [],
       setUserClosed: async (c, userClosed) => {
         await bridge.setCardUserClosed?.(c.component.id, userClosed);
         mgr.setHidden(c.component.id, userClosed);
         await store.refreshCards();
-        await shelfPanel.refresh();
+        await shelfState.load();
       },
       dismiss: async (c, title) => {
         // 结构化事实；closed_by_user 双行事件由 core 按 lifecycle 单源现写
@@ -409,10 +454,14 @@ export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<
         bridge.pushEvent({ action: "dismiss", cardId: c.component.id });
         mgr.closeById(c.component.id);
         await store.refreshCards();
-        await shelfPanel.refresh();
+        await shelfState.load();
       },
       onCardsChanged: (cb) => store.onCards(cb),
-    });
+    };
+    const shelfState = createShelfState(shelfActions);
+    mountComponent(ShelfPanel, { target: shelfMount, props: { state: shelfState, actions: shelfActions } });
+    // Card 集合外部变化（agent 增删）→ 面板重取
+    shelfActions.onCardsChanged?.(() => void shelfState.load());
     onShelfToggle = () => {
       if (shelfMount.style.display === "none") {
         const r = viewEl.getBoundingClientRect();
@@ -424,7 +473,7 @@ export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<
         shelfMount.style.left = `${Math.min(Math.round(c.x), window.innerWidth - w - 8)}px`;
         shelfMount.style.top = `${Math.max(8, Math.round(c.y) - h)}px`;
         shelfMount.style.display = "";
-        void shelfPanel.refresh();
+        void shelfState.load();
       } else {
         closeShelfOverlay();
       }
@@ -467,7 +516,9 @@ export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<
         });
         el.remove();
       });
-      chatPanel.systemHide();
+      chatState.systemHide();
+      const chatHidden = chatEl();
+      if (chatHidden) chatHidden.hidden = true;
       mgr.systemHideAll();
     };
     endDrag = () => {
@@ -479,9 +530,13 @@ export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<
         // 系统恢复（统一 API：systemRestore 判定 + showAt 定位，不再 toggle）
         const restored = engine.restorePositions(petC);
         for (const r of restored) {
-          if (r.id === "chat-panel" && chatPanel.systemRestore()) {
-            chatPanel.showAt(r.center);
-          }
+          if (r.id !== "chat-panel" || !chatState.systemRestore()) continue;
+          const chatRestored = chatEl();
+          if (!chatRestored) continue;
+          chatRestored.style.left = `${r.center.x - CHAT_W / 2}px`;
+          chatRestored.style.top = `${r.center.y - CHAT_H / 2}px`;
+          chatRestored.hidden = false;
+          chatState.show();
         }
         // card 跟随（browser DOM 卡片纳入 engine 语义，#12）
         mgr.followRestore(restored);

@@ -1,11 +1,13 @@
 // i18n 模块前端 case：ui_language 字段校验 + 切换即重渲染 + 机器契约不译。
 
 import { beforeAll, expect, it, vi } from "vitest";
+import { mount as mountComponent } from "svelte";
 import { waitCore, coreBase } from "./shim";
-import { createBridge } from "../src/bridge";
+import { createBridge, type Bridge } from "../src/bridge";
 import { Store } from "../src/store";
-import { t, uiLanguage } from "../src/i18n";
-import { ChatPanel } from "../src/windows/chat";
+import { t, uiLanguage, wireI18n } from "../src/i18n";
+import ChatPanel from "../src/components/chat-panel/ChatPanel.svelte";
+import { createChatState } from "../src/shell/kinds/chat-state.svelte";
 import { ComponentManager } from "../src/components/component-manager";
 
 beforeAll(async () => {
@@ -13,6 +15,16 @@ beforeAll(async () => {
 
   document.body.innerHTML = '<div id="app"></div>';
 }, 60000);
+
+/** 面板是组件：case 与宿主同一路径（状态对象 + mount；i18n 接线由入口负责，这里照做） */
+function mountChat(bridge: Bridge, store: Store): HTMLElement {
+  const target = document.createElement("div");
+  document.body.appendChild(target);
+  wireI18n(store);
+  const state = createChatState(bridge, store);
+  mountComponent(ChatPanel, { target, props: { chat: state } });
+  return target;
+}
 
 const postConfig = (path: string, value: unknown) =>
   fetch(`${coreBase()}/config`, {
@@ -39,9 +51,7 @@ it("字段默认与校验：harness_language 默认 zh；非法语言原子拒�
 it("切换 ui_language 即重渲染：card chrome 跟随", async () => {
   const bridge = await createBridge();
   const store = await Store.create(bridge);
-  const mount = document.createElement("div");
-  document.body.appendChild(mount);
-  const panel = new ChatPanel(mount, bridge, store);
+  const mount = mountChat(bridge, store);
   const mgr = new ComponentManager(mount, bridge, () => ({ x: 0, y: 0 }), false);
   mgr.render({ id: "i1", type: "text_card", title: "T", text: "x" });
 
@@ -63,7 +73,6 @@ it("切换 ui_language 即重渲染：card chrome 跟随", async () => {
   await vi.waitFor(() =>
     expect(mount.querySelector(".cmp-body button")?.textContent).toBe(expectedCopy),
   );
-  expect(panel).toBeTruthy();
 
   // 机器契约不译：Config path 原样（t() 不涉及 path）；名称不参与翻译
   expect(t("pet.default-name")).toBe("pet");
@@ -80,10 +89,8 @@ it("插值工作", async () => {
 it("chat 标题 = i18n 文案（不显示 pet 名称），改名不重贴标题", async () => {
   const bridge = await createBridge();
   const store = await Store.create(bridge);
-  const mount = document.createElement("div");
-  document.body.appendChild(mount);
-  new ChatPanel(mount, bridge, store);
-  const title = mount.querySelector(".chat-header span")!;
+  const mount = mountChat(bridge, store);
+  const title = mount.querySelector(".panel-head span")!;
   // 标题 = chat.title（i18n），不是 pet 名称
   expect(title.textContent).toBe(t("chat.title"));
   // 改名 → 标题不变（非 ASCII 多字节名验证 i18n 不随 pet 名变）

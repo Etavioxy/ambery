@@ -14,7 +14,7 @@ async function route() {
   if (key.startsWith("card-")) {
     import("./windows/card-window").then((m) => m.main());
   } else if (key === "chat") {
-    import("./windows/chat-window").then((m) => m.main());
+    import("./entry/chat").then((m) => m.main());
   } else if (key === "menu") {
     import("./windows/menu").then((m) => m.main());
   } else if (key === "shelf") {
