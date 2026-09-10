@@ -2,77 +2,43 @@
 
 [English](README.md) | 中文
 
-Ambery 是一个桌面 Agent Harness：监督你的 Claude Code 会话，把它们变成安静、可扫读的陪伴——悬浮宠物、聊天面板和持久卡片。它通过 Claude Code hooks 观察会话生命周期，通过 Windows UIA sidecar 读取终端状态，并让 agent 通过一个小而显式的工具集行动。
+Ambery 是一个基于 Tauri 的 agent harness：为 agent 提供记忆、工具与日程；它是一只可拖动、始终置顶的桌宠，信息以卡片呈现。
 
-## 能做什么
+早期阶段：所有发布均为 pre-release，协议尚未冻结，发布阶梯见 [docs/roadmap.zh.md](docs/roadmap.zh.md)。
 
-- **Hook 驱动的监督**——Claude Code 的 `SessionStart` / `UserPromptSubmit` / `Stop` / `SessionEnd` / `Notification` hooks 喂给本地后端（仅 loopback）。
-- **带宠物 UI 的 agent loop**——Queue → Context → LLM → effects；宠物决定「通知 vs 沉默」，用颜文字状态表达，并借 `call_component` 渲染卡片。
-- **全保真 storage**——append-only JSONL 让 OpenAI 请求上下文几乎可以完整复原。
-- **可观测性**——`ambery-case` 回放 storage 快照并断言概念结构不变量；`ambery-activity` 是带 turn-aware trajectory 模式的 TUI 查看器。
-- **Windows UIA sidecar**——Windows Terminal 的可选增强读取（self-contained win-x64，用户无需 .NET runtime）。
+它的核心是 [Ambery Protocol](docs/access-protocol.zh.md)：基于 MCP 的更高一层访问协议，让外部的软件与文件成为桌宠能观察的对象。每个对象有稳定编号，变化按编号归入；消息由对象推送，或由桌宠按计划主动读取。
+
+## 快速开始
+
+前置：Rust stable、Node 24 + npm；Windows 构建还需要 .NET 9，未安装时可用 `packages/apps` 下的 no-sidecar 脚本，构建与运行不受影响。
+
+```bash
+# 让桌宠接收 Claude Code 会话（Windows，PowerShell 7），在仓库根目录执行
+# 当前为安装 hook 脚本的方式，后续会改为直接解析会话文件
+pwsh -File scripts/install-hooks.ps1
+
+# 安装前端依赖并启动壳（壳内嵌 core）
+cd packages/apps && npm ci
+cd tauri && npx tauri dev
+```
+
+`npx tauri build` 产出安装包，`cargo test --workspace` 运行 Rust 测试。headless case、浏览器调试 UI 与 storage 工具见 [docs/DEVELOPING.zh.md](docs/DEVELOPING.zh.md)。
 
 ## 平台矩阵
 
 | 平台 | 状态 |
 |---|---|
-| Windows 10/11 | 一等公民：Tauri 壳 + 托盘 + UIA sidecar + hook 安装脚本 |
-| macOS | core 可编译可运行；Hook 驱动的核心体验；无 UIA sidecar |
-| Linux | core 可编译可运行；Hook 驱动的核心体验；无 UIA sidecar |
-
-## 快速开始
-
-前置：Rust stable、Node 24 + npm；仅 Windows 侧需要 .NET 9 SDK 构建 UIA sidecar。
-
-```bash
-# Rust workspace（core + case runner + activity TUI）
-cargo test --workspace
-
-# 前端 headless case（全 mock/keyless，内嵌 core 并拉起 vitest）
-cargo run -p ambery-case -- frontend --silent
-
-# 安装 Claude Code hooks（Windows PowerShell）
-powershell -File scripts/install-hooks.ps1
-
-# 用 trajectory TUI 查看 storage
-cargo run -p ambery-core --bin ambery-activity -- --dir ~/.config/ambery/storage --trajectory
-```
-
-浏览器调试宿主：
-
-```bash
-cargo run -p ambery-case -- serve --silent
-cd app && npm install && npm run dev
-```
-
-## 配置
-
-配置与会话数据位于你的用户配置目录下（首次运行自动创建）：
-
-| 平台 | 配置文件 | Storage |
-|---|---|---|
-| Windows | `%USERPROFILE%\.config\ambery\config.json` | `%USERPROFILE%\.config\ambery\storage\` |
-| macOS / Linux | `~/.config/ambery/config.json` | `~/.config/ambery/storage/` |
-
-- `AMBERY_CONFIG_DIR` / `AMBERY_STORAGE_DIR` 可覆盖这两个位置（开发用）。
-- **API key 只存在环境变量，从不进 config**——`config.json` 只存变量*名*（如 `"api_key_env": "AMBERY_DEEPSEEK_API_KEY"`）；key 本体设在你的 shell 环境里。默认预设遵循 `AMBERY_<NAME>_API_KEY` 约定。
-- 全新安装时 `llm.active` 默认为**未配置**值；首次使用需设置 key 并选择 provider（配置引导会带你走一遍）。
-- config 可手改、经设置面板、或经 `ambery-cli`；所有路径走同一条验证管道（docs/config.md）。
-
-## 仓库地图
-
-- `core/` — Rust 核心：Harness、backend、server、storage、filter、TUI activity viewer
-- `packages/case-runner/` — storage 快照回放与概念观测 runner
-- `packages/apps/` — Svelte 窗口壳前端；`packages/apps/tauri/src-tauri/` 为 Tauri 壳
-- `packages/terminal-lib/` — 终端访问契约 crate（adapter trait / 信封 / composite）
-- `packages/terminals/wt/` — Windows Terminal 包：C# UIA sidecar + Rust 客户端
-- `packages/terminals/zellij/` — zellij 包：进程内 CLI adapter
-- `docs/` — 分域设计文档；`concepts.md` 术语；`spec.md` 技术选型与结构决定
-- `dev/` — 开发记录
+| Windows 10/11 | Tauri 壳 + 托盘 + hook 安装脚本 |
+| macOS | Tauri 壳 + Hook 驱动的监督 |
+| Linux | Tauri 壳 + Hook 驱动的监督 |
 
 ## 文档
 
-从 `concepts.md`、`spec.md` 与 `docs/AGENTS.md` 开始。贡献指南见 `CONTRIBUTING.md`。
+- [concepts.zh.md](concepts.zh.md) — 概念模型
+- [spec.zh.md](spec.zh.md) — 仓库结构与技术选型
+- [docs/roadmap.zh.md](docs/roadmap.zh.md) — 发布阶梯
+- [docs/DEVELOPING.zh.md](docs/DEVELOPING.zh.md) — 构建、运行、调试
+- [CONTRIBUTING.zh.md](CONTRIBUTING.zh.md) — 贡献指南
 
 ## License
 
