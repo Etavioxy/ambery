@@ -13,11 +13,18 @@
     node,
     readOnly,
     pools = null,
+    enumAdd = null,
     applyValue,
   }: {
     node: ConfigSchemaNode;
     readOnly: boolean;
     pools?: { system: Record<string, unknown>; user: Record<string, unknown> } | null;
+    /** enum 行的下拉扩展（新增条目，如引导 modal 给 llm.active 加 provider） */
+    enumAdd?: {
+      label: string;
+      validate?: (value: string) => string | null;
+      onConfirm: (value: string) => Promise<{ ok: boolean; error?: string }>;
+    } | null;
     /** 写值：返回 false = core 拒绝（本行控件转错误态） */
     applyValue: (path: string, value: unknown) => Promise<boolean>;
   } = $props();
@@ -74,6 +81,7 @@
           options={node.type.options ?? []}
           value={String(node.value ?? "")}
           {readOnly}
+          add={enumAdd}
           onChange={commit}
         />
       {:else if kind === "int" || kind === "float"}

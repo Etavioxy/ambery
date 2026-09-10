@@ -3,8 +3,8 @@
 <script lang="ts">
   import { t } from "../../i18n";
   import type { MenuState } from "../../shell/kinds/menu-state.svelte";
-  import ApiKeyRow from "./ApiKeyRow.svelte";
-  import ConfigRow from "./ConfigRow.svelte";
+  import ApiKeyRow from "../config-rows/ApiKeyRow.svelte";
+  import ConfigRow from "../config-rows/ConfigRow.svelte";
 
   let {
     menu,

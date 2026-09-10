@@ -116,3 +116,144 @@
     {/if}
   {/if}
 </div>
+
+<style>
+  /* 注意：`.cfg-select-btn/-arrow/-list/-option` 落在 bits-ui 的 Trigger/Content/Item 上
+     （子组件元素拿不到本组件的作用域哈希），故必须 :global——否则会被当"未使用"剪掉。
+     其余 .cfg-select（本组件自己的容器）与 addMode 弹层是本组件元素，保持作用域样式。
+
+     原生 select 的弹出层是 OS 级的，会被 alwaysOnTop 窗口本体盖住，故走 DOM 内浮层。
+     按钮复刻原生 select（appearance:none + 同 token/尺寸）；箭头 = 内联 SVG 下 chevron。 */
+  .cfg-select {
+    position: relative;
+    display: inline-block;
+  }
+  :global(.cfg-select-btn) {
+    position: relative;
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: content-box; /* 与 .cfg-line select 默认 box-sizing 一致，渲染尺寸对齐 */
+    width: 170px; /* 与原生 select 声明宽度一致 */
+    background: var(--ov-input-bg);
+    border: 1px solid var(--ov-input-border);
+    border-radius: 5px;
+    color: var(--ov-text-strong);
+    padding: 3px 6px;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  :global(.cfg-select-arrow) {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ov-text-strong);
+    pointer-events: none;
+  }
+  :global(.cfg-select-btn:disabled) {
+    opacity: 0.45;
+    cursor: default;
+  }
+  :global(.cfg-select-btn:disabled .cfg-select-arrow) {
+    opacity: 0.6;
+  }
+  /* 浮层：bits-ui 用 floating 定位（逃出滚动容器），本处只给视觉 */
+  :global(.cfg-select-list) {
+    position: fixed;
+    z-index: 10000;
+    box-sizing: border-box;
+    background: var(--ov-panel-bg);
+    border: 1px solid var(--ov-input-border);
+    border-radius: 5px;
+    box-shadow: var(--ov-popup-shadow);
+    overflow-y: auto;
+    /* 浮层 append 到 body，不继承 .cfg-line 的主题色/字体——显式补上 */
+    color: var(--ov-text-strong);
+    font: inherit;
+  }
+  :global(.cfg-select-option) {
+    padding: 3px 8px; /* 上下 3px 与原生 select 一致 → 选项行高≈select 高 */
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  :global(.cfg-select-option:hover) {
+    background: var(--ov-accent-bg);
+  }
+  /* 选中态：bits-ui 的 Item 带 data-selected */
+  :global(.cfg-select-option[data-selected]) {
+    color: var(--ov-accent);
+  }
+  .cfg-select-add-trigger {
+    display: block;
+    margin: 4px 0 0 auto;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    line-height: 1;
+    border: 1px solid var(--ov-input-border);
+    border-radius: 5px;
+    background: var(--ov-input-bg);
+    color: var(--ov-text-strong);
+    cursor: pointer;
+  }
+  .cfg-select-add-trigger:hover {
+    border-color: var(--ov-accent-border);
+    color: var(--ov-accent);
+  }
+  /* 一格输入弹层：贴触发器下方右对齐（旧实现用 JS 按 rect 定 fixed 位置，等价视觉） */
+  .cfg-select-add-popup {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 10000;
+    box-sizing: border-box;
+    min-width: 170px;
+    background: var(--ov-panel-bg);
+    border: 1px solid var(--ov-input-border);
+    border-radius: 5px;
+    box-shadow: var(--ov-popup-shadow);
+    color: var(--ov-text-strong);
+    padding: 2px;
+  }
+  .cfg-select-add-cell {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .cfg-select-add-input {
+    flex: 1;
+    min-width: 0;
+    background: var(--ov-input-bg);
+    border: 1px solid var(--ov-input-border);
+    border-radius: 4px;
+    color: var(--ov-text-strong);
+    padding: 2px 6px;
+    font: inherit;
+  }
+  .cfg-select-add-confirm {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    line-height: 1;
+    border: 1px solid var(--ov-input-border);
+    border-radius: 4px;
+    background: var(--ov-input-bg);
+    color: var(--ov-ok);
+    cursor: pointer;
+  }
+  .cfg-select-add-confirm:hover {
+    border-color: var(--ov-success);
+  }
+  .cfg-select-add-err {
+    color: var(--ov-error);
+    font-size: 11px;
+    padding: 2px 6px 4px;
+  }
+</style>

@@ -6,7 +6,7 @@ import type { WindowShell } from "../window-shell";
 import type { ChatState } from "./chat-state.svelte";
 import { requestPlace, requestRelease, reportMoved } from "../../positioning/tauri-server";
 import { Direction } from "../../positioning/types";
-import { openSetupModal } from "../../setup";
+import { openSetupModal } from "../../components/setup-modal/mount-setup.svelte";
 
 export async function wireChatWindow(shell: WindowShell, state: ChatState): Promise<void> {
   if (!("__TAURI_INTERNALS__" in window) || !shell.adapter) return;

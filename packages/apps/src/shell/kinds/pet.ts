@@ -393,7 +393,7 @@ export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<
       chatPanelEl.style.height = `${CHAT_H}px`;
       chatPanelEl.hidden = true;
     }
-    const { openSetupModal } = await import("../../setup");
+    const { openSetupModal } = await import("../../components/setup-modal/mount-setup.svelte");
     let setupDismiss: (() => void) | null = null;
     chatState.onOpenSetup = () => {
       setupDismiss?.();
