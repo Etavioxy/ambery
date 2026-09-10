@@ -79,5 +79,5 @@ Error presentation (bubble / banner) follows the model in [errors.md](errors.md)
 
 - Storing keys in config (the env-file discipline keeps `config.json` key-free).
 - Auto-detect "env set but key invalid" at startup (that is the error path, not the setup path).
-- Connection test as a periodic health check (post-0.1.0).
-- OS keychain integration (post-0.1.0; the 0600 env file is the 0.1.0 answer).
+- Connection test as a periodic health check (registered in [post-0.1.0.md](post-0.1.0.md)).
+- OS keychain integration (registered in [post-0.1.0.md](post-0.1.0.md); the 0600 env file is the answer).

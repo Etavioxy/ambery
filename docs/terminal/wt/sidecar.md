@@ -14,8 +14,8 @@ English | [中文](sidecar.zh.md)
 
 - **self-contained win-x64, not single-file**: `sidecar.csproj` pins `RuntimeIdentifier=win-x64` / `SelfContained=true` / `PublishSingleFile=false`; the user's machine does not need the .NET 9 Desktop Runtime.
 - Publish command: `dotnet publish sidecar/sidecar.csproj -c Release` → `sidecar/bin/Release/net9.0-windows/win-x64/publish/ambery-uia-sidecar.exe`.
-- Tauri side: `bundle.active` is currently false (enabled in the release round). When Windows packaging is enabled, add `../../sidecar/bin/Release/net9.0-windows/win-x64/publish/ambery-uia-sidecar.exe` to `bundle.externalBin` in `packages/apps/tauri/src-tauri/tauri.conf.json`; do not keep this configuration resident in non-Windows builds — the Tauri build script resolves externalBin paths according to the current platform.
-- Path discovery priority (`core/src/paths.rs`): `AMBERY_SIDECAR` env > next to the current exe > `sidecar/` next to the current exe > Release publish > Debug. Before real-machine Windows verification, the publish layout has not been tested by the packaging pipeline.
+- **Into the shell bundle**: the Windows bundle declares the sidecar as `externalBin`, so the artifact must sit at `binaries/ambery-uia-sidecar-x86_64-pc-windows-msvc.exe` under `packages/apps/tauri/src-tauri/` (Tauri appends the target triple to the declared name). That file is a build input and never committed: the release workflow publishes it and copies it in before `npx tauri build --bundles nsis`, while a local Windows build copies it by hand. The declaration lives in the Windows platform config, so non-Windows bundles resolve no external binary; a machine without the .NET toolchain builds the same bundle through the no-sidecar overlay (docs/tauri-shell.md §Bundle configuration).
+- Path discovery priority (`core/src/paths.rs`): `AMBERY_SIDECAR` env > next to the current exe > `sidecar/` next to the current exe > Release publish > Debug.
 
 ## Command Set
 

@@ -45,7 +45,7 @@ macOS / Linux
   不提供：UIA 开关、UIA sidecar、Windows UIA 调用路径
 ```
 
-因此，非 Windows 构建不是“找不到 sidecar 后的降级版”：UIA sidecar 不编译、不打包，Windows 专属实现也不参与其编译或链接。Windows 目标则一律编译 UIA 相关代码，并携带已编译的 UIA sidecar；“可选”只表示运行时默认不启动、不使用，用户选择启用后才走该能力路径。
+因此，非 Windows 构建不是“找不到 sidecar 后的降级版”：UIA sidecar 不编译、不打包，Windows 专属实现也不参与其编译或链接。Windows 目标则一律编译 UIA 相关代码，并携带已编译的 UIA sidecar；“可选”只表示运行时默认不启动、不使用，用户选择启用后才走该能力路径。唯一的例外是本地 no-sidecar 构建覆盖（§打包配置）。
 
 当前隔离状态：
 
@@ -53,9 +53,16 @@ macOS / Linux
 - core 的 UIA sidecar 发现（`paths::sidecar_exe`）在非 Windows 目标恒为 `None`——不发现、不启动、不使用；sidecar 客户端是纯 std 进程通信代码，非 Windows 目标上无调用路径（Option 链天然降级，`sidecar_enabled=false`）。C# sidecar 目标为 `net9.0-windows` 且发布形态为 self-contained win-x64，不进入非 Windows 打包（docs/terminal/wt/sidecar.md §打包）。
 - 残余验证边界：非 Windows 目标的 `cargo check --target` 需要交叉工具链（`ring` 经 reqwest 引入原生 C 构建），本机不可行；`cfg(not(windows))` 分支为最小 stub，正确性由评审保证，交叉编译验证待 CI。
 
+## 打包配置
+
+基础 `tauri.conf.json` 承担 `bundle.active` 与图标集；各平台文件收窄 bundle 目标：`tauri.windows.conf.json`（nsis）、`tauri.linux.conf.json`（appimage, deb）、`tauri.macos.conf.json`（dmg）。
+
+- Windows 包为 UIA sidecar 声明 `externalBin`，因此该构建需要 `src-tauri/binaries/` 下带目标三元组后缀的 sidecar 产物（发布流水线产出，本地构建手动拷入；docs/terminal/wt/sidecar.md §打包）。
+- `tauri.no-sidecar.conf.json` 是覆盖配置，把 `externalBin` 换成空列表，供没有 .NET 工具链的机器使用：在 `packages/apps` 下 `npm run tauri:build:no-sidecar` / `npm run tauri:dev:no-sidecar`。它不是平台文件，Tauri 不会隐式合并它。
+
 ## 全局唤起快捷键
 
-**0.1.0 明确 cut**（docs/post-0.1.0.md）：不实现全局快捷键；托盘/手势是当前唯一唤起路径。
+**明确 cut**（docs/post-0.1.0.md）：不实现全局快捷键；托盘/手势是唯一唤起路径。
 
 ## 模块拆分
 

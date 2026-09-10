@@ -4,7 +4,7 @@
 
 ## Concept List
 
-### 1. pet（宠物）— agent
+### 1. pet（桌宠）— agent
 Ambery 的人机界面，内置 LLM，住在自己的浮动窗口中——窗内只有颜文字。通过颜文字表达状态，通过 Component 展示信息。用户可与之打字聊天——纯自然语言，无指令。pet 理解用户意图、分析 Context、决定表达方式与何时值得打扰用户。不修改代码文件，权限边界由 Harness 的 Tool Set 限定。pet 是 agent；它呈现给用户的那一面是 pet Surface（见 Surface），同时也是锚点：其余每个 Surface 的布局都以它为原点度量。
 
 #### 1a. Autonomy（自主行为层）— 子概念

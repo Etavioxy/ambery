@@ -14,8 +14,8 @@
 
 - **self-contained win-x64，非单文件**：`sidecar.csproj` 固化 `RuntimeIdentifier=win-x64` / `SelfContained=true` / `PublishSingleFile=false`；用户机器无需 .NET 9 Desktop Runtime。
 - 发布命令：`dotnet publish sidecar/sidecar.csproj -c Release` → `sidecar/bin/Release/net9.0-windows/win-x64/publish/ambery-uia-sidecar.exe`。
-- Tauri 侧：`bundle.active` 当前为 false（发布轮开启）。开启 Windows 打包时在 `packages/apps/tauri/src-tauri/tauri.conf.json` 的 `bundle.externalBin` 加入 `../../sidecar/bin/Release/net9.0-windows/win-x64/publish/ambery-uia-sidecar.exe`；不要在非 Windows 构建常驻该配置——Tauri build script 会按当前平台解析 externalBin 路径。
-- 路径发现优先级（`core/src/paths.rs`）：`AMBERY_SIDECAR` env > 当前 exe 旁 > 当前 exe 旁 `sidecar/` > Release publish > Debug。Windows 真机验证前，publish 布局未经打包流水线实测。
+- **随壳打包**：Windows 包把 sidecar 声明为 `externalBin`，因此产物必须落在 `packages/apps/tauri/src-tauri/` 下的 `binaries/ambery-uia-sidecar-x86_64-pc-windows-msvc.exe`（Tauri 会给声明的名字补上目标三元组）。该文件是构建输入、从不提交：发布流水线 publish 后拷入，再执行 `npx tauri build --bundles nsis`；本地 Windows 构建则手动拷入。声明放在 Windows 平台配置里，非 Windows 包不解析任何外部二进制；没有 .NET 工具链的机器改用 no-sidecar 覆盖构建同一包体（docs/tauri-shell.md §打包配置）。
+- 路径发现优先级（`core/src/paths.rs`）：`AMBERY_SIDECAR` env > 当前 exe 旁 > 当前 exe 旁 `sidecar/` > Release publish > Debug。
 
 ## 命令集
 

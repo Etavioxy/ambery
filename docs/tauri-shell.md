@@ -45,7 +45,7 @@ macOS / Linux
   不提供：UIA 开关、UIA sidecar、Windows UIA 调用路径
 ```
 
-Therefore, a non-Windows build is not a "degraded version after the sidecar is missing": the UIA sidecar is not compiled or packaged, and Windows-specific implementations do not participate in compilation or linking. Windows targets always compile UIA-related code and ship the compiled UIA sidecar; "optional" only means the runtime does not start or use it by default, and that capability path is only taken after the user opts in.
+Therefore, a non-Windows build is not a "degraded version after the sidecar is missing": the UIA sidecar is not compiled or packaged, and Windows-specific implementations do not participate in compilation or linking. Windows targets always compile UIA-related code and ship the compiled UIA sidecar; "optional" only means the runtime does not start or use it by default, and that capability path is only taken after the user opts in. The one exception is the local no-sidecar build overlay (§Bundle configuration).
 
 Current isolation status:
 
@@ -53,9 +53,16 @@ Current isolation status:
 - core's UIA sidecar discovery (`paths::sidecar_exe`) is always `None` on non-Windows targets — not discovered, not started, not used; the sidecar client is pure std process-communication code with no call path on non-Windows targets (the Option chain degrades naturally, `sidecar_enabled=false`). The C# sidecar targets `net9.0-windows` and is published as self-contained win-x64, so it never enters non-Windows packaging (docs/terminal/wt/sidecar.md §packaging).
 - Residual verification boundary: `cargo check --target` for non-Windows targets needs a cross toolchain (`ring` pulls in a native C build via reqwest), which is not feasible on this machine; the `cfg(not(windows))` branches are minimal stubs whose correctness is guaranteed by review, with cross-compilation verification pending CI.
 
+## Bundle configuration
+
+The base `tauri.conf.json` carries `bundle.active` and the icon set; each platform file narrows the bundle target: `tauri.windows.conf.json` (nsis), `tauri.linux.conf.json` (appimage, deb), `tauri.macos.conf.json` (dmg).
+
+- The Windows bundle declares the UIA sidecar as `externalBin`, so that build requires the target-suffixed sidecar artifact under `src-tauri/binaries/` (produced by the release workflow, or copied by hand for a local build; docs/terminal/wt/sidecar.md §Packaging).
+- `tauri.no-sidecar.conf.json` is an overlay that replaces `externalBin` with an empty list, for machines without the .NET toolchain: `npm run tauri:build:no-sidecar` / `npm run tauri:dev:no-sidecar` from `packages/apps`. It is not a platform file, so Tauri never merges it implicitly.
+
 ## Global wake hotkey
 
-**Explicitly cut from 0.1.0** (docs/post-0.1.0.md): no global hotkey is implemented; the tray / gesture is currently the only wake path.
+**Explicitly cut** (docs/post-0.1.0.md): no global hotkey is implemented; the tray / gesture is the only wake path.
 
 ## Module split
 
