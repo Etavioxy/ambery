@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "pretest": "cargo build -p ambery-case --manifest-path ../../Cargo.toml",
-    "test": "node test/run-frontend-case.mjs"
+    "test": "node test/run-frontend-case.mjs",
+    "tauri:build:no-sidecar": "tauri build --config tauri/src-tauri/tauri.no-sidecar.conf.json",
+    "tauri:dev:no-sidecar": "tauri dev --config tauri/src-tauri/tauri.no-sidecar.conf.json"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
