@@ -48,6 +48,7 @@ packages/apps/                     前端包
 - **prop 或局部绑定不叫 `state`**：与 rune 同名会让 `$state(...)` 被读成 store 订阅，组件悄悄失去响应性。
 - **交给子组件的 class 用 `:global()` 定样式**，且写在持有该类名的组件里：作用域哈希到不了子组件元素，Svelte 会把规则当未使用剪掉——样式在产物里消失。
 - **原语的 portal 是平铺的**：bits-ui 的 dialog portal 把 `Overlay` 与 `Content` 作为兄弟节点放进页面根，而 `Content` 自身不带定位——调用方给它盒子（`position: fixed`、自己的居中、高于遮罩的 `z-index`），否则它会落进文档流、被遮罩压在下面。
+- **自有 keyframes 带前缀**：Tailwind 主题自带 `float`、`bounce`、`shake` 三份同名 keyframes，裸名会解析到后加载的那份——pet 的动作动画因此叫 `pet-*`，主题的 keyframes 永远抢不走。
 - **只显示图标或符号的控件配 Tooltip 与 `aria-label`**；已带标签的行上的文字提示仍用原生 `title`。
 - **新代码只用 runes**：`onclick={...}`、`$props()`、snippet 取代 slot；不用 legacy API。
 

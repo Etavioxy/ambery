@@ -48,6 +48,7 @@ Rules this package adopts, taken from the frameworks it builds on — Svelte's a
 - **No prop or local binding named `state`**: a binding that collides with a rune name makes `$state(...)` read as a store subscription, and the component silently loses its reactivity.
 - **A class handed to a child component is styled with `:global()`**, in the component that owns the class name: the scope hash never reaches a child's element, and Svelte prunes the rule as unused — the style disappears from the bundle.
 - **A primitive's portal renders flat**: bits-ui's dialog portal puts `Overlay` and `Content` into the page root as siblings, and the content carries no position of its own — the caller styles its box (`position: fixed`, its own centering, a `z-index` above the overlay), otherwise it lands in the document flow behind the overlay.
+- **Local keyframes carry a prefix**: Tailwind's theme ships keyframes named `float`, `bounce` and `shake`, and a bare name resolves to whichever definition loads last — the pet's motion animations are therefore `pet-*`, so a theme keyframe can never shadow them.
 - **A control that shows only an icon or a symbol carries a Tooltip and an `aria-label`**; a text hint attached to a labelled row keeps the native `title`.
 - **Runes only in new code**: `onclick={...}`, `$props()`, snippets instead of slots; no legacy APIs.
 
