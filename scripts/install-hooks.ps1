@@ -1,4 +1,4 @@
-# install-hooks.ps1：把 ambery-hook 挂进 ~/.claude/settings.json。
+﻿# install-hooks.ps1：把 ambery-hook 挂进 ~/.claude/settings.json。
 #   powershell -File scripts/install-hooks.ps1            # 安装（幂等，改前备份）
 #   powershell -File scripts/install-hooks.ps1 -Uninstall # 卸载（只移除我们的条目）
 param([switch]$Uninstall)
@@ -19,7 +19,7 @@ if (-not (Test-Path $settingsPath)) {
         exit 0
     }
     New-Item -ItemType Directory -Path (Split-Path $settingsPath -Parent) -Force | Out-Null
-    "{}" | Out-File $settingsPath -Encoding UTF8
+    [System.IO.File]::WriteAllText($settingsPath, "{}", [System.Text.UTF8Encoding]::new($false))
 }
 
 $settings = Get-Content $settingsPath -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -35,7 +35,7 @@ if ($Uninstall) {
         if ($kept.Count -eq 0) { $settings.hooks.PSObject.Properties.Remove($e) }
         else { $settings.hooks.$e = $kept }
     }
-    $settings | ConvertTo-Json -Depth 20 | Out-File $settingsPath -Encoding UTF8
+    [System.IO.File]::WriteAllText($settingsPath, ($settings | ConvertTo-Json -Depth 20), [System.Text.UTF8Encoding]::new($false))
     Remove-Item $scriptDst -ErrorAction SilentlyContinue
     Write-Host "uninstalled: ambery hook entries removed, script deleted"
     exit 0
@@ -70,6 +70,6 @@ foreach ($e in $events) {
         Write-Host "= $e (已存在,跳过)"
     }
 }
-$settings | ConvertTo-Json -Depth 20 | Out-File $settingsPath -Encoding UTF8
+[System.IO.File]::WriteAllText($settingsPath, ($settings | ConvertTo-Json -Depth 20), [System.Text.UTF8Encoding]::new($false))
 Write-Host "installed: backup at $bak"
 Write-Host "提示: WT 开启「在所有桌面上显示此应用的窗口」可让其他桌面的实例也可读（可选）"
