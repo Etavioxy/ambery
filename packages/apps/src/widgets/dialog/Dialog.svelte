@@ -44,10 +44,18 @@
     z-index: 1000;
   }
   /* 与设置面板视觉对齐：字号/文字色显式对齐菜单面板（否则继承 chat 的 13px/--ov-text）；
-     背景用主题 modal token（--ov-modal-bg）——modal 是独立视觉层，不是 panel。 */
+     背景用主题 modal token（--ov-modal-bg）——modal 是独立视觉层，不是 panel。
+     尺寸受宿主窗口约束：引导 modal 就开在 320×380 的 chat 窗里，写死 360 会被窗口裁掉。
+     Portal 把 Overlay/Content 铺成 body 的同胞节点，Content 不自带定位——居中与层级这边给，
+     否则 modal 会落回文档流、还被 overlay 的 z-index 压住。 */
   :global(.setup-modal) {
-    width: 360px;
-    max-height: 70vh;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1001;
+    width: min(360px, calc(100% - 16px));
+    max-height: calc(100% - 16px);
     overflow-y: auto;
     background: var(--ov-modal-bg);
     color: var(--ov-text-strong);
