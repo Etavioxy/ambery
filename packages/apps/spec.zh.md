@@ -19,6 +19,7 @@ packages/apps/                     前端包
 │   ├── components/                二级业务件：Card 渲染与类型注册表、消息列表、配置字段行
 │   ├── size/                      尺寸模型：文本度量、块模型、按类型的 sizeModel
 │   ├── positioning/               窗口定位引擎
+│   ├── utils/                     无 UI、无服务的小工具（防抖、文本）
 │   └── styles/                    token 表、Tailwind 入口，以及组件共用的规则（配置行族）
 ├── test/                          前端 headless case（vitest）
 ├── tauri/                         tauri 形态：宿主层 + Tauri 壳

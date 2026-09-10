@@ -19,6 +19,7 @@ packages/apps/                     frontend package
 │   ├── components/                tier-2 business components: Card rendering and its type registry, message list, config field rows
 │   ├── size/                      size model: text measurement, block model, per-type sizeModel
 │   ├── positioning/               window placement engine
+│   ├── utils/                     small shared helpers: no UI, no services (debounce, text)
 │   └── styles/                    token table, the Tailwind entry, and the rules components share (the config-row family)
 ├── test/                          headless frontend cases (vitest)
 ├── tauri/                         tauri form: host layer + Tauri shell
