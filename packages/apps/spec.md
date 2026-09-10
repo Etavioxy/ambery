@@ -44,6 +44,7 @@ Rules this package adopts, taken from Svelte's own best practices and the placem
 - **Local reuse is a snippet** (`{#snippet}` with `{@render}`); it becomes its own component file when a second consumer appears or when it carries a behaviour contract of its own.
 - **A keyed each block keys by identity** — never by index.
 - **`$derived` carries computation; `$effect` is an escape hatch** for DOM side effects (scroll, measurement, observers) and writes no state — an interaction drives state from its own handler.
+- **A measurement reads the DOM after the render it depends on**: a state write lands in the DOM on the next render, so a measurement that follows one awaits `tick()`; reading it in the same task measures the previous frame and yields a size or a rect taken from stale geometry.
 - **No prop or local binding named `state`**: a binding that collides with a rune name makes `$state(...)` read as a store subscription, and the component silently loses its reactivity.
 - **A class handed to a child component is styled with `:global()`**, in the component that owns the class name: the scope hash never reaches a child's element, and Svelte prunes the rule as unused — the style disappears from the bundle.
 - **A control that shows only an icon or a symbol carries a Tooltip and an `aria-label`**; a text hint attached to a labelled row keeps the native `title`.
