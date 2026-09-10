@@ -69,7 +69,9 @@ only requiring full-pipeline consistency within one environment. Conversion is a
 | Adapter exit (engine → OS) | physical → OS | engine output goes directly to `setPosition/setSize` (PhysicalPosition/Size), with no second conversion |
 
 Already observed: card-window measures `offsetWidth × dpr` ✓, `outerPosition` (physical) write-back ✓,
-the monitors table stores raw physical rectangles ✓. **Forbidden**: DOM/CSS values (not ×dpr) written into the engine's
+the monitors table stores raw physical rectangles ✓. The dpr is read at each conversion and never captured once at startup:
+one process crosses screens, so a snapshot taken at boot scales every later conversion by the old ratio (a window whose size no longer matches its content, cards overlapping each other).
+**Forbidden**: DOM/CSS values (not ×dpr) written into the engine's
 occupied/offset (the root cause of offset drift on mixed-DPI screens).
 
 Logical-pixel needs (style caps such as cap = screen height × 0.5) do not belong to the engine world — they go through

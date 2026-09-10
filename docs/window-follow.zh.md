@@ -70,7 +70,7 @@ monitorOf(petCenter) → 所在屏矩形                  // 出屏判定 / 高�
 | adapter 出口（engine → OS） | 物理 → OS | engine 输出直接给 `setPosition/setSize`（PhysicalPosition/Size），不经二次换算 |
 
 已有遵守：card-window 测量 `offsetWidth × dpr` ✓、`outerPosition`（物理）回写 ✓、
-monitors 表存物理原始矩形 ✓。**禁止**:DOM/CSS 值（未 ×dpr）写入 engine 的
+monitors 表存物理原始矩形 ✓。dpr 每次换算**现读**，不在启动时抓一份：同一进程会跨屏，开机固定一份会让其后每次换算都按旧比例（窗口尺寸与内容不匹配、卡片互相重叠）。**禁止**:DOM/CSS 值（未 ×dpr）写入 engine 的
 occupied/offset（多 DPI 屏下偏移错位的根源）。
 
 逻辑像素需求（样式上限如 cap=屏高×0.5）不属于 engine 世界——走
