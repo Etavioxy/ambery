@@ -11,8 +11,8 @@ Storage 快照驱动的回归测试与概念观测工具（docs/case-runner.md�
 
 ```bash
 # 在仓库根（workspace）执行
-cargo run -p ambery-case -- ambery-case/cases/closed-stale-cache.case          # 执行所有 steps
-cargo run -p ambery-case -- ambery-case/cases/closed-stale-cache.case --health # case 合法性校验
+cargo run -p ambery-case -- packages/case-runner/cases/closed-stale-cache.case          # 执行所有 steps
+cargo run -p ambery-case -- packages/case-runner/cases/closed-stale-cache.case --health # case 合法性校验
 cargo run -p ambery-case -- <case> --step-num 2                                  # 仅执行到第 N 步
 cargo run -p ambery-case -- export --case-id <id> [--storage DIR] [--instances a,b] [--keep-agents] \
     [--keep-memory --memory name-a,AGENTS] [--keep-cron --cron-ids id-a,id-b] [--dry-run]

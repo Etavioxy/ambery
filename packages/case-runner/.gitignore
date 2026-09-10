@@ -1,0 +1,2 @@
+# Case files stay local: real data must not leak, and replay fixtures are not shared either
+/cases/

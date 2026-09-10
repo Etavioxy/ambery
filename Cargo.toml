@@ -3,7 +3,7 @@ resolver = "2"
 members = [
     "core",
     "observe-derive",
-    "ambery-case",
+    "packages/case-runner",
     "packages/terminal-lib",
     "packages/terminals/wt",
     "packages/terminals/zellij",
