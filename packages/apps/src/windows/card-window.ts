@@ -12,7 +12,11 @@ import { Direction } from "../positioning/types";
 
 let adapter: WindowAdapter | null = null;
 let lastPw = 260, lastPh = 140;
-let dpr = 1;
+
+/** 当前 DPR：多屏不同 DPI，跨屏后必须**现读**（#19 坐标契约，与 shell/kinds/pet 同口径）。
+ *  启动时抓死一份 → 之后每次测量都按旧比例换算物理尺寸/位置，窗口尺寸与实际内容不匹配、
+ *  卡片互相重叠（拖到另一块不同 DPI 的屏后必现）。 */
+const currentDpr = () => window.devicePixelRatio || 1;
 
 /** 双 rAF：等浏览器完成布局与字体定稿后再量（单帧不够，字体/折行以最终宽度为准）。
  *  包裹流量在 show 后仍会随宽度变化收敛，详见 fitWindow 的增长循环。 */
@@ -22,8 +26,7 @@ const nextFrame = () =>
 export async function main() {
   const { getCurrentWindow } = await import("@tauri-apps/api/window");
   const win = getCurrentWindow();
-  dpr = window.devicePixelRatio || 1;
-  adapter = await createTauriAdapter(document.body, dpr);
+  adapter = await createTauriAdapter(document.body, currentDpr());
 
   const bridge = await createBridge();
   //  + ：新卡窗随当前主题与 UI 语言，切换即生效
@@ -74,8 +77,8 @@ export async function main() {
     // 修法：show 后双 rAF 复测，只增不减直到稳定，窗口恰好包裹真实内容；show 的
     // setFocus 在 macOS 可能抛错，不得中断包裹流程（原 settle 从未触发与这有关）。
     const measure = () => ({
-      pw: Math.ceil((card.offsetWidth || 260) * dpr),
-      ph: Math.ceil((card.offsetHeight || 140) * dpr),
+      pw: Math.ceil((card.offsetWidth || 260) * currentDpr()),
+      ph: Math.ceil((card.offsetHeight || 140) * currentDpr()),
     });
     let applied = measure();
     lastPw = applied.pw;

@@ -216,6 +216,7 @@ html.browser body {
   padding: 3px 10px;
   cursor: pointer;
   font-size: 12px;
+  font-family: inherit; /* preflight 把表单控件字体 revert 了；不显式继承会用 UA 默认（Arial），与卡内正文不一致 */
 }
 
 .cmp-git-log {
