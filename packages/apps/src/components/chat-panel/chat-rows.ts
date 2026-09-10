@@ -8,12 +8,15 @@ import type { ContextMessage } from "../../bridge";
 export type ChatRow =
   | { kind: "message"; key: string; role: "user" | "assistant"; text: string; ts: number }
   | { kind: "error"; key: string; text: string; ts: number }
+  | { kind: "notice"; key: string; text: string }
   | { kind: "stream"; key: string; text: string }
   | { kind: "thinking"; key: string }
   | { kind: "replying"; key: string }
   | { kind: "send-failed"; key: string; text: string };
 
 export interface ChatTransientRows {
+  /** core 未就绪时的提示行（消息流为空时才出现）；null = 不显示 */
+  notice: string | null;
   /** 乐观用户气泡：已发出但 Context 尚未回流（回流后由调用方移出，避免重复一行） */
   optimisticUsers: { text: string; ts: number }[];
   /** transient 错误气泡：带触发时刻，按 ts 并回消息流（时序正确） */
@@ -56,6 +59,9 @@ export function buildChatRows(
   }
   // 消息与错误气泡按时序合并；瞬态行（ts = ∞）恒在末尾，互不越序
   rows.sort((a, b) => tsOf(a) - tsOf(b));
+  if (transient.notice !== null && rows.length === 0) {
+    rows.push({ kind: "notice", key: "notice", text: transient.notice });
+  }
   if (transient.streamingText) {
     rows.push({ kind: "stream", key: "stream", text: transient.streamingText });
   }

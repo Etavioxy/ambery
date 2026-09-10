@@ -385,7 +385,14 @@ export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<
     document.body.appendChild(chatMount);
     mountChatComponent(ChatPanel, { target: chatMount, props: { chat: chatState } });
     const chatEl = () => chatMount.querySelector<HTMLElement>("#chat-panel");
-    if (chatEl()) chatEl()!.hidden = true;
+    // 浏览器形态的几何由宿主给：固定尺寸浮层（窗口形态由窗口尺寸决定，面板填满窗口）
+    const chatPanelEl = chatEl();
+    if (chatPanelEl) {
+      chatPanelEl.style.position = "fixed";
+      chatPanelEl.style.width = `${CHAT_W}px`;
+      chatPanelEl.style.height = `${CHAT_H}px`;
+      chatPanelEl.hidden = true;
+    }
     const { openSetupModal } = await import("../../setup");
     let setupDismiss: (() => void) | null = null;
     chatState.onOpenSetup = () => {
