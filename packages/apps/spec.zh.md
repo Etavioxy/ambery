@@ -19,7 +19,7 @@ packages/apps/                     前端包
 │   ├── components/                二级业务件：Card 渲染与类型注册表、消息列表、配置字段行
 │   ├── size/                      尺寸模型：文本度量、块模型、按类型的 sizeModel
 │   ├── positioning/               窗口定位引擎
-│   └── styles/                    token 表与 Tailwind 入口
+│   └── styles/                    token 表、Tailwind 入口，以及组件共用的规则（配置行族）
 ├── test/                          前端 headless case（vitest）
 ├── tauri/                         tauri 形态：宿主层 + Tauri 壳
 │   └── src-tauri/                 壳 crate（frontendDist 指 ../../dist）
@@ -43,6 +43,8 @@ packages/apps/                     前端包
 - **局部复用是 snippet**（`{#snippet}` 配合 `{@render}`）；出现第二个使用方、或它自带行为契约时，才升为组件文件。
 - **keyed each 块按身份取键**——不用索引。
 - **`$derived` 承担计算；`$effect` 是逃生口**，只做 DOM 副作用（滚动、度量、观察者）且不写 state——交互经自己的处理函数驱动状态。
+- **prop 或局部绑定不叫 `state`**：与 rune 同名会让 `$state(...)` 被读成 store 订阅，组件悄悄失去响应性。
+- **交给子组件的 class 用 `:global()` 定样式**，且写在持有该类名的组件里：作用域哈希到不了子组件元素，Svelte 会把规则当未使用剪掉——样式在产物里消失。
 - **新代码只用 runes**：`onclick={...}`、`$props()`、snippet 取代 slot；不用 legacy API。
 
 ## 技术选型
