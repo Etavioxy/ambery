@@ -89,7 +89,7 @@ Card 文件以完整 JSON 持久化：`component` 是 Agent 正常读取与更�
   - `layout.size`：投影的 Card 窗口尺寸 `[width, height]`，单位 CSS px，由尺寸计算产出；没有任何用户动作编辑它（docs/card-window-size.md）。
   - `layout.layoutVersion`：决定 `layout.size` 的输入标识（布局常量 + 字体标识）；与当前输入不一致即投影过期。
 - dismiss（agent close / 用户 ×）：结束 Surface——删文件、出注册表、忘记布局。
-- id 即文件相对路径：可含 `/`（嵌套子目录），禁空段与 `..` 段（tool 校验拒绝）。
+- id 即文件相对路径，也是窗口名后缀：字符限 `A-Z a-z 0-9 _ - /`——因为 id 会拼成 `card-<id>` 当 Tauri 窗口标签，而 Tauri 拒收 `.`；可含 `/`（嵌套子目录），禁空段与 `..` 段（tool 校验拒绝）。
 - 恢复：启动时扫描 `memory/cards/` 全部 `.card.json` 重建注册表；坏文件跳过（单文件病灶不带倒整体）。窗口重建由 pet 启动时 pull（readonly `list_cards` IPC，返回 component + `_meta`）：`user_closed=false` 的卡片重建窗口；`layout.manual` 的相对 pet 偏移先 seed 进 engine（`seedManual`），card 的 `requestPlace` 命中 manual 占区即原位恢复、不占自动布局。不用 push-at-startup——effect 广播在 webview 就绪前发出会丢，pull 没有时序漏洞。
 
 ## 卡片生命周期事件

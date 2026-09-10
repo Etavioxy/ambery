@@ -89,7 +89,7 @@ One Card = one complete JSON file at `memory/cards/<id>.card.json` — content (
   - `layout.size`: projected Card window size `[width, height]` in CSS pixels, produced by the size computation; no user action edits it (docs/card-window-size.md).
   - `layout.layoutVersion`: identity of the inputs that determine `layout.size` (layout constants + font identity); a value that differs from the current inputs marks the projection stale.
 - dismiss (agent close / user ×): ends the Surface — delete the file, leave the registry, forget the layout.
-- id is the file-relative path: it may contain `/` (nested subdirectories); empty segments and `..` segments are forbidden (tool validation rejects them).
+- id is the file-relative path and the window-label suffix: its characters are limited to `A-Z a-z 0-9 _ - /`, because the id becomes `card-<id>` as a Tauri window label and Tauri rejects `.`; it may contain `/` (nested subdirectories), and empty or `..` segments are forbidden (tool validation rejects them).
 - Recovery: at startup, scan all `.card.json` under `memory/cards/` to rebuild the registry; bad files are skipped (one sick file does not take down the whole). Window rebuilding is pulled at pet startup (readonly `list_cards` IPC, returning component + `_meta`): cards with `user_closed=false` have their windows rebuilt; for `layout.manual`, the pet-relative offset is first seeded into the engine (`seedManual`), and a card's `requestPlace` hitting the manual occupied area restores it in place without occupying automatic layout. No push-at-startup — effect broadcasts sent before the webview is ready would be lost; pull has no timing hole.
 
 ## Card Lifecycle Events
