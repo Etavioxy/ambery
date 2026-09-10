@@ -35,6 +35,13 @@ button {
   display: none !important;
 }
 
+/* ── 窗口高度链的第一环 ──
+   #app 必须有确定高度，否则 .window 的 h-full 与面板的 flex:1 都退化成 auto：
+   面板内容既不滚动也不裁切（菜单设置面板就踩过这条）。 */
+#app {
+  height: 100%;
+}
+
 /* ── 窗口组件根：内容子元素拉伸 ──
    根自身的 flex/高度由组件上的工具类给（Window.svelte）；
    面板自身声明 width/height:100%，需要祖先链有确定高度，窗口组件是这条链的第一环。 */
@@ -239,10 +246,6 @@ html.browser body {
 }
 
 .cmp-chart svg { display: block; }
-
-/* ── Chat 窗口的宿主容器：面板填满窗口（chrome 在 Panel widget，行样式在 chat-panel）── */
-.chat-mode { height: 100vh; }
-
 
 /* browser overlay 容器（pet 页内嵌的瞬时 Shelf 面板；尺寸由 pet×3 现算；
    面板 chrome 在 Panel widget，行样式在 shelf-panel） */

@@ -7,8 +7,6 @@ import ChatWindow from "../windows/ChatWindow.svelte";
 
 export async function main() {
   if (!("__TAURI_INTERNALS__" in window)) return;
-  // chat 窗口：面板填充整个窗口（无内缩环），尺寸由壳测量后设给窗口
-  document.getElementById("app")?.classList.add("chat-mode");
   const shell = await createWindowShell("chat");
   mount(ChatWindow, { target: document.getElementById("app")!, props: { shell } });
 }
