@@ -9,7 +9,7 @@ How to build, run, observe, and debug ambery while developing. All commands run 
 ```bash
 cargo test --workspace                          # Rust workspace (core + case runner + activity viewer)
 cargo run -p ambery-case -- frontend --silent   # headless frontend case (mock/keyless, embeds core)
-cd app && npm ci && npm run build               # frontend: tsc + vite build
+cd packages/apps && npm ci && npm run build        # frontend: tsc + vite build
 ```
 
 ## Run the full stack (browser debug UI)
@@ -23,8 +23,8 @@ python3 scripts/debug_brain.py
 # 2) core backend (HTTP + WS on 127.0.0.1:47600; AMBERY_PORT overrides the port)
 cargo run -p ambery-case -- serve --brain-addr http://127.0.0.1:47777
 
-# 3) frontend dev server — open the printed URL (usually http://localhost:5173)
-cd app && npm run dev
+# 3) frontend dev server — open the printed URL (usually http://127.0.0.1:3000)
+cd packages/apps && npm run dev
 ```
 
 The debug brain is a minimal threshold decision source, not a conversational model: a hook that passes its notify rule produces a notification card, and an ordinary chat gets an empty reply. For real conversation, point `--brain-addr` at any OpenAI-compatible endpoint.
@@ -40,7 +40,7 @@ This is the standard development command: the trajectory ledger (session / turn 
 
 ## Simulate hooks
 
-The real product is driven by Claude Code hooks; during development you can drive the same path over HTTP:
+The real product is driven by host hooks (Claude Code's five lifecycle events are the first instance); during development you can drive the same path over HTTP:
 
 ```bash
 curl -X POST http://127.0.0.1:47600/hook -H 'Content-Type: application/json' \
@@ -54,15 +54,16 @@ curl -X POST http://127.0.0.1:47600/hook -H 'Content-Type: application/json' \
 ## Tauri shell
 
 ```bash
-cd packages/apps && npx tauri build               # the only correct build entry point (see below)
+cd packages/apps && npx tauri build                   # the only correct build entry point (see below)
+cd packages/apps && npm run tauri:build:no-sidecar   # same bundle, without the Windows UIA sidecar
 cd packages/apps/tauri/src-tauri && AMBERY_PORT=47601 ./target/release/ambery   # run on a non-default port
 ```
 
-The shell embeds the built frontend and core. Packaging (`.app` bundle) is not active until the release round (docs/terminal/wt/sidecar.md).
+The shell embeds the built frontend and core. Bundle targets and the Windows sidecar requirement are per-platform configuration (docs/tauri-shell.md §Bundle configuration; docs/terminal/wt/sidecar.md §Packaging).
 
 **The shell build must go through `npx tauri build` — never bare `cargo build`.** The frontend `dist/` is embedded into `tauri-codegen-assets/` by the build script, which does not watch `dist/`; the tauri CLI re-runs the build script by injecting `TAURI_CONFIG` (`cargo:rerun-if-env-changed=TAURI_CONFIG`). A bare `cargo build --release` can reuse a stale build-script output and embed an outdated or empty frontend — the shell then shows a blank pet/UI. `npx tauri build` runs `npm run build` (tsc + vite) first, so it always embeds the current frontend.
 
-Dev iteration with live reload: keep the vite dev server pinned to the port in `tauri.conf.json` `devUrl` (127.0.0.1:5174) — `cd packages/apps && npm run dev -- --port 5174 --strictPort` — then run `AMBERY_PORT=47602 npx tauri dev` from `packages/apps/tauri/` (the shell embeds its own core server, so `AMBERY_PORT` must not collide with the standalone backend).
+Dev iteration with live reload: run `AMBERY_PORT=47602 npx tauri dev` from `packages/apps/tauri/` — the tauri CLI launches the vite dev server itself via `beforeDevCommand` (pinned to the `tauri.conf.json` `devUrl` port, 127.0.0.1:3000); the shell embeds its own core server, so `AMBERY_PORT` must not collide with the standalone backend.
 
 **macOS: blank/absent windows after `./target/release/ambery`.** Two distinct causes, both producing "no windows on screen" (check with `swift -e 'import CoreGraphics; CGWindowListCopyWindowInfo(...)'`):
 

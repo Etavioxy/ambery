@@ -15,7 +15,7 @@ Ambery 是 Tauri 多窗口桌宠（pet/chat/menu/shelf/card）+ Rust core。改�
 
 ## 运行与构建
 
-- 壳必须经 tauri CLI：`npx tauri dev`（开发热更，连 vite 5174）或 `npx tauri build`（生产，嵌 dist 出安装包）。
+- 壳必须经 tauri CLI：`npx tauri dev`（开发热更，连 vite 3000）或 `npx tauri build`（生产，嵌 dist 出安装包）。
 - 裸 `cargo build` 保持 dev 模式但不带 vite，跑起来"127.0.0.1 拒绝连接"，只做编译检查。
 - CI（push/PR，三平台门禁）：Rust 测试（默认 + case-runner）、前端 tsc/token 守卫/双语配对、frontend vitest、shell cargo check。本地改完至少跑 `cargo test --workspace`。
 - Release：`v*` tag 或 workflow_dispatch 触发 → 三平台 `npx tauri build` 出安装包传 Release。

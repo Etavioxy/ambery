@@ -8,7 +8,7 @@ Ambery 是 Agent 模型的桌宠：它 hook 进 agent 会话、观察模型的�
 
 ## 跟随文档提交（docs-first）
 
-文档是项目的设计源头：改行为前，先读 `docs/` 里对应的域文档，行为变了文档一起改（文档与代码分开提交）。术语见 `concepts.md`；技术选型与结构决定见 `spec.md`；未决问题与回归记录在 `dev/`。
+文档是项目的设计源头：改行为前，先读 `docs/` 里对应的域文档，行为变了文档一起改（文档与代码分开提交）。术语见 `concepts.md`；技术选型与结构决定见 `spec.md`。
 
 ## 仓库布局
 
@@ -44,10 +44,10 @@ tools/            诊断工具
 cargo test --workspace
 cargo test -p ambery-core --features case-runner
 cargo run -p ambery-case -- frontend --silent   # 前端 headless case，无 key
-cd app && npm ci && npx tsc --noEmit && node scripts/lint-tokens.mjs
+cd packages/apps && npm ci && npx tsc --noEmit && node scripts/lint-tokens.mjs
 ```
 
-CI（`.github/workflows/ci.yml`）在 ubuntu + macOS 跑上述命令；无 secrets、无真实 LLM 调用。
+CI（`.github/workflows/ci.yml`）在 ubuntu、macOS、windows 上跑上述命令；无 secrets、无真实 LLM 调用。
 
 ## 许可
 

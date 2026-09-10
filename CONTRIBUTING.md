@@ -8,7 +8,7 @@ Questions, ideas, or bugs? Just open an issue or discussion — no need to ask f
 
 ## Docs-first: follow the docs
 
-The docs are the design source. Before changing behavior, read the corresponding domain doc in `docs/`, and when behavior changes, update the doc along with it (docs and code are committed separately). Terms: `concepts.md`; technology choices and structural decisions: `spec.md`. Open questions and regression records: `dev/`.
+The docs are the design source. Before changing behavior, read the corresponding domain doc in `docs/`, and when behavior changes, update the doc along with it (docs and code are committed separately). Terms: `concepts.md`; technology choices and structural decisions: `spec.md`.
 
 ## Repository layout
 
@@ -44,10 +44,10 @@ tools/            diagnostic tools
 cargo test --workspace
 cargo test -p ambery-core --features case-runner
 cargo run -p ambery-case -- frontend --silent   # headless frontend cases, no keys
-cd app && npm ci && npx tsc --noEmit && node scripts/lint-tokens.mjs
+cd packages/apps && npm ci && npx tsc --noEmit && node scripts/lint-tokens.mjs
 ```
 
-CI (`.github/workflows/ci.yml`) runs this on ubuntu + macOS; no secrets, no real LLM calls.
+CI (`.github/workflows/ci.yml`) runs this on ubuntu, macOS, and windows; no secrets, no real LLM calls.
 
 ## License
 
