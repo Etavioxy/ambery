@@ -1,9 +1,11 @@
 <!-- 二级业务组件：Cards Shelf 的一行 —— 类型图标 + 标题 + 显隐 / 删除两图标。
-     只渲染与回调：显隐语义、dismiss 的后果都由动作层决定，本组件不做判断。 -->
+     只渲染与回调：显隐语义、dismiss 的后果都由动作层决定，本组件不做判断。
+     两个图标按钮是「只有图标」的控件：配 Tooltip（可见提示 + 无障碍描述）+ aria-label。 -->
 <script lang="ts">
   import type { RestoredCard } from "../../bridge";
   import { t } from "../../i18n";
   import Button from "../../widgets/button/Button.svelte";
+  import Tooltip from "../../widgets/tooltip/Tooltip.svelte";
   import type { ShelfActions } from "./shelf-actions";
 
   let {
@@ -33,14 +35,24 @@
     class="flex-1 min-w-0 truncate select-none{hidden ? ' opacity-45 line-through' : ''}"
     title={`${title} (${id})`}
   >{title}</span>
-  <Button
-    variant="quiet"
-    title={hidden ? t("shelf.show") : t("shelf.hide")}
-    onclick={() => void actions.setUserClosed(card, !hidden)}
-  >{hidden ? "👁" : "🙈"}</Button>
-  <Button
-    variant="danger"
-    title={t("shelf.dismiss-title")}
-    onclick={() => void actions.dismiss(card, title)}
-  >✕</Button>
+  <Tooltip text={hidden ? t("shelf.show") : t("shelf.hide")}>
+    {#snippet children({ props })}
+      <Button
+        variant="quiet"
+        {...props}
+        aria-label={hidden ? t("shelf.show") : t("shelf.hide")}
+        onclick={() => void actions.setUserClosed(card, !hidden)}
+      >{hidden ? "👁" : "🙈"}</Button>
+    {/snippet}
+  </Tooltip>
+  <Tooltip text={t("shelf.dismiss-title")}>
+    {#snippet children({ props })}
+      <Button
+        variant="danger"
+        {...props}
+        aria-label={t("shelf.dismiss-title")}
+        onclick={() => void actions.dismiss(card, title)}
+      >✕</Button>
+    {/snippet}
+  </Tooltip>
 </div>

@@ -8,6 +8,7 @@
   import type { Snippet } from "svelte";
   import { tv, type VariantProps } from "tailwind-variants";
   import Button from "../button/Button.svelte";
+  import Tooltip from "../tooltip/Tooltip.svelte";
 
   export const panel = tv({
     base: "relative flex h-full min-h-0 w-full flex-col",
@@ -26,6 +27,7 @@
     id = null,
     title = null,
     onClose = null,
+    closeTitle = null,
     tone = "panel",
     headRight = null,
     children,
@@ -33,6 +35,8 @@
     id?: string | null;
     title?: string | null;
     onClose?: (() => void) | null;
+    /** 关闭按钮的提示（× 是「只有符号」的控件）：给了就配 Tooltip + aria-label */
+    closeTitle?: string | null;
     tone?: PanelTone;
     /** 标题栏右侧的额外内容（状态字等），排在关闭按钮之前 */
     headRight?: Snippet | null;
@@ -50,7 +54,15 @@
             {@render headRight()}
           {/if}
           {#if onClose}
-            <Button variant="close" class="panel-close" onclick={onClose}>×</Button>
+            {#if closeTitle}
+              <Tooltip text={closeTitle}>
+                {#snippet children({ props })}
+                  <Button variant="close" class="panel-close" {...props} aria-label={closeTitle} onclick={onClose}>×</Button>
+                {/snippet}
+              </Tooltip>
+            {:else}
+              <Button variant="close" class="panel-close" onclick={onClose}>×</Button>
+            {/if}
           {/if}
         </div>
       {/if}

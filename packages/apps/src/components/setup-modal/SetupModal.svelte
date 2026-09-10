@@ -1,4 +1,4 @@
-<!-- 二级业务组件：LLM 首启配置引导 modal（docs/llm-setup.md）。
+<!-- 二级业务组件：LLM 首启配置引导 modal。
      从 Chat 打开；内容 = llm.active 行（含「新增 provider」）+ 当前 provider 字段 + key 行 + 连通测试。
      schema 驱动，不手写表单；数据与动作都从 setup 状态来。 -->
 <script lang="ts">

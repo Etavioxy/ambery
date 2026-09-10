@@ -1,4 +1,4 @@
-// LLM 首启配置引导（docs/llm-setup.md）的数据状态与动作：
+// LLM 首启配置引导的数据状态与动作：
 // 只取 llm 相关 schema 节点（与设置面板同一 get_config_schema 投影），
 // 提供 provider 选择、新增 provider、key 状态与保存、连通测试。
 // 组件（components/setup-modal）只读字段、只调动作；宿主（chat 窗口 / pet 页）只负责挂载。

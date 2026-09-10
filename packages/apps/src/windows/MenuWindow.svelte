@@ -34,6 +34,7 @@
     id="menu-panel"
     tone="popup"
     title={t("menu.title")}
+    closeTitle={t("menu.close-title")}
     {headRight}
     onClose={() => void hideMenuWindow()}
   >
