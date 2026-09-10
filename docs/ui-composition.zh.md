@@ -36,6 +36,8 @@ const shell = await createWindowShell("shelf"); // bridge、store、theme、i18n
 mount(ShelfWindow, { target: document.getElementById("app")!, props: { shell } });
 ```
 
+入口挂载到页面根（`#app`），页面根填满窗口：窗口组件与它下面的面板高度都从它取。根停在 auto 高度会让这条链塌掉——它下面每一处 `flex: 1` 都按内容定尺寸，面板主体于是既不滚动也不裁切。
+
 ### 窗口组件
 
 ```svelte

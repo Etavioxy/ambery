@@ -36,6 +36,8 @@ const shell = await createWindowShell("shelf"); // bridge, store, theme, i18n, a
 mount(ShelfWindow, { target: document.getElementById("app")!, props: { shell } });
 ```
 
+The entry mounts into the page root (`#app`), and the page root fills the window: the frame and the panels under it take their height from it. A root left at auto height collapses that chain — every `flex: 1` below it sizes to content, so a panel body neither scrolls nor clips.
+
 ### Window component
 
 ```svelte
