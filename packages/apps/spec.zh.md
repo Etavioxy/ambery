@@ -12,7 +12,8 @@ packages/apps/                     前端包
 ├── src/                           前端本体（宿主无关）
 │   ├── main.ts                    窗口 label / hash → 入口模块
 │   ├── entry/                     每个窗口一个入口模块：建 shell → mount
-│   ├── shell/                     入口创建的服务：bridge、store、动作层、theme、i18n、窗口 adapter
+│   ├── shell/                     入口创建的服务与宿主接线：bridge、store、动作层、theme、i18n、窗口 adapter
+│   │   └── kinds/                 每个窗口的宿主接线与共享状态（`<kind>.ts` / `<kind>-state.svelte.ts`）
 │   ├── windows/                   窗口组件：外框与恰好一个 Surface 的内容
 │   ├── widgets/                   一级 widget 与其变体
 │   ├── components/                二级业务件：Card 渲染与类型注册表、消息列表、配置字段行
@@ -29,6 +30,20 @@ packages/apps/                     前端包
 - `entry/` 是唯一创建服务的地方；`windows/`、`widgets/`、`components/` 放组件；`size/` 只放尺寸模型。分层规则与 widget 层级见 `docs/ui-composition.md`。
 - 窗口管理——建窗、定尺寸、定位、显隐、销毁——归形态的宿主层（`tauri/src-tauri/`）；前端不执行这些动作。
 - 只有一个窗口用的内容放在它的窗口组件旁；跨窗口共用的内容放 `components/`。
+
+## 最佳实践
+
+本包采纳的规则，取自 Svelte 官方 best practices 与它隐含的放置约定。上游规则不是本地口味：局部复用是 snippet、keyed 块按身份取键、effect 不写 state。
+
+- **一个组件一个文件**，命名 `PascalCase.svelte`；文件名即组件名。窗口组件用窗口名（`windows/ChatWindow.svelte`）。
+- **带私有文件的组件用同名目录**——变体、纯逻辑、自己的状态模块与它并排：`widgets/button/Button.svelte` + `button-variants.ts`、`components/chat-panel/ChatPanel.svelte` + `chat-rows.ts`；没有私有文件的组件平铺在本层目录里。
+- **widget 的变体声明在它旁边**（tailwind-variants），不写进共享样式表。
+- **纯逻辑是消费它的组件旁的普通模块**：无 DOM、无服务、不用 runes——组件调用它并渲染结果。
+- **宿主与组件共享的响应式状态住在 shell**（`shell/kinds/<kind>-state.svelte.ts`）；组件以 props 收到它，不自己创建。
+- **局部复用是 snippet**（`{#snippet}` 配合 `{@render}`）；出现第二个使用方、或它自带行为契约时，才升为组件文件。
+- **keyed each 块按身份取键**——不用索引。
+- **`$derived` 承担计算；`$effect` 是逃生口**，只做 DOM 副作用（滚动、度量、观察者）且不写 state——交互经自己的处理函数驱动状态。
+- **新代码只用 runes**：`onclick={...}`、`$props()`、snippet 取代 slot；不用 legacy API。
 
 ## 技术选型
 

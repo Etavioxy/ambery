@@ -13,6 +13,7 @@ packages/apps/                     frontend package
 │   ├── main.ts                    window label / hash → entry module
 │   ├── entry/                     per-window entry: createWindowShell + mount
 │   ├── shell/                     services an entry creates: bridge, store, actions, theme, i18n, window adapter
+│   │   └── kinds/                 per-window host wiring and shared state (`<kind>.ts` / `<kind>-state.svelte.ts`)
 │   ├── windows/                   window components: the frame and exactly one Surface's content
 │   ├── widgets/                   tier-1 widgets and their variants
 │   ├── components/                tier-2 business components: Card rendering and its type registry, message list, config field rows
@@ -29,6 +30,20 @@ packages/apps/                     frontend package
 - `entry/` is the only place that creates services; `windows/`, `widgets/` and `components/` hold components; `size/` holds the size model and nothing else. Layer rules and widget tiers: `docs/ui-composition.md`.
 - Window management — create, size, place, show, hide, destroy — belongs to the form's host layer (`tauri/src-tauri/`); the frontend never performs it.
 - Content one window uses sits beside its window component; content shared across windows sits in `components/`.
+
+## Best practices
+
+Rules this package adopts, taken from Svelte's own best practices and the placement they imply. Upstream rules are not local taste: local markup reuse is a snippet, a keyed block keys by identity, and an effect does not write state.
+
+- **One component per file**, named `PascalCase.svelte`; the file name is the component's name. A window component keeps the window name (`windows/ChatWindow.svelte`).
+- **A component with private files gets a directory named after it** — variants, pure logic and its own state module sit beside it: `widgets/button/Button.svelte` + `button-variants.ts`, `components/chat-panel/ChatPanel.svelte` + `chat-rows.ts`. A component without private files stays flat in its layer directory.
+- **A widget's variants are declared beside it** (`tailwind-variants`), never in the shared stylesheet.
+- **Pure logic is a plain module** beside the component that consumes it: no DOM, no services, no runes — the component calls it and renders the result.
+- **Reactive state shared by a host and its component lives in the shell** (`shell/kinds/<kind>-state.svelte.ts`); the component receives it as a prop and never constructs it.
+- **Local reuse is a snippet** (`{#snippet}` with `{@render}`); it becomes its own component file when a second consumer appears or when it carries a behaviour contract of its own.
+- **A keyed each block keys by identity** — never by index.
+- **`$derived` carries computation; `$effect` is an escape hatch** for DOM side effects (scroll, measurement, observers) and writes no state — an interaction drives state from its own handler.
+- **Runes only in new code**: `onclick={...}`, `$props()`, snippets instead of slots; no legacy APIs.
 
 ## Technology choices
 
