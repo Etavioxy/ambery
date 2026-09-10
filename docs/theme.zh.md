@@ -13,7 +13,7 @@ theme   当前使用的主题名
 themes  主题名 → 主题 value 的 Map
 ```
 
-每个主题 value 表达该主题的配色表与常见样式修改。具体字段清单、命名和校验规则应从现有界面视觉需求中收敛，本文不预设。收敛的物理落点是 `packages/apps/src/styles.css` `:root` 的 `--ov-*` token 表——主题 value 的字段与该表一一对应，应用主题即覆写这张表。
+每个主题 value 表达该主题的配色表与常见样式修改。具体字段清单、命名和校验规则应从现有界面视觉需求中收敛，本文不预设。收敛的物理落点是 `packages/apps/src/styles/tokens.css` `:root` 的 `--ov-*` token 表——主题 value 的字段与该表一一对应，应用主题即覆写这张表。
 
 ## 作用范围
 

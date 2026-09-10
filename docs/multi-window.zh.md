@@ -16,7 +16,7 @@
 
 静态窗口（pet/chat/menu）都是 `transparent: true` + `decorations: false` + `alwaysOnTop: true` 的小窗口（不在中间铺全屏透明层），所以不会有挡住桌面点击的问题。`card-<id>` 由 pet 经 `ensure_card_window` 创建（Rust 权威注册表决策，docs/case-runner.md §窗口决策上提）——每 id 一个独立窗口，同 id 原地更新（持续管理协议，docs/components.md）。
 
-透明窗口 chrome 规则（样式单源在 `styles.css` 顶部注释）：填充型面板（chat/shelf/menu）`box-sizing: border-box` + 100% 填满窗口，border 内绘于自身盒内、天然落在窗口边界内；card 的盒含自身 border，窗口按投影尺寸创建（docs/card-window-size.md）；pet 由窗口尺寸公式 +BORDER_PX 补偿（docs/pet-window-size.md）。
+透明窗口 chrome 规则（样式层在 `packages/apps/src/styles/`——`index.css` 放窗口与组件规则、`tokens.css` 放 token 表，顶部注释为单源）：填充型面板（chat/shelf/menu）`box-sizing: border-box` + 100% 填满窗口，border 内绘于自身盒内、天然落在窗口边界内；card 的盒含自身 border，窗口按投影尺寸创建（docs/card-window-size.md）；pet 由窗口尺寸公式 +BORDER_PX 补偿（docs/pet-window-size.md）。
 
 ## 数据通道
 

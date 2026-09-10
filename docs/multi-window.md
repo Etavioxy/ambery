@@ -16,7 +16,7 @@ English | [中文](multi-window.zh.md)
 
 Static windows (pet/chat/menu) are all small windows with `transparent: true` + `decorations: false` + `alwaysOnTop: true` (no full-screen transparent layer spread across the middle), so there is no problem of blocking desktop clicks. `card-<id>` is created by pet via `ensure_card_window` (authoritative Rust registry decision, docs/case-runner.md §Window Decision Hoisted) — one independent window per id, updated in place for the same id (continuous management protocol, docs/components.md).
 
-Transparent-window chrome rules (the single source for styles is the comment at the top of `styles.css`): filled panels (chat/shelf/menu) use `box-sizing: border-box` + 100% to fill the window, and the border is drawn inside the box itself, so it naturally falls within the window bounds; a Card's box includes its own border, and the window is created at the projected size (docs/card-window-size.md); pet is compensated by the window-size formula + BORDER_PX (docs/pet-window-size.md).
+Transparent-window chrome rules (the style layer is `packages/apps/src/styles/` — `index.css` for window and component rules, `tokens.css` for the token table, whose header comment is the single source): filled panels (chat/shelf/menu) use `box-sizing: border-box` + 100% to fill the window, and the border is drawn inside the box itself, so it naturally falls within the window bounds; a Card's box includes its own border, and the window is created at the projected size (docs/card-window-size.md); pet is compensated by the window-size formula + BORDER_PX (docs/pet-window-size.md).
 
 ## Data Channels
 
