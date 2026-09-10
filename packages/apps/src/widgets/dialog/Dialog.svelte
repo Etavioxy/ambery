@@ -43,6 +43,11 @@
     justify-content: center;
     z-index: 1000;
   }
+  /* 透明窗口里遮罩跟面板轮廓一致：窗口四角是透明的，矩形遮罩会在圆角外画出方角
+     （桌面上表现为模态漏出的方形阴影）。browser 调试页是不透明整页，遮罩即整页，不圆角。 */
+  :global(html:not(.browser) .setup-overlay) {
+    border-radius: var(--ov-panel-radius);
+  }
   /* 与设置面板视觉对齐：字号/文字色显式对齐菜单面板（否则继承 chat 的 13px/--ov-text）；
      背景用主题 modal token（--ov-modal-bg）——modal 是独立视觉层，不是 panel。
      尺寸受宿主窗口约束：引导 modal 就开在 320×380 的 chat 窗里，写死 360 会被窗口裁掉。
