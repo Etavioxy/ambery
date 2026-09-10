@@ -226,7 +226,7 @@ none < minimal < low < medium < high < xhigh < max
   - `from_provider` 把 `p.reasoning` 与 `p.vendor` 存下；
   - `build_body` 末尾按 vendor 表把 domain effort 翻译进 body（§3.3）。
 - 告警走既有 `eprintln!("[llm] ...")` 风格；归并/忽略逻辑收敛到一个 `fn apply_reasoning(body, vendor, effort)` 纯函数，便于单测（仓库现有测试风格可照 `openai_body_maps_tool_flow` 写）。
-- 渲染层（`app/src/windows/chat.ts`）已支持 `reasoning_content` 流式展示，无需改。
+- 渲染层（`packages/apps/src/components/chat-panel/ChatPanel.svelte`）已支持 `reasoning_content` 流式展示，无需改。
 
 ---
 

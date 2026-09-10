@@ -20,7 +20,7 @@ pet initial seed 116×40 (recomputed at runtime by the pet-window-size.md formul
 
 ## Frontend adaptation
 
-- Each window loads `index.html`; `main.ts` routes by window label to `pet.ts` / `menu.ts` / `chat-window.ts` / `shelf.ts` / `card-window.ts`
+- Each window loads `index.html`; `main.ts` routes by window label to `entry/pet.ts` / `entry/menu.ts` / `entry/chat.ts` / `entry/shelf.ts` / `windows/card-window.ts`
 - Each window connects to ambery-core independently (Tauri IPC; browser debugging uses RemoteBridge HTTP+WS); reads converge through the frontend store (docs/case-runner.md §frontend read architecture)
 - pet dragging uses IPC `window.setPosition()` and emits the `"pet:moved"` event
 - chat/Card windows request positions through the positioning engine (pet holds the engine; `engine:place` / `engine:moved` protocol)

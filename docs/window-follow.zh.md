@@ -80,7 +80,7 @@ occupied/offset（多 DPI 屏下偏移错位的根源）。
 
 **不压人 > 完全可见**：宁允许卡片部分出屏，绝不做「拉回屏内」的事后 clamp——
 事后 clamp 只看视口不看障碍，会把引擎算好的位置拉到别的窗口上（重叠元凶：
-chat.ts 与 component-manager.ts 的定位不做事后 clamp）。
+shell/kinds/chat.ts 与 components/component-manager.ts 的定位不做事后 clamp）。
 
 **完全失踪**（卡片矩形与所在屏零相交）不允许，兜底 = **全 16 方位环重试**
 （算法层零改动，computeCDSegments / ternarySearch 不感知视口）：
@@ -134,7 +134,7 @@ onMoved 防抖 → outerPosition（OS 钳制后的真实位置）
 
 恢复/隐藏语义**单源**在 ChatPanel 的统一 API，分支只做事件翻译：
 
-| API | 语义 | Tauri（chat-window） | browser（DOM ChatPanel） |
+| API | 语义 | Tauri（shell/kinds/chat.ts） | browser（DOM ChatPanel） |
 |---|---|---|---|
 | `intentClose()` | 用户意图关：userClosed=true + 隐藏 | × / toggle 关 | × 按钮 |
 | `intentOpen()` | 用户意图开：userClosed=false + 显示 | toggle 开 | （右键唤出） |

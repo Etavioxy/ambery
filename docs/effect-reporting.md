@@ -100,9 +100,9 @@ The same runtime action is recorded exactly once, at the place where it is actua
 |------|------------|------------------|
 | WebView | resize_window / move_window / show_window / hide_window | setSize/setOffset, setPosition, show/hide in `window-adapter.ts`; shared by the pet/card/chat windows, window name taken from getCurrentWindow().label |
 | Rust shell | ensure_card_window / close_card_window | pet/card/shelf three paths (agent render/close, shelf show-hide/dismiss, user ×) triggered via the WebView action layer invoke; Rust command endpoint records: create→window_opened, reuse→event_emit(card:spec), close→window_closed |
-| WebView | start_dragging | `windows/pet.ts`, `windows/card-window.ts`, `windows/chat-window.ts`; corresponds to window_drag |
-| WebView | emit_event | emit / emitTo in `windows/pet.ts`, `positioning/tauri-server.ts`; corresponds to event_emit |
-| WebView | hide_window | menu hide in `windows/menu.ts`; corresponds to window_hidden |
+| WebView | start_dragging | `shell/kinds/pet.ts`, `windows/card-window.ts`, `shell/kinds/chat.ts`; corresponds to window_drag |
+| WebView | emit_event | emit / emitTo in `shell/kinds/pet.ts`, `positioning/tauri-server.ts`; corresponds to event_emit |
+| WebView | hide_window | menu hide in `shell/kinds/menu.ts`; corresponds to window_hidden |
 | Rust shell | show_window / hide_window / close_window / emit_event | toggle, tray close, and other equivalent WebviewWindow / AppHandle actions in `packages/apps/tauri/src-tauri`; each corresponds to window_visible / window_hidden / window_closed / event_emit |
 | Browser simulation | — | browser adapter / drag.ts / component-manager.ts **do not enter the action layer and are not instrumented** (DOM simulation, not Tauri runtime actions) |
 

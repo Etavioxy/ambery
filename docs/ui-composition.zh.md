@@ -71,8 +71,8 @@ WebviewWindowBuilder::new(&app, &label, WebviewUrl::App("index.html#chat".into()
 | 层 | 归属 | 例子 | 规则 |
 |---|---|---|---|
 | 0 行为原语 | bits-ui（依赖） | Select、Checkbox、Dialog、Tooltip | 行为、无障碍、定位；不带样式 |
-| 1 widget | 本项目 | Button、Input、Panel、Field | 变体在这里定义；widget 之间可以互相组合 |
-| 2 业务件 | 本项目 | ChatPanel、CardBox | 只做组合与业务语义 |
+| 1 widget | 本项目 | Button、Input、Panel、Select、Dialog、Tooltip | 变体在这里定义；widget 之间可以互相组合 |
+| 2 业务件 | 本项目 | ChatPanel、MenuPanel、ConfigRow | 只做组合与业务语义 |
 
 - 第 1 层 widget 要么给第 0 层原语套本项目的变体，要么在 bits-ui 没有对应物时自写。
 - 依赖单向：2 → 1 → 0；第 2 层不得直接用第 0 层原语。

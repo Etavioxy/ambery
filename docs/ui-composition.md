@@ -71,8 +71,8 @@ WebviewWindowBuilder::new(&app, &label, WebviewUrl::App("index.html#chat".into()
 | Tier | Owner | Examples | Rule |
 |---|---|---|---|
 | 0 behaviour primitive | bits-ui (dependency) | Select, Checkbox, Dialog, Tooltip | behaviour, accessibility, placement; no styling |
-| 1 widget | this project | Button, Input, Panel, Field | variants are defined here; widgets may compose each other |
-| 2 business component | this project | ChatPanel, CardBox | composition and business semantics only |
+| 1 widget | this project | Button, Input, Panel, Select, Dialog, Tooltip | variants are defined here; widgets may compose each other |
+| 2 business component | this project | ChatPanel, MenuPanel, ConfigRow | composition and business semantics only |
 
 - A tier-1 widget either wraps a tier-0 primitive with this project's variants, or is written here when bits-ui has no counterpart.
 - Dependency is one-way: 2 → 1 → 0; a tier-2 component does not use a tier-0 primitive directly.

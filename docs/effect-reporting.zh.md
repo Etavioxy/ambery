@@ -100,9 +100,9 @@ Tauri 运行时动作分两类，通道不同：
 |------|------------|------------------|
 | WebView | resize_window / move_window / show_window / hide_window | `window-adapter.ts` 的 setSize/setOffset、setPosition、show/hide；pet/card/chat 三窗共用，window 名取 getCurrentWindow().label |
 | Rust 壳 | ensure_card_window / close_card_window | pet/card/shelf 三路径（agent render/close、shelf 显隐/dismiss、用户 ×）经 WebView 动作层 invoke 触发，Rust 命令端点记录：create→window_opened、reuse→event_emit(card:spec)、close→window_closed |
-| WebView | start_dragging | `windows/pet.ts`、`windows/card-window.ts`、`windows/chat-window.ts`；对应 window_drag |
-| WebView | emit_event | `windows/pet.ts`、`positioning/tauri-server.ts` 的 emit / emitTo；对应 event_emit |
-| WebView | hide_window | `windows/menu.ts` 的 menu hide；对应 window_hidden |
+| WebView | start_dragging | `shell/kinds/pet.ts`、`windows/card-window.ts`、`shell/kinds/chat.ts`；对应 window_drag |
+| WebView | emit_event | `shell/kinds/pet.ts`、`positioning/tauri-server.ts` 的 emit / emitTo；对应 event_emit |
+| WebView | hide_window | `shell/kinds/menu.ts` 的 menu hide；对应 window_hidden |
 | Rust 壳 | show_window / hide_window / close_window / emit_event | `packages/apps/tauri/src-tauri` 的 toggle、托盘关闭及其他 WebviewWindow / AppHandle 等价动作；逐个对应 window_visible / window_hidden / window_closed / event_emit |
 | 浏览器模拟 | — | browser adapter / drag.ts / component-manager.ts **不进入动作层、不埋点**（DOM 模拟，非 Tauri 运行时动作） |
 

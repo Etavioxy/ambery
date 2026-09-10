@@ -79,7 +79,7 @@ the separate `adapter.getScreenHeight()` (logical pixels) channel, and are not m
 
 **Don't overlap others > fully visible**: prefer letting a card go partially off-screen; never do an after-the-fact clamp that "pulls it back on screen" —
 an after-the-fact clamp looks only at the viewport, not at obstacles, and would pull the engine-computed position onto other windows (the overlap culprit:
-positioning in chat.ts and component-manager.ts must not do an after-the-fact clamp).
+positioning in shell/kinds/chat.ts and components/component-manager.ts must not do an after-the-fact clamp).
 
 **Fully missing** (the card rectangle has zero intersection with its screen) is not allowed; the fallback = **full 16-direction ring retry**
 (zero algorithm-layer changes; computeCDSegments / ternarySearch are viewport-unaware):
@@ -133,7 +133,7 @@ Concrete instances in this project:
 
 Restore/hide semantics are **single-sourced** in ChatPanel's unified API; branches only translate events:
 
-| API | Semantics | Tauri (chat-window) | browser (DOM ChatPanel) |
+| API | Semantics | Tauri (shell/kinds/chat.ts) | browser (DOM ChatPanel) |
 |---|---|---|---|
 | `intentClose()` | User intent close: userClosed=true + hide | × / toggle close | × button |
 | `intentOpen()` | User intent open: userClosed=false + show | toggle open | (right-click summons) |
