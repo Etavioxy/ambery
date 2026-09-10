@@ -13,12 +13,12 @@ The docs are the design source. Before changing behavior, read the corresponding
 ## Repository layout
 
 ```
-core/             Rust core library (harness / backend / server / storage)
-ambery-case/      case-runner: snapshot replay, concept observation, frontend headless host
+core/                       Rust core library (harness / backend / server / storage)
+packages/case-runner/       case-runner: snapshot replay, concept observation, frontend headless host
 packages/terminal-lib/      terminal access contract crate (trait / envelope / composite / test stub)
 packages/terminals/wt/      Windows Terminal package: C# UIA sidecar + Rust client (Windows-only)
 packages/terminals/zellij/  zellij package: in-process CLI adapter
-packages/apps/              frontend vanilla TypeScript (pet / chat / cards / positioning)
+packages/apps/              Svelte window shell frontend (pet / chat / cards / positioning)
 packages/apps/tauri/        Tauri form: shell + host layer (static window + card windows + /hook thin server)
 scripts/          development scripts
 tools/            diagnostic tools

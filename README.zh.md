@@ -62,8 +62,8 @@ cd app && npm install && npm run dev
 ## 仓库地图
 
 - `core/` — Rust 核心：Harness、backend、server、storage、filter、TUI activity viewer
-- `ambery-case/` — storage 快照回放与概念观测 runner
-- `packages/apps/` — vanilla TypeScript 前端；`packages/apps/tauri/src-tauri/` 为 Tauri 壳
+- `packages/case-runner/` — storage 快照回放与概念观测 runner
+- `packages/apps/` — Svelte 窗口壳前端；`packages/apps/tauri/src-tauri/` 为 Tauri 壳
 - `packages/terminal-lib/` — 终端访问契约 crate（adapter trait / 信封 / composite）
 - `packages/terminals/wt/` — Windows Terminal 包：C# UIA sidecar + Rust 客户端
 - `packages/terminals/zellij/` — zellij 包：进程内 CLI adapter

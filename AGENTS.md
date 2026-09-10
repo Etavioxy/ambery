@@ -38,3 +38,4 @@ Ambery 是 Tauri 多窗口桌宠（pet/chat/menu/shelf/card）+ Rust core。改�
 ## User Goals
 
 - UI 交互禁止浏览器原生弹窗（alert / prompt / confirm）：错误与输入用应用内 UI 元素表达（内联提示 / 内联表单），不用系统对话框。
+- (.gitignore) 注释全用英文。

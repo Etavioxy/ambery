@@ -12,19 +12,15 @@ Storage 快照驱动的回归测试与概念观测工具；兼承接 CLI 决策�
 
 > **边界隔离**——一次性沙盒（生产永不写）+ headless（不启动真实 OS 界面）；细节见 §边界隔离。
 
-> **前端 headless 观测**——观测边界与接入形态（headless JS + RemoteBridge 连 case-runner 内嵌 core + mock 窗口层，即 `packages/apps/test/` vitest 套件）；细节见 §前端 headless 观测。
-
-> **壳类比**——case-runner 类比 Tauri 壳：进程主体内嵌 core（run_core 同款），按需拉起 TS 测试进程，TS 走 RemoteBridge 连内嵌 core——与「壳内嵌 core + 壳驱动 WebView」同构。对应 Tauri 多窗口（每窗口一个独立 Renderer），一个 TS 测试进程模拟一个窗口的 JS 运行时；多窗口场景用多个 TS 测试进程（多 node），各自经 RemoteBridge 连共享的内嵌 core。TS 不是常驻环境，是 case-runner 流程的一环。
+> **前端 headless 观测**——case-runner 以 headless 运行：与 Tauri 壳同款地内嵌 core，每个被模拟的窗口由一个 TS 测试进程经 RemoteBridge 接入；与 Tauri 形态的一致性分析和 mock 窗口层见 §前端 headless 观测。
 
 > **LLM 模式**——两种平级（debug / real），case 头部显式声明，无隐含默认；细节见 §LLM 模式。
 
-> **核心概念 5 个**——case / observe / chat(=user+real llm) / toolcall / worker 是第一类对象。
-
-> **可观测体系**——所有模块可观测、observe 两类输出、effects 进 observe；细节见 §可观测体系。
-
-> **Tauri 运行时动作可观测**——非只读 Tauri 运行时动作统一进 effect 流；细节见 §Tauri 运行时动作可观测。
+> **一切行为可观测**——所有模块可观测（concepts §可观测体系，归属 docs/observability.md），observe 输出与 effects 落入 observe 流，非只读 Tauri 运行时动作进 effect 流；细节见 §可观测体系。
 
 > **case 隐私边界**——case 绝不携带敏感信息（apikey / 项目名等）；细节见 §case 隐私。
+
+> **测试基建不进生产构建**——回放引擎与 DebugAgent mock 位于 ambery-core 的可选 feature 之后；core 的 release 构建两者皆不含。
 
 ## 哲学
 
@@ -87,34 +83,14 @@ headless 前端 case =
 
 webview 必须挂真实窗口，Tauri/wry 无 headless webview（见 wry discussion #373）。
 
-## 布局
+### Core feature 与执行器分工
 
-workspace 根 `Cargo.toml`（members：core / observe-derive / ambery-case；exclude packages/apps/tauri/src-tauri 壳独立构建）：
+step 执行器在 ambery-case（binary 侧）而非 core：沙盒、终端剧情状态、打印是 CLI 关注点；core 只承载概念（解析/求值/观测），保持库纯粹。这个分工乘坐 ambery-core 的两个可选 cargo feature：
 
-```
-ambery-case/                    ← workspace member
-├── Cargo.toml                    ← deps: ambery-core (features=["case-runner"])
-├── cases/                        ← .case 文件（两段式），一个 case 一个文件（gitignore）
-│   └── closed-stale-cache.case
-├── src/
-│   ├── main.rs                   ← CLI 入口（运行/health/export 参数、沙盒 setup、step 循环）
-│   ├── runner.rs                 ← step 执行器（load / timer_scan / hook / trigger / user / tool_call / store / terminal / terminal_gone / observe 打印）
-│   └── export.rs                 ← 实时 storage → case 导出管线
-└── README.md
-```
+- `case-runner`——概念侧：两段式解析、求值、观测，以及可选的 `ambery-observe-derive` proc-macro。
+- `debug-agent`——DebugAgent mock 后端（case-runner 二进制两者全开）。
 
-```
-ambery-core (feature "case-runner"):
-  src/
-    case.rs                       ← 两段式解析 + CaseStep/meta + CaseObserve 组装 + pre_parse_check
-    eval.rs                       ← 求值引擎（Parser trait/四 parser/变量/类型/DirectToString，case-eval-system.md）
-    observe.rs                    ← Observable trait + 各模块投影（observability.md）
-    lib.rs                        ← cfg(feature = "case-runner") 暴露；Harness derive(Observe) 覆盖断言
-observe-derive/                   ← proc-macro（derive(Observe)，case-runner feature 可选依赖）
-```
-
-> step 执行器在 ambery-case（binary 侧）而非 core：沙盒/终端剧情状态/打印是 CLI 关注点；
-> core 只承载概念（解析/求值/观测），保持库纯粹。
+core 的 release 构建两者皆不含——生产二进制永不携带回放引擎或 mock；CI 以独立 feature 运行验证门控面（`cargo test -p ambery-core --features case-runner`）。
 
 ## Case 文件格式（两段式，`.case` 后缀）
 
@@ -404,11 +380,11 @@ ambery-case <case> --brain-addr http://127.0.0.1:47777
 
 ```bash
 # workspace 根（推荐）
-cargo run -p ambery-case -- ambery-case/cases/closed-stale-cache.case          # 执行所有 steps
-cargo run -p ambery-case -- ambery-case/cases/closed-stale-cache.case --health # case 合法性校验
+cargo run -p ambery-case -- packages/case-runner/cases/closed-stale-cache.case          # 执行所有 steps
+cargo run -p ambery-case -- packages/case-runner/cases/closed-stale-cache.case --health # case 合法性校验
 
 # crate 内亦可（workspace 感知）
-cd ambery-case
+cd packages/case-runner
 cargo build
 cargo run -- cases/closed-stale-cache.case
 ```

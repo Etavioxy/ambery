@@ -12,19 +12,15 @@ Storage snapshot-driven regression testing and concept observation tool; also ho
 
 > **Boundary isolation** — one-shot sandbox (production is never written) + headless (never starts a real OS UI); details in §Boundary isolation.
 
-> **Frontend headless observation** — observation boundary and integration shape (headless JS + RemoteBridge connecting to the case-runner's embedded core + mock window layer, i.e. the `packages/apps/test/` vitest suite); details in §Frontend headless observation.
-
-> **Shell analogy** — the case-runner is analogous to the Tauri shell: the process body embeds core (the same run_core), spawns a TS test process on demand, and TS connects to the embedded core via RemoteBridge — the same shape as "shell embeds core + shell drives WebView". Corresponding to Tauri multi-window (each window an independent Renderer), one TS test process simulates one window's JS runtime; multi-window scenarios use multiple TS test processes (multiple nodes), each connecting to the shared embedded core via RemoteBridge. TS is not a resident environment; it is one link in the case-runner flow.
+> **Frontend headless observation** — the case-runner runs headless: it embeds core like the Tauri shell does, and one TS test process per simulated window connects via RemoteBridge; the consistency analysis against the Tauri shape and the mock window layer are in §Frontend headless observation.
 
 > **LLM modes** — two equal modes (debug / real), declared explicitly in the case header; no implicit default; details in §LLM modes.
 
-> **5 core concepts** — case / observe / chat(=user+real llm) / toolcall / worker are first-class objects.
-
-> **Observability system** — all modules are observable, observe has two kinds of output, effects go into observe; details in §Observability system.
-
-> **Tauri runtime actions observable** — non-readonly Tauri runtime actions uniformly enter the effect stream; details in §Tauri runtime actions observable.
+> **All behavior observable** — every module is observable (concepts §Observability system, owned by docs/observability.md), observe output and effects land in the observe stream, and non-readonly Tauri runtime actions enter the effect stream; details in §Observability system.
 
 > **case privacy boundary** — a case never carries sensitive information (apikey / project names, etc.); details in §case privacy.
+
+> **Test infrastructure stays out of production builds** — the replay engine and the DebugAgent mock sit behind optional ambery-core features; release builds of core contain neither.
 
 ## Philosophy
 
@@ -87,34 +83,14 @@ headless 前端 case =
 
 A webview must be attached to a real window; Tauri/wry has no headless webview (see wry discussion #373).
 
-## Layout
+### Core features and the executor split
 
-Workspace root `Cargo.toml` (members: core / observe-derive / ambery-case; exclude packages/apps/tauri/src-tauri shell built independently):
+The step executor lives on the ambery-case (binary) side, not in core: sandbox, terminal story state, and printing are CLI concerns; core carries only the concepts (parsing / evaluation / observation) to keep the library pure. The split rides two optional ambery-core cargo features:
 
-```
-ambery-case/                    ← workspace member
-├── Cargo.toml                    ← deps: ambery-core (features=["case-runner"])
-├── cases/                        ← .case 文件（两段式），一个 case 一个文件（gitignore）
-│   └── closed-stale-cache.case
-├── src/
-│   ├── main.rs                   ← CLI 入口（运行/health/export 参数、沙盒 setup、step 循环）
-│   ├── runner.rs                 ← step 执行器（load / timer_scan / hook / trigger / user / tool_call / store / terminal / terminal_gone / observe 打印）
-│   └── export.rs                 ← 实时 storage → case 导出管线
-└── README.md
-```
+- `case-runner` — the concept side: two-section parsing, evaluation, observation, and the optional `ambery-observe-derive` proc-macro.
+- `debug-agent` — the DebugAgent mock backend (the case-runner binary enables both features).
 
-```
-ambery-core (feature "case-runner"):
-  src/
-    case.rs                       ← 两段式解析 + CaseStep/meta + CaseObserve 组装 + pre_parse_check
-    eval.rs                       ← 求值引擎（Parser trait/四 parser/变量/类型/DirectToString，case-eval-system.md）
-    observe.rs                    ← Observable trait + 各模块投影（observability.md）
-    lib.rs                        ← cfg(feature = "case-runner") 暴露；Harness derive(Observe) 覆盖断言
-observe-derive/                   ← proc-macro（derive(Observe)，case-runner feature 可选依赖）
-```
-
-> The step executor is on the ambery-case (binary) side, not in core: sandbox/terminal story state/printing are CLI concerns;
-> core only carries the concepts (parsing/evaluation/observation), keeping the library pure.
+Release builds of core enable neither, so production binaries never carry the replay engine or the mock; CI verifies the gated surface with a dedicated feature run (`cargo test -p ambery-core --features case-runner`).
 
 ## Case file format (two-section, `.case` suffix)
 
@@ -404,11 +380,11 @@ ambery-case <case> --brain-addr http://127.0.0.1:47777
 
 ```bash
 # workspace 根（推荐）
-cargo run -p ambery-case -- ambery-case/cases/closed-stale-cache.case          # 执行所有 steps
-cargo run -p ambery-case -- ambery-case/cases/closed-stale-cache.case --health # case 合法性校验
+cargo run -p ambery-case -- packages/case-runner/cases/closed-stale-cache.case          # 执行所有 steps
+cargo run -p ambery-case -- packages/case-runner/cases/closed-stale-cache.case --health # case 合法性校验
 
 # crate 内亦可（workspace 感知）
-cd ambery-case
+cd packages/case-runner
 cargo build
 cargo run -- cases/closed-stale-cache.case
 ```

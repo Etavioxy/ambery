@@ -13,12 +13,12 @@ Ambery 是 Agent 模型的桌宠：它 hook 进 agent 会话、观察模型的�
 ## 仓库布局
 
 ```
-core/             Rust 核心库（harness / backend / server / storage）
-ambery-case/      case-runner：快照回放、概念观测、前端 headless 宿主
+core/                       Rust 核心库（harness / backend / server / storage）
+packages/case-runner/       case-runner：快照回放、概念观测、前端 headless 宿主
 packages/terminal-lib/      终端访问契约 crate（trait / 信封 / composite / 测试桩）
 packages/terminals/wt/      Windows Terminal 包：C# UIA sidecar + Rust 客户端（仅 Windows）
 packages/terminals/zellij/  zellij 包：进程内 CLI adapter
-packages/apps/              前端 vanilla TypeScript（pet / chat / 卡片 / positioning）
+packages/apps/              Svelte 窗口壳前端（pet / chat / 卡片 / positioning）
 packages/apps/tauri/        Tauri 形态：壳 + 宿主层（静态窗口 + 卡片窗口 + /hook 薄 server）
 scripts/          开发脚本
 tools/            诊断工具

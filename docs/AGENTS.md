@@ -44,6 +44,7 @@ The public document set = all rows of the table above (README / VISION to be cre
 - History or war-story narration: "previously", "now", "no longer", "used to", "renamed", PR, commit.
 - Implementation status markers ("implemented!", "future:"): status rots; code and repo layout carry status.
 - Hand-copied catalogs / lists (tests, packages, status): forbidden when a source or generator is authoritative.
+- Hand-copied repository file trees: the repo itself (workspace manifest and directories) is the authoritative source and changes without touching docs; docs name crates, modules and types instead. Data-artifact layouts (storage directories, config locations) are contract content and stay.
 - Reasoning transcripts: step-by-step implementation narration, proofs of obvious branches, test walkthroughs, rejected local alternatives. Keep the final contract, delete the derivation path.
 - Repeated rationale next to sibling entries: rationale is written once, at the owning capability / entry.
 - Paragraph walls: a paragraph carrying multiple rules and parenthetical asides → split or demote to the owner.
