@@ -147,7 +147,7 @@ static TABLE: &[(&str, &str, &str)] = &[
     ("sleep.ms-over", "ms {ms} 超上限 {max}（5 分钟，设计常量）", "ms {ms} exceeds the {max} limit (5 minutes, design constant)"),
     ("mem.content-required", "content 必填（完整替换，无局部 patch）", "content is required (full replacement; no partial patches)"),
     ("err.component-type", "未知 Component type：'{typ}'，合法值：{valid}", "unknown Component type: '{typ}', valid: {valid}"),
-    ("err.component-id", "spec.id '{id}' 不合法：窗口名只允许 A-Z a-z 0-9 _ - . /，不含空格、中文或特殊字符；路径段不得为空或 '..'", "invalid spec.id '{id}': window name allows only A-Z a-z 0-9 _ - . / (no spaces/CJK/special chars); path segments must not be empty or '..'"),
+    ("err.component-id", "spec.id '{id}' 不合法：id 同时是窗口名与 Card 文件路径，只允许 A-Z a-z 0-9 _ - /（不含 `.`、空格、中文或特殊字符）；路径段不得为空或 '..'", "invalid spec.id '{id}': the id is both a window label and a Card file path — only A-Z a-z 0-9 _ - / are allowed (no `.`, spaces, CJK or special characters); path segments must not be empty or '..'"),
     ("err.component-missing", "type={typ} 缺少必填字段：{missing}。字段在 spec 顶层，不要包在 props 里", "type={typ} missing required fields: {missing}. Fields live at spec top level; do not wrap them in props"),
     ("err.todobox-items", "todobox items 结构不合法：需 [{text: string, done: boolean}]", "invalid todobox items structure: expected [{text: string, done: boolean}]"),
     ("msg.saved-restart", "已保存，重启应用后生效", "Saved; takes effect after restart"),

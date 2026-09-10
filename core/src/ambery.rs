@@ -1774,10 +1774,11 @@ impl<L: Llm> AmberyBackend<L> {
                     .and_then(Value::as_str)
                     .unwrap_or("")
                     .to_string();
-                // Tauri label 规则：只允许 [A-Za-z0-9_\-/.]+；id 即 Card 文件相对路径
-                //（memory/cards/<id>.card.json）——禁空段与 `..` 段（路径逃逸防护）
+                // Tauri label 规则：只允许字母数字与 `-`、`/`、`:`、`_`；id 同时是 Card 文件相对路径
+                //（memory/cards/<id>.card.json），故取两者交集 [A-Za-z0-9_\-/]——`.` 会被 Tauri 拒
+                //（前端建窗随之失败），`:` 是 Windows 路径非法字符；禁空段与 `..` 段（路径逃逸防护）
                 if id.is_empty()
-                    || !id.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-' || c == '.' || c == '/')
+                    || !id.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-' || c == '/')
                     || id.split('/').any(|seg| seg.is_empty() || seg == "..")
                 {
                     return (
@@ -3217,6 +3218,28 @@ mod tests {
         assert!(events.iter().any(|l| l.starts_with("card created: todobox「t」(todo-1) @ ") && l.ends_with(", → 存活 1")), "created 事件: {events:?}");
         assert!(events.iter().any(|l| l.starts_with("card closed: todobox「t」(todo-1), ") && l.contains(" / ") && l.ends_with(", → 存活 0")), "closed 事件: {events:?}");
         let _ = std::fs::remove_dir_all(tmp_dir("cmp-mgmt"));
+    }
+
+    #[tokio::test]
+    async fn call_component_rejects_id_illegal_as_window_label() {
+        // id 同时是 Tauri 窗口标签（`card-<id>`）与 Card 文件相对路径（memory/cards/<id>.card.json）：
+        // `.` 只有文件路径容忍，Tauri 拒收 → 必须在工具边界拦下，否则前端建窗失败、用户看不到卡
+        let mut ov = make_ambery("cmp-id");
+        let call = |id: &str| crate::context::ToolCall {
+            id: "c1".into(),
+            name: "call_component".into(),
+            arguments: json!({"spec": {"id": id, "type": "todobox", "title": "t", "items": [{"text": "a", "done": false}]}}).to_string(),
+        };
+        let (bad, bad_effects) = ov.execute_tool(&call("demo.text_card")).await;
+        assert_eq!(bad["ok"], json!(false), "带点的 id 会被 Tauri 拒收，工具边界必须拦下：{bad}");
+        assert!(bad_effects.is_empty(), "校验不过不产生 effect");
+        assert!(!ov.harness.cards_dir().join("demo.text_card.card.json").exists(), "拦下即不落盘");
+        // 合法集保持可用：`-`、`_`、`/`（嵌套目录）
+        let (good, good_effects) = ov.execute_tool(&call("proj/todo-1")).await;
+        assert_eq!(good["rendered"], json!("proj/todo-1"), "嵌套路径 id 仍合法：{good}");
+        assert!(matches!(good_effects[0], Effect::RenderComponent(_)));
+        assert!(ov.harness.cards_dir().join("proj/todo-1.card.json").exists());
+        let _ = std::fs::remove_dir_all(tmp_dir("cmp-id"));
     }
 
     #[tokio::test]
