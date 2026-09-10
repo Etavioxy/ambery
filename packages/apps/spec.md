@@ -34,7 +34,7 @@ packages/apps/                     frontend package
 
 ## Best practices
 
-Rules this package adopts, taken from Svelte's own best practices and the placement they imply. Upstream rules are not local taste: local markup reuse is a snippet, a keyed block keys by identity, and an effect does not write state.
+Rules this package adopts, taken from the frameworks it builds on — Svelte's and bits-ui's own best practices — and the placement they imply. Upstream rules are not local taste: local markup reuse is a snippet, a keyed block keys by identity, and an effect does not write state.
 
 - **One component per file**, named `PascalCase.svelte`; the file name is the component's name. A window component keeps the window name (`windows/ChatWindow.svelte`).
 - **A component with private files gets a directory named after it** — variants, pure logic and its own state module sit beside it: `widgets/button/Button.svelte` + `button-variants.ts`, `components/chat-panel/ChatPanel.svelte` + `chat-rows.ts`. A component without private files stays flat in its layer directory.
@@ -47,6 +47,7 @@ Rules this package adopts, taken from Svelte's own best practices and the placem
 - **A measurement reads the DOM after the render it depends on**: a state write lands in the DOM on the next render, so a measurement that follows one awaits `tick()`; reading it in the same task measures the previous frame and yields a size or a rect taken from stale geometry.
 - **No prop or local binding named `state`**: a binding that collides with a rune name makes `$state(...)` read as a store subscription, and the component silently loses its reactivity.
 - **A class handed to a child component is styled with `:global()`**, in the component that owns the class name: the scope hash never reaches a child's element, and Svelte prunes the rule as unused — the style disappears from the bundle.
+- **A primitive's portal renders flat**: bits-ui's dialog portal puts `Overlay` and `Content` into the page root as siblings, and the content carries no position of its own — the caller styles its box (`position: fixed`, its own centering, a `z-index` above the overlay), otherwise it lands in the document flow behind the overlay.
 - **A control that shows only an icon or a symbol carries a Tooltip and an `aria-label`**; a text hint attached to a labelled row keeps the native `title`.
 - **Runes only in new code**: `onclick={...}`, `$props()`, snippets instead of slots; no legacy APIs.
 

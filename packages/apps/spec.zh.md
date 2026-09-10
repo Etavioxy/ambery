@@ -34,7 +34,7 @@ packages/apps/                     前端包
 
 ## 最佳实践
 
-本包采纳的规则，取自 Svelte 官方 best practices 与它隐含的放置约定。上游规则不是本地口味：局部复用是 snippet、keyed 块按身份取键、effect 不写 state。
+本包采纳的规则，取自它构建其上的框架——Svelte 与 bits-ui 的官方 best practices——以及它们隐含的放置约定。上游规则不是本地口味：局部复用是 snippet、keyed 块按身份取键、effect 不写 state。
 
 - **一个组件一个文件**，命名 `PascalCase.svelte`；文件名即组件名。窗口组件用窗口名（`windows/ChatWindow.svelte`）。
 - **带私有文件的组件用同名目录**——变体、纯逻辑、自己的状态模块与它并排：`widgets/button/Button.svelte` + `button-variants.ts`、`components/chat-panel/ChatPanel.svelte` + `chat-rows.ts`；没有私有文件的组件平铺在本层目录里。
@@ -47,6 +47,7 @@ packages/apps/                     前端包
 - **测量读的是它依赖的那次渲染之后的 DOM**：state 写入要到下一次渲染才落到 DOM，所以跟着写入的测量先 `await tick()`；在同一任务里读量到的是上一帧，得到按过期几何算出的尺寸或矩形。
 - **prop 或局部绑定不叫 `state`**：与 rune 同名会让 `$state(...)` 被读成 store 订阅，组件悄悄失去响应性。
 - **交给子组件的 class 用 `:global()` 定样式**，且写在持有该类名的组件里：作用域哈希到不了子组件元素，Svelte 会把规则当未使用剪掉——样式在产物里消失。
+- **原语的 portal 是平铺的**：bits-ui 的 dialog portal 把 `Overlay` 与 `Content` 作为兄弟节点放进页面根，而 `Content` 自身不带定位——调用方给它盒子（`position: fixed`、自己的居中、高于遮罩的 `z-index`），否则它会落进文档流、被遮罩压在下面。
 - **只显示图标或符号的控件配 Tooltip 与 `aria-label`**；已带标签的行上的文字提示仍用原生 `title`。
 - **新代码只用 runes**：`onclick={...}`、`$props()`、snippet 取代 slot；不用 legacy API。
 
