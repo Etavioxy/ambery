@@ -45,6 +45,7 @@ packages/apps/                     前端包
 - **`$derived` 承担计算；`$effect` 是逃生口**，只做 DOM 副作用（滚动、度量、观察者）且不写 state——交互经自己的处理函数驱动状态。
 - **prop 或局部绑定不叫 `state`**：与 rune 同名会让 `$state(...)` 被读成 store 订阅，组件悄悄失去响应性。
 - **交给子组件的 class 用 `:global()` 定样式**，且写在持有该类名的组件里：作用域哈希到不了子组件元素，Svelte 会把规则当未使用剪掉——样式在产物里消失。
+- **只显示图标或符号的控件配 Tooltip 与 `aria-label`**；已带标签的行上的文字提示仍用原生 `title`。
 - **新代码只用 runes**：`onclick={...}`、`$props()`、snippet 取代 slot；不用 legacy API。
 
 ## 技术选型

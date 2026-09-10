@@ -45,6 +45,7 @@ Rules this package adopts, taken from Svelte's own best practices and the placem
 - **`$derived` carries computation; `$effect` is an escape hatch** for DOM side effects (scroll, measurement, observers) and writes no state — an interaction drives state from its own handler.
 - **No prop or local binding named `state`**: a binding that collides with a rune name makes `$state(...)` read as a store subscription, and the component silently loses its reactivity.
 - **A class handed to a child component is styled with `:global()`**, in the component that owns the class name: the scope hash never reaches a child's element, and Svelte prunes the rule as unused — the style disappears from the bundle.
+- **A control that shows only an icon or a symbol carries a Tooltip and an `aria-label`**; a text hint attached to a labelled row keeps the native `title`.
 - **Runes only in new code**: `onclick={...}`, `$props()`, snippets instead of slots; no legacy APIs.
 
 ## Technology choices
