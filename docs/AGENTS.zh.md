@@ -21,12 +21,12 @@ one home per fact —— 一个主题只在一份文档完整陈述；他处提�
 | `spec.md` | 技术选型、结构决定、取舍 | 运行机制（→ `docs/`）、概念定义（→ `concepts.md`） |
 | `reports/` | 调研结论：证据 + 结论 | 过程记录、契约正文 |
 | 根 `README.md` | 项目入口：是什么、quickstart、平台矩阵 | 架构细节（→ `docs/`） |
-| 根 `VISION.md` | 项目愿景：手写一页纸 | 设计细节（→ `docs/`） |
+| `docs/roadmap.md` | 发布阶梯：通向 0.1.0 的主题与验收 | ticket 级规划、契约正文 |
 | 本文件 | 全仓文档写作标准 | 职责地图（→ `docs-spec.md`） |
 
 放置规则：未决工作 → 开发 ticket / `docs/post-0.1.0.md`；调研 → `reports/`；契约 → `docs/`；概念 → `concepts.md`；技术选型、结构决定、取舍 → `spec.md`；入口 → `README.md`。
 
-公开文档集 = 上表全部（README / VISION 待创建）。`drafts/`、`user-goals.md`、`ideas.md`、`debug-lessons.md`、`mem.md` 不公开，不进入公开仓库。
+公开文档集 = 上表全部。`drafts/`、`user-goals.md`、`ideas.md`、`debug-lessons.md`、`mem.md` 不公开，不进入公开仓库。
 
 ## 写作规则
 
@@ -70,4 +70,3 @@ one home per fact —— 一个主题只在一份文档完整陈述；他处提�
 
 - 改动任何文档前：先读 `docs-spec.md`（职责）与本文档（标准）。
 - 文档改动与代码改动分开提交（原子提交粒度，便于审阅与回滚）。
-- README / VISION / CONTRIBUTING 的专项规则待其创建时补充。

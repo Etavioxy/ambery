@@ -2,11 +2,11 @@
 
 English | [中文](post-0.1.0.zh.md)
 
-> This document only records directions after `0.1.0`; it does not define the current implementation, protocol, permission flow, asset format, rendering interface, or configuration structure.
+> This document only records directions after `0.1.0`; it does not define the current implementation, protocol, permission flow, asset format, rendering interface, or configuration structure. The release ladder toward `0.1.0` is [roadmap.md](roadmap.md).
 
 ## Global Wake-up Hotkey (Explicitly Cut)
 
-0.1.0 **does not implement** a global wake-up hotkey. An earlier design once listed it as a v2 candidate but never delivered it; it is formally cut here: it involves cross-platform global listening, conflicts with tray show/hide semantics, and preemption decisions against the user's existing hotkeys, so it is not part of alpha0's minimal credible surface. When restarting this capability, first determine the trigger key, conflict handling, and interaction with tray/blur-close, and only then land the implementation.
+0.1.0 **does not implement** a global wake-up hotkey; it is formally cut. It involves cross-platform global listening, conflicts with tray show/hide semantics, and preemption decisions against the user's existing hotkeys. Restarting this capability requires first determining the trigger key, conflict handling, and interaction with tray/blur-close.
 
 ## Codex Skin
 
@@ -19,6 +19,14 @@ A formal design must independently determine the skin's identity, assets and mot
 ## Temporary User effort Adjustment and Chat Shortcut Bar
 
 The user manually shifts the effort of the current `user_chat` (temporarily raising/lowering the thinking budget), plus a chat shortcut bar as the UI entry for that adjustment. These are independent user capabilities above effort classification and keyword matching; a formal design must independently determine the granularity of manual shifting, its effective scope, and the form of the shortcut bar.
+
+## LLM Connection Health Check
+
+A periodic background re-test of the configured endpoint, surfacing degradation before a round fails. It extends the one-shot connection test in the setup guide (docs/llm-setup.md). A formal design must independently determine: the interval, the presentation channel, and the boundary against the error path.
+
+## OS Keychain Integration
+
+Key storage moves from the 0600 env file to the OS keychain (macOS Keychain / Windows Credential Manager / Linux Secret Service). A formal design must independently determine: the per-provider storage schema, the resolution order against the env file, the fallback when no keychain is available, and the migration of existing keys.
 
 ## Tool Call Batching and Concurrency (Observation-Driven)
 

@@ -21,12 +21,12 @@ one home per fact — a topic is fully stated in only one document; when mention
 | `spec.md` | Technology choices, structural decisions, tradeoffs | Runtime mechanisms (→ `docs/`), concept definitions (→ `concepts.md`) |
 | `reports/` | Research conclusions: evidence + conclusion | Process records, contract body |
 | Root `README.md` | Project entry: what it is, quickstart, platform matrix | Architecture details (→ `docs/`) |
-| Root `VISION.md` | Project vision: one handwritten page | Design details (→ `docs/`) |
+| `docs/roadmap.md` | Release ladder: themes and acceptance toward 0.1.0 | Ticket-level planning, contract body |
 | This file | Repo-wide documentation writing standard | Responsibility map (→ `docs-spec.md`) |
 
 Placement rules: undecided work → development tickets / `docs/post-0.1.0.md`; research → `reports/`; contracts → `docs/`; concepts → `concepts.md`; technology choices, structural decisions, tradeoffs → `spec.md`; entry → `README.md`.
 
-The public document set = all rows of the table above (README / VISION to be created). `drafts/`, `user-goals.md`, `ideas.md`, `debug-lessons.md`, and `mem.md` are not public and do not enter the public repo.
+The public document set = all rows of the table above. `drafts/`, `user-goals.md`, `ideas.md`, `debug-lessons.md`, and `mem.md` are not public and do not enter the public repo.
 
 ## Writing rules
 
@@ -70,4 +70,3 @@ The public document set = all rows of the table above (README / VISION to be cre
 
 - Before changing any document: first read `docs-spec.md` (responsibilities) and this file (standards).
 - Commit document changes separately from code changes (atomic commit granularity, for review and rollback).
-- Specific rules for README / VISION / CONTRIBUTING will be added when those are created.

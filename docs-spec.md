@@ -92,6 +92,7 @@ Each `docs/*.md` has one responsibility. The grouping is reading organization, n
 
 ### Roadmap
 
+- `roadmap.md` — release ladder toward 0.1.0: theme and acceptance per stage; the single home of version boundaries
 - `post-0.1.0.md` — post-0.1.0 capability roadmap: one short statement per future capability
 
 ## Document distribution
@@ -107,7 +108,7 @@ Where contract documents live in the repository:
 
 The following content is **forbidden** in ordinary `docs/*.md`; each has its own dedicated carrier:
 
-- **Version info** — docs do not write any version number or version range (e.g. "X belongs before/after 0.1.0"). Version boundaries are defined by unified release planning; a single capability document does not temporarily assign its own version attribution.
+- **Version info** — docs do not write any version number or version range (e.g. "X belongs before/after 0.1.0"). Version boundaries are defined by the release ladder (`docs/roadmap.md`) and nowhere else; a single capability document does not temporarily assign its own version attribution.
 - **Status markers** — docs do not write volatile status (current contract / to-be-landed / undecided, etc.). Superseded historical plans are deleted or marked historical in the original text, not expressed as maintained status fields.
 - **No internal issue references** — docs do not reference internal issue numbers (#N, issue-xxx, issues #N): docs state only the current state and contracts, and do not use internal issue numbers as evidence or anchors; external upstream references (such as upstream issue / discussion numbers) are allowed.
 - **Research and argumentation process** — belongs in `reports/`; docs record only converged conclusions; the ins and outs of research are not design contracts.
