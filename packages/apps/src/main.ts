@@ -1,4 +1,4 @@
-import "./styles.css";
+import "./styles/index.css";
 
 // 路由依据 = Tauri 窗口 label（一等公民，不经过 URL）；
 // 浏览器模式（无 label）回退 hash。#menu hash 在 conf url 里会丢（可见性

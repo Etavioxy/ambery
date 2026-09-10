@@ -2,7 +2,7 @@
 // 原生 select 的选项弹出层是 OS 级 popup，在 alwaysOnTop + 500ms TOPMOST 重申
 // 协调器（docs/tauri-shell.md）下会被窗口本体盖住。改为 DOM 内 div 列表渲染——
 // 它是窗口表面的一部分，抬窗口时一起抬，盖不住。视觉复刻原生 select。
-// 列表契约（styles.css .cfg-select-list）：position:fixed，JS 按按钮 rect 定位，
+// 列表契约（styles/index.css .cfg-select-list）：position:fixed，JS 按按钮 rect 定位，
 // append 到 body，逃出 modal/滚动容器，像原生 popup 一样浮在上层。
 // addMode（T8 调研前的 stopgap）：下拉下方渲染「+」触发器（独立行靠右）；
 // 点它弹一格输入+✓，位置/宽/样式与原下拉列表一致（盖住「+」本身）。

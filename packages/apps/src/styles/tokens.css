@@ -1,0 +1,116 @@
+/* ── 设计 token（主题 value 的字段收敛源——主题即写这张表）──
+   收敛自既有界面视觉（值与原硬编码逐一对应，视觉零变化）；默认配色表 = 深色。
+   这张表是主题的唯一落点：core 的 theme 定义与 theme.ts 的 KNOWN_TOKENS 都对着它。 */
+:root {
+  /* 页面底（仅 browser 调试模式；Tauri 窗口透明） */
+  --ov-bg: #1e1e2e;
+
+  /* 面板族（chat / shelf / menu） */
+  --ov-panel-bg: rgba(30, 30, 46, 0.97);
+  --ov-panel-border: rgba(255, 255, 255, 0.18); /* chat */
+  --ov-panel-border-soft: rgba(255, 255, 255, 0.12); /* shelf / menu */
+  --ov-panel-radius: 12px;
+  --ov-overlay: rgba(0, 0, 0, 0.35); /* 弹层遮罩（引导 modal / 横幅） */
+
+  /* 卡片族（Component） */
+  --ov-card-bg: rgba(30, 30, 46, 0.96);
+  --ov-card-border: rgba(255, 255, 255, 0.18);
+  --ov-card-radius: 10px;
+
+  /* 文本（同族多档透明度由 color-mix 从 --ov-text-strong 派生，主题只调基色） */
+  --ov-text: #cdd6f4;
+  --ov-text-strong: #e6e6f0;
+  --ov-muted: #9399b2;
+  --ov-group: #9dc3ff;
+  --ov-code-bg: rgba(0, 0, 0, 0.3);
+
+  /* 强调与状态 */
+  --ov-accent: #89b4fa;
+  --ov-accent-bg: rgba(137, 180, 250, 0.15);
+  --ov-accent-border: rgba(137, 180, 250, 0.4);
+  --ov-danger: #f38ba8; /* close hover / badge / chart4 */
+  --ov-dismiss: #ff9b92; /* shelf 删除图标 */
+  --ov-success: #a6e3a1;
+  --ov-ok: #7ee787;
+  --ov-warn: #f2cc60;
+  --ov-error: #ff7b72;
+
+  /* pet 白胶囊 */
+  --ov-view-bg: rgba(255, 255, 255, 0.92);
+  --ov-view-border: rgba(0, 0, 0, 0.28);
+
+  /* 控件 */
+  --ov-input-bg: rgba(255, 255, 255, 0.08);
+  --ov-input-border: rgba(255, 255, 255, 0.15);
+  --ov-hover-bg: rgba(255, 255, 255, 0.16);
+  --ov-divider: rgba(255, 255, 255, 0.08);
+  --ov-divider-soft: rgba(255, 255, 255, 0.06);
+  --ov-control-radius: 6px;
+  --ov-input-radius: 8px;
+  --ov-popup-shadow: 0 4px 14px rgba(0, 0, 0, 0.35); /* 浮层（下拉 / 新增 popup）投影 */
+
+  /* chat 气泡 */
+  --ov-bubble-user: rgba(137, 180, 250, 0.2);
+  --ov-bubble-assistant: rgba(166, 227, 161, 0.14);
+  --ov-bubble-system: rgba(255, 255, 255, 0.06);
+  --ov-thinking-border: rgba(255, 255, 255, 0.35);
+  --ov-overlay-bg: rgba(0, 0, 0, 0.6);
+  --ov-modal-bg: #1e1e28;
+  --ov-modal-text: #dde;
+
+  /* 图表调色板（SVG paint 经 style 属性引用） */
+  --ov-chart-1: #89b4fa;
+  --ov-chart-2: #a6e3a1;
+  --ov-chart-3: #f9e2af;
+  --ov-chart-4: #f38ba8;
+}
+
+/* ── Tailwind 语义层：token → 工具类 ──
+   `@theme inline` 让工具类直接引用 `--ov-*`（不复制值），主题切换即生效；
+   token 表仍是唯一颜色源，此处不新增颜色。 */
+@theme inline {
+  --color-bg: var(--ov-bg);
+  --color-panel: var(--ov-panel-bg);
+  --color-panel-border: var(--ov-panel-border);
+  --color-panel-border-soft: var(--ov-panel-border-soft);
+  --color-overlay: var(--ov-overlay);
+  --color-card: var(--ov-card-bg);
+  --color-card-border: var(--ov-card-border);
+  --color-fg: var(--ov-text);
+  --color-fg-strong: var(--ov-text-strong);
+  --color-muted: var(--ov-muted);
+  --color-group: var(--ov-group);
+  --color-code-bg: var(--ov-code-bg);
+  --color-accent: var(--ov-accent);
+  --color-accent-bg: var(--ov-accent-bg);
+  --color-accent-border: var(--ov-accent-border);
+  --color-danger: var(--ov-danger);
+  --color-dismiss: var(--ov-dismiss);
+  --color-success: var(--ov-success);
+  --color-ok: var(--ov-ok);
+  --color-warn: var(--ov-warn);
+  --color-error: var(--ov-error);
+  --color-view: var(--ov-view-bg);
+  --color-view-border: var(--ov-view-border);
+  --color-input: var(--ov-input-bg);
+  --color-input-border: var(--ov-input-border);
+  --color-hover: var(--ov-hover-bg);
+  --color-divider: var(--ov-divider);
+  --color-divider-soft: var(--ov-divider-soft);
+  --color-bubble-user: var(--ov-bubble-user);
+  --color-bubble-assistant: var(--ov-bubble-assistant);
+  --color-bubble-system: var(--ov-bubble-system);
+  --color-thinking-border: var(--ov-thinking-border);
+  --color-overlay-bg: var(--ov-overlay-bg);
+  --color-modal: var(--ov-modal-bg);
+  --color-modal-text: var(--ov-modal-text);
+  --color-chart-1: var(--ov-chart-1);
+  --color-chart-2: var(--ov-chart-2);
+  --color-chart-3: var(--ov-chart-3);
+  --color-chart-4: var(--ov-chart-4);
+
+  --radius-panel: var(--ov-panel-radius);
+  --radius-card: var(--ov-card-radius);
+  --radius-control: var(--ov-control-radius);
+  --radius-input: var(--ov-input-radius);
+}

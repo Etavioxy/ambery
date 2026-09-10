@@ -3,8 +3,8 @@
 // 取四个方向的最大值作障碍区预留，set_autonomy(once:true) 从 durationMs 取 TTL。
 //
 // ⚠ CSS ↔ JS 一致性契约：
-//   overflow 必须与 styles.css @keyframes 的 translateX/Y 极值一致；
-//   durationMs 必须与 styles.css 的 animation-duration 一致。
+//   overflow 必须与 styles/index.css @keyframes 的 translateX/Y 极值一致；
+//   durationMs 必须与 styles/index.css 的 animation-duration 一致。
 //   新增 motion 只加一条 MotionDef；CSS keyframes 同步写注释标注对应值。
 
 import type { Motion } from "./bridge";

@@ -81,7 +81,7 @@ export async function main() {
     lastPw = applied.pw;
     lastPh = applied.ph;
     let pos = await requestPlace(label, { id: label, width: applied.pw, height: applied.ph }, dir);
-    // chrome 规则（styles.css）：测量值已含 border，窗口恰好包裹内容（阴影留边已废弃）
+    // chrome 规则（styles/index.css）：测量值已含 border，窗口恰好包裹内容（阴影留边已废弃）
     await adapter?.setSize(applied.pw, applied.ph);
     await adapter?.setPosition(Math.round(pos.x - applied.pw / 2), Math.round(pos.y - applied.ph / 2));
     try {

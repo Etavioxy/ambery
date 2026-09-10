@@ -1,12 +1,12 @@
 // 主题应用：切换 theme = 全应用立即覆写 --ov-* token 表。
 // 纯视觉变更：只写 documentElement 内联 CSS 变量，不触碰窗口开关/位置/尺寸/布局记忆、
 // 阅读位置、输入内容、Card 内容与可见性、pet 名称/表情或任何 Harness 行为。
-// 应用规则：先清全部已知 token 的内联覆写（回到 styles.css :root 内置默认），再写
+// 应用规则：先清全部已知 token 的内联覆写（回到 styles/tokens.css :root 内置默认），再写
 // 当前主题表的覆写——内置 dark 为空表，即「清干净 = dark 视觉」。
 
 import type { AppConfig } from "./bridge";
 
-/** 已知 token 清单（去 --ov- 前缀，与 styles.css :root 一一对应；scripts/lint-tokens.mjs 守卫漂移） */
+/** 已知 token 清单（去 --ov- 前缀，与 styles/tokens.css :root 一一对应；scripts/lint-tokens.mjs 守卫漂移） */
 export const KNOWN_TOKENS = [
   "bg",
   "panel-bg",

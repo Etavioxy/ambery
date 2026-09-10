@@ -1,5 +1,5 @@
 // theme 模块前端 case：store 事件 → applyTheme → token 表覆写语义。
-// 另含 KNOWN_TOKENS ↔ styles.css :root 的 parity 守卫（node fs 直读样式表）。
+// 另含 KNOWN_TOKENS ↔ styles/tokens.css :root 的 parity 守卫（node fs 直读样式表）。
 
 import { beforeAll, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
@@ -13,9 +13,9 @@ beforeAll(async () => {
   await waitCore(); // case-runner 内嵌 core（ambery-case frontend 拉起本进程）
 }, 60000);
 
-it("parity：KNOWN_TOKENS == styles.css :root 的 --ov-* 定义", () => {
-  const css = readFileSync(join(__dirname, "../src/styles.css"), "utf8");
-  const rootBlock = css.slice(css.indexOf(":root"), css.indexOf("/* ── 透明窗口"));
+it("parity：KNOWN_TOKENS == styles/tokens.css :root 的 --ov-* 定义", () => {
+  const css = readFileSync(join(__dirname, "../src/styles/tokens.css"), "utf8");
+  const rootBlock = css.slice(css.indexOf(":root"), css.indexOf("/* ── Tailwind 语义层"));
   const defined = [...rootBlock.matchAll(/(--ov-[a-z0-9-]+)\s*:/g)].map((m) =>
     m[1].replace(/^--ov-/, ""),
   );

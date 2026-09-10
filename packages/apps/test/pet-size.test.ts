@@ -1,6 +1,6 @@
 // pet 窗口尺寸公式：scale 有效性矩阵 + CSS↔JS 契约锁定。
 // 纯函数测试（无 DOM、无 core）：直接跑 vitest，不需 case-runner。
-// 契约：常量与 styles.css #view/#face 的标注 token 一一对应（pet-size.ts 头部 ⚠ 注释）。
+// 契约：常量与 styles/index.css #view/#face 的标注 token 一一对应（pet-size.ts 头部 ⚠ 注释）。
 
 import { describe, expect, it } from "vitest";
 import {
@@ -17,7 +17,7 @@ import { MOTIONS, type MotionOverflow } from "../src/motions";
 
 const STILL: MotionOverflow = { top: 0, bottom: 0, left: 0, right: 0 };
 
-describe("CSS↔JS 契约：常量与 styles.css token 一致", () => {
+describe("CSS↔JS 契约：常量与 styles/index.css token 一致", () => {
   it("设计基底（viewScale=1 基准）", () => {
     expect(BASELINE_H).toBe(20); // #view height
     expect(MIN_FACE_W).toBe(36); // #view min-width

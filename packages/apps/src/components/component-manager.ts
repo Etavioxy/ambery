@@ -171,7 +171,7 @@ export class ComponentManager {
     card.append(header, body);
     // #20 高度 cap（单源：Tauri/browser 共用渲染路径）——body 限高 = 屏高×0.5 − header，
     // 屏高经 adapter 取口（分支不各自 window.screen），
-    // 超长走 .cmp-body 滚动（styles.css overflow-y:auto），内容不截断
+    // 超长走 .cmp-body 滚动（styles/index.css overflow-y:auto），内容不截断
     const screenH = this.screenH ?? window.screen.availHeight;
     const cap = Math.max(screenH * 0.5 - (header.offsetHeight || 40), 120);
     body.style.maxHeight = `${cap}px`;
@@ -257,7 +257,7 @@ export class ComponentManager {
     const { kind, labels, series } = spec.chart;
     const flat = series.flatMap((s) => s.data);
     const max = Math.max(...flat, 1);
-    // 调色板走设计 token（styles.css --ov-chart-*：SVG paint 属性不认 var()，
+    // 调色板走设计 token（styles/tokens.css --ov-chart-*：SVG paint 属性不认 var()，
     // 经 style 属性引用（fill/stroke 是 CSS 属性，var() 在文档内解析）
     const colors = ["var(--ov-chart-1)", "var(--ov-chart-2)", "var(--ov-chart-3)", "var(--ov-chart-4)"];
 

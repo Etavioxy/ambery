@@ -58,7 +58,7 @@ pub struct Config {
     #[serde(default = "default_theme")]
     pub theme: String,
     /// 主题表：主题名 → token 覆写表（token 名去 `--ov-` 前缀 → CSS 值）；
-    /// 未覆写的 token 回落 styles.css :root 内置默认。内置 "dark" = 全空覆写（= 当前默认视觉）
+    /// 未覆写的 token 回落 styles/tokens.css :root 内置默认。内置 "dark" = 全空覆写（= 当前默认视觉）
     #[serde(default = "default_themes")]
     pub themes: std::collections::HashMap<String, std::collections::HashMap<String, String>>,
     /// UI 语言：zh / en。首次初始化跟随受支持的系统语言，不支持回退项目默认；
@@ -331,7 +331,7 @@ fn default_badge_side() -> String {
     "right".into()
 }
 
-/// 默认主题名：内置深色（空覆写 = styles.css :root 值即 dark 主题）
+/// 默认主题名：内置深色（空覆写 = styles/tokens.css :root 值即 dark 主题）
 fn default_theme() -> String {
     "dark".into()
 }
