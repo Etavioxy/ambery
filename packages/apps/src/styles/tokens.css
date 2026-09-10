@@ -48,6 +48,7 @@
   --ov-control-radius: 6px;
   --ov-input-radius: 8px;
   --ov-popup-shadow: 0 4px 14px rgba(0, 0, 0, 0.35); /* 浮层（下拉 / 新增 popup）投影 */
+  --ov-scrollbar-thumb: rgba(255, 255, 255, 0.28); /* 滚动条滑块；轨道透明 */
 
   /* chat 气泡 */
   --ov-bubble-user: rgba(137, 180, 250, 0.2);

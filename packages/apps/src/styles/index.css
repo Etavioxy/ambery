@@ -8,6 +8,14 @@ html {
   line-height: normal; /* preflight 设 1.5；本仓从不设全局行高，钉住默认 */
 }
 
+/* ── 滚动条：跟随主题 ──
+   平台默认滚动条不跟主题（暗色面板上画出一条浅色轨道），故滚动容器统一戴主题的细滚动条。
+   scrollbar-color / scrollbar-width 可继承，写在根上一次即可，不需要 ::-webkit-scrollbar 私有选择器。 */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ov-scrollbar-thumb) transparent;
+}
+
 input,
 select,
 textarea,

@@ -41,6 +41,7 @@ export const KNOWN_TOKENS = [
   "control-radius",
   "input-radius",
   "popup-shadow",
+  "scrollbar-thumb",
   "bubble-user",
   "bubble-assistant",
   "bubble-system",
