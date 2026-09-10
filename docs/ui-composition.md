@@ -94,7 +94,7 @@ WebviewWindowBuilder::new(&app, &label, WebviewUrl::App("index.html#chat".into()
 | motion | Svelte transitions | `transition:`, `animate:flip` |
 | instance override | the caller's `class` | a local adjustment |
 
-Discipline: a utility reads tokens and never a literal value; a variant uses utilities and primitive state; an instance override adjusts and never redefines; the theme layer carries no size (`docs/card-window-size.md` §Recompute triggers). Text selection follows the chrome/content split: chrome — titles, buttons, labels — is not selectable; content — message bodies, Card text, code — is.
+Discipline: a utility reads tokens and never a literal value; a variant uses utilities and primitive state; an instance override adjusts and never redefines; the theme layer carries no size (`docs/card-window-size.md` §Recompute triggers). A scroll container wears the theme's scrollbar — a thin bar with the theme's thumb colour (`--ov-scrollbar-thumb`) — because the platform scrollbar does not follow the theme and paints a light track across the dark panels. Text selection follows the chrome/content split: chrome — titles, buttons, labels — is not selectable; content — message bodies, Card text, code — is.
 
 ## Component principles
 
