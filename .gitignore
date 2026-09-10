@@ -1,22 +1,16 @@
-# C# 构建产物（锚定到具体项目，避免误伤 core/src/bin 等 Rust 源码目录）
-/packages/terminals/wt/sidecar/bin/
-/packages/terminals/wt/sidecar/obj/
-/experiments/**/bin/
-/experiments/**/obj/
+# Global patterns (editors, system files, dependencies, build artifacts); each package's artifact directories are owned by its own .gitignore
 *.user
 .vs/
 .vscode/
+.idea/
 node_modules/
 dist/
 target/
 *.log
-__pycache__/
-
-# 本地工具与系统残留（发布卫生）
-.claude/
-.DS_Store
-.idea/
 *.bak
+__pycache__/
+.DS_Store
 .vite/
-# tauri externalBin 构建产物（CI 生成）
-packages/apps/tauri/src-tauri/binaries/
+
+# Local agent workspace (private, separate repo)
+.claude/
