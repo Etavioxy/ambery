@@ -6,6 +6,7 @@ import { BrowserMockBridge, type AppConfig, type Motion } from "../../bridge";
 import { reportEffect } from "../../effects";
 import { motionDef } from "../../motions";
 import { contextSize, MAX_FACE_MARGIN, MIN_FACE_W, obstacleSize, windowSize } from "../../pet-size";
+import { tick } from "svelte";
 import { engine, setupServer } from "../../positioning/tauri-server";
 import { createBrowserAdapter, createTauriAdapter, type WindowAdapter } from "../../window-adapter";
 import type { WindowShell } from "../window-shell";
@@ -563,18 +564,21 @@ export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<
   }
 
   // ── Autonomy：expression 变化驱动尺寸重算（入口 1/3） ──
-  const autonomy = new Autonomy(store, (e, source) => {
+  const autonomy = new Autonomy(store, async (e, source) => {
     petFace.text = e.face;
     petFace.motion = e.motion;
-    faceW = measureFaceW(); // 入口 1：face 变 → 重测自然宽度
     curMotion = e.motion; // 入口 3：motion 变 → 换当前四向溢出
     // #27：表情变化专用 effect（Tauri 模式；browser 为 no-op），覆盖/回落/推导语义显式
     reportEffect("expression_changed", { face: e.face, motion: e.motion, source });
-    void applySize(true); // 中心锚定（petCenter 已就位；尺寸未变内部跳过 setSize）
+    // 颜文字是先写状态、后量宽度：等 Svelte 把它刷进 DOM 再测。否则量到上一帧（启动时是空串），
+    // 兜底成 minFaceW → 窗口短一截、正文被窗口右缘裁掉。
+    await tick();
+    faceW = measureFaceW(); // 入口 1：face 变 → 重测自然宽度
+    await applySize(true); // 中心锚定（petCenter 已就位；尺寸未变内部跳过 setSize）
   });
   bridge.onSetAutonomy?.((args) => autonomy.setAutonomy(args)); // set_autonomy 是推送事件（非 store 状态）
 
-  store.onConfig((cfg) => {
+  store.onConfig(async (cfg) => {
     autonomy.updateConfig(cfg); // 表情解析热更新（key 消失回落在 deriveDefault）
     applyBadgeStyle(cfg.badgeStyle ?? "number", cfg.badgeSide ?? "right"); // badge 热更新
     //  字段表：系统池变更 → 立即重扫、重算 pet 尺寸与固定障碍区
@@ -585,8 +589,11 @@ export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<
       applyBadgeScale();
       petFace.scale = scale;
     }
+    // scale 与颜文字都要先落到 DOM 再量（同 autonomy 回调的理由）
+    await tick();
     faceW = measureFaceW();
-    void applySize(true).then(() => syncObstacle());
+    await applySize(true);
+    syncObstacle();
   });
 
   await autonomy.init();
