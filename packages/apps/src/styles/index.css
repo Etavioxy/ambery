@@ -131,30 +131,32 @@ html.browser body {
 /* ── Autonomy motion ──
    ⚠ CSS ↔ JS 一致性契约：translateX/Y 极值与
    animation-duration 必须与 app/src/motions.ts 的 MotionDef 同步——
-   极值 → overflow 四向预留；duration → durationMs（once:true 的 TTL）。 */
-@keyframes float {
+   极值 → overflow 四向预留；duration → durationMs（once:true 的 TTL）。
+   名字带 pet- 前缀：Tailwind v4 主题自带 float/bounce/shake 三份同名 keyframes，
+   裸名解析到后加载的那份（实测 pet 的 bounce 被 Tailwind 的 translateY(-25%) 顶掉——幅度变成元素高度的四分之一）。 */
+@keyframes pet-float {
   /* MotionDef float: overflow.top=10, durationMs=4000 */
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
 }
 
-@keyframes bounce {
+@keyframes pet-bounce {
   /* MotionDef bounce: overflow.top=18, durationMs=900 */
   0%, 100% { transform: translateY(0); }
   30% { transform: translateY(-18px); }
   60% { transform: translateY(0); }
 }
 
-@keyframes shake {
+@keyframes pet-shake {
   /* MotionDef shake: overflow.left=6, overflow.right=6, durationMs=400 */
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-6px); }
   75% { transform: translateX(6px); }
 }
 
-#view[data-motion="float"] { animation: float 4s ease-in-out infinite; }
-#view[data-motion="bounce"] { animation: bounce 0.9s ease-in-out infinite; }
-#view[data-motion="shake"] { animation: shake 0.4s ease-in-out infinite; }
+#view[data-motion="float"] { animation: pet-float 4s ease-in-out infinite; }
+#view[data-motion="bounce"] { animation: pet-bounce 0.9s ease-in-out infinite; }
+#view[data-motion="shake"] { animation: pet-shake 0.4s ease-in-out infinite; }
 /* data-motion="still"：无动画 */
 
 /* ── Component ── */
