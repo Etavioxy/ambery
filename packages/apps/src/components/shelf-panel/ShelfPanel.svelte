@@ -22,9 +22,9 @@
 <Panel id="shelf-panel" tone="popup">
   <div id="shelf-body">
     {#if state.cards === null}
-      <div class="dim">{t("shelf.loading")}</div>
+      <div class="dim select-none">{t("shelf.loading")}</div>
     {:else if state.cards.length === 0}
-      <div class="dim py-1.5 px-2">{t("shelf.empty")}</div>
+      <div class="dim select-none py-1.5 px-2">{t("shelf.empty")}</div>
     {:else}
       {#each state.cards as card (card.component.id)}
         <ShelfRow {card} {actions} title={rowTitle(card)} />

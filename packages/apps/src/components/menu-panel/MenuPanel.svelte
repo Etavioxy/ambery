@@ -49,7 +49,7 @@
     <div class="warn">{t("menu.restart-banner", { paths: menu.restartRequired.join(", ") })}</div>
   {/if}
   {#if menu.loading}
-    <div class="dim">{t("menu.loading")}</div>
+    <div class="dim select-none">{t("menu.loading")}</div>
   {/if}
 
   {#each menu.groups as group (group.name)}
@@ -88,3 +88,31 @@
   <button type="button" onclick={onTogglePet}>{t("menu.toggle-pet")}</button>
   <button type="button" onclick={onQuit}>{t("menu.quit")}</button>
 </div>
+
+<style>
+  /* 面板体与底栏：这两块只有本组件渲染 */
+  #panel-body { flex: 1; overflow-y: auto; padding: 8px 12px; }
+  #panel-foot {
+    padding: 8px 12px;
+    border-top: 1px solid var(--ov-divider);
+    display: flex;
+    gap: 8px;
+  }
+  #panel-foot button {
+    flex: 1;
+    background: var(--ov-input-bg);
+    color: var(--ov-text-strong);
+    border: 1px solid var(--ov-input-border);
+    border-radius: var(--ov-control-radius);
+    padding: 5px 0;
+    cursor: pointer;
+  }
+  #panel-foot button:hover { background: var(--ov-hover-bg); }
+  .group {
+    margin: 10px 0 4px;
+    font-weight: 600;
+    color: var(--ov-group);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+</style>

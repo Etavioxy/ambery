@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./tokens.css";
+@import "./card.css";
 
 /* ── preflight 钉子（Tailwind 引入不改变现有渲染；本仓 CSS 在 preflight 之后，故只在未显式声明处生效）──
    接受：box-sizing:border-box（#view 已显式 content-box）、border 归零（边框全为显式声明）、
@@ -27,21 +28,15 @@ button {
   color: revert; /* preflight 改 currentColor 50%；钉住 UA 占位符色 */
 }
 
-.cmp-git-log {
-  list-style: disc; /* preflight 清空列表标记；git log 条目需要圆点 */
-}
-
 /* ── 透明窗口 chrome 规则（#17 定案，单一机制）──
    填充型面板（chat/shelf/menu 窗口模式）：box-sizing: border-box + 100% 填满窗口，
      border 内绘于自身盒内，天然落在窗口边界内（不再需要 calc(100%-4px)+margin 内缩环）。
    自然尺寸型：pet 由窗口尺寸公式 +BORDER_PX 补偿（pet-size.ts）；
      card 按 offsetWidth/offsetHeight 测量（已含 border），窗口恰好包裹内容。 */
 
-/* ── 宿主用 hidden 属性控制窗口内容的显隐 ──
-   面板/卡片根是 flex 容器（工具类给 display），会盖掉 UA 的 [hidden]，故显式让位。 */
-[hidden] {
-  display: none !important;
-}
+/* 宿主用 hidden 属性控制窗口内容的显隐：面板/卡片根是 flex 容器（工具类给 display），
+   会盖掉 UA 的 [hidden]；挡住它的是 Tailwind preflight 自带的
+   `[hidden]:where(:not([hidden="until-found"])) { display: none !important }`，本文件不再重复。 */
 
 /* ── 窗口高度链的第一环 ──
    #app 必须有确定高度，否则 .window 的 h-full 与面板的 flex:1 都退化成 auto：
@@ -73,191 +68,6 @@ html.browser body {
   background: var(--ov-bg);
 }
 
-/* ── View：球场圆形浮动窗口，窗内仅颜文字 ──
-   ⚠ CSS ↔ JS 一致性契约：标注 token 被 JS 直接读取，
-   修改必须在 app/src/pet-size.ts 同步，否则窗口尺寸会错 */
-#view {
-  --view-scale: 1;
-  position: fixed;
-  min-width: calc(36px * var(--view-scale)); /* ← JS: minFaceW 基底 */
-  height: calc(20px * var(--view-scale)); /* ← JS: baselineH 基底 */
-  padding: 0 calc(11px * var(--view-scale)); /* ← JS: padLR 基底（11×2） */
-  border-radius: calc(10px * var(--view-scale)); /* 球场圆形（pill）= height/2 */
-  background: var(--ov-view-bg);
-  /* 描边（#17 增补）：白胶囊与背景区分；1px 不随 scale。窗口公式 +BORDER_PX 补偿（pet-size.ts） */
-  border: 1px solid var(--ov-view-border);
-  box-sizing: content-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  user-select: none;
-  cursor: grab;
-  touch-action: none;
-}
-
-#face {
-  font-size: calc(11.25px * var(--view-scale));
-  line-height: 1; /* ← JS: height 由 line-height=1 保证 */
-  white-space: nowrap;
-  flex-shrink: 0; /* 必须：禁止被容器压缩，确保测量为自然宽度 */
-  pointer-events: none;
-  user-select: none; /* 颜文字不可被双击选中 */
-}
-
-/* #5 pet 未读角标：样式/方位由 Config 驱动（pet.ts 切 class），默认纯数字容器内右。
-   颜色默认灰（--ov-text）；字号为固有 px（12px 的 40% = 5px 基线，
-   跟随 viewScale 由 pet.ts 覆写 fontSize——缩放不变时即 5px） */
-#pet-badge {
-  display: none;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 5px; /* 基线：12px 的 40%；pet.ts 按 scale 覆写 */
-  font-weight: 700;
-  line-height: 1;
-  z-index: 10;
-  pointer-events: none;
-}
-#pet-badge.side-right { right: 8px; }
-#pet-badge.side-left { left: 8px; }
-#pet-badge.badge-number { color: var(--ov-text); }
-#pet-badge.badge-bubble {
-  background: color-mix(in srgb, var(--ov-text) 75%, transparent);
-  color: var(--ov-view-bg);
-  border-radius: 5px;
-  padding: 0.5px 3px;
-}
-
-/* ── Autonomy motion ──
-   ⚠ CSS ↔ JS 一致性契约：translateX/Y 极值与
-   animation-duration 必须与 app/src/motions.ts 的 MotionDef 同步——
-   极值 → overflow 四向预留；duration → durationMs（once:true 的 TTL）。
-   名字带 pet- 前缀：Tailwind v4 主题自带 float/bounce/shake 三份同名 keyframes，
-   裸名解析到后加载的那份（实测 pet 的 bounce 被 Tailwind 的 translateY(-25%) 顶掉——幅度变成元素高度的四分之一）。 */
-@keyframes pet-float {
-  /* MotionDef float: overflow.top=10, durationMs=4000 */
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-@keyframes pet-bounce {
-  /* MotionDef bounce: overflow.top=18, durationMs=900 */
-  0%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-18px); }
-  60% { transform: translateY(0); }
-}
-
-@keyframes pet-shake {
-  /* MotionDef shake: overflow.left=6, overflow.right=6, durationMs=400 */
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-6px); }
-  75% { transform: translateX(6px); }
-}
-
-#view[data-motion="float"] { animation: pet-float 4s ease-in-out infinite; }
-#view[data-motion="bounce"] { animation: pet-bounce 0.9s ease-in-out infinite; }
-#view[data-motion="shake"] { animation: pet-shake 0.4s ease-in-out infinite; }
-/* data-motion="still"：无动画 */
-
-/* ── Component ── */
-/* cards 窗口模式：卡片自然流式布局，窗口自身定位；
-   窗口量 offsetWidth/offsetHeight（已含 border），恰好包裹内容（chrome 规则） */
-.cards-mode { height: 100vh; }
-.cards-mode .component { position: static; margin-bottom: 8px; width: fit-content; }
-
-.component {
-  position: fixed;
-  min-width: 200px;
-  max-width: 480px;
-  background: var(--ov-card-bg);
-  border: 1px solid var(--ov-card-border);
-  border-radius: var(--ov-card-radius);
-  color: var(--ov-text);
-  font-size: 13px;
-}
-
-.cmp-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 10px 4px;
-}
-
-.cmp-title {
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.cmp-close {
-  background: none;
-  border: none;
-  color: var(--ov-muted);
-  font-size: 15px;
-  cursor: pointer;
-  padding: 0 2px;
-}
-
-.cmp-close:hover { color: var(--ov-danger); }
-
-.cmp-body {
-  padding: 4px 10px 10px;
-  overflow-y: auto; /* #20：max-height 由 card-window 按屏高 cap 内联下发，超长滚动 */
-}
-
-.cmp-body p { margin: 4px 0 8px; white-space: pre-wrap; }
-
-.cmp-body button {
-  background: var(--ov-accent-bg);
-  border: 1px solid var(--ov-accent-border);
-  border-radius: var(--ov-control-radius);
-  color: var(--ov-accent);
-  padding: 3px 10px;
-  cursor: pointer;
-  font-size: 12px;
-  font-family: inherit; /* preflight 把表单控件字体 revert 了；不显式继承会用 UA 默认（Arial），与卡内正文不一致 */
-}
-
-.cmp-git-log {
-  margin: 4px 0;
-  padding-left: 16px;
-}
-
-.cmp-git-log li { margin: 2px 0; font-family: Consolas, monospace; font-size: 12px; }
-
-.cmp-body details summary { cursor: pointer; color: var(--ov-accent); }
-
-.cmp-body details pre {
-  background: var(--ov-code-bg);
-  padding: 6px;
-  border-radius: var(--ov-control-radius);
-  overflow: auto;
-  max-height: 180px;
-  font-size: 11px;
-}
-
-.cmp-todo ul { margin: 4px 0; padding: 0; list-style: none; }
-
-.cmp-todo li { display: flex; gap: 6px; align-items: center; margin: 3px 0; }
-
-.cmp-todo li input[type="checkbox"] { accent-color: var(--ov-success); }
-
-.cmp-todo li:has(input:checked) span { text-decoration: line-through; opacity: 0.55; }
-
-.cmp-todo > input {
-  width: 100%;
-  box-sizing: border-box;
-  background: var(--ov-input-bg);
-  border: 1px solid var(--ov-input-border);
-  border-radius: var(--ov-control-radius);
-  color: var(--ov-text);
-  padding: 4px 8px;
-  margin-top: 6px;
-}
-
-.cmp-chart svg { display: block; }
-
 /* browser overlay 容器（pet 页内嵌的瞬时 Shelf 面板；尺寸由 pet×3 现算；
    面板 chrome 在 Panel widget，行样式在 shelf-panel） */
 #shelf-overlay {
@@ -265,55 +75,8 @@ html.browser body {
   z-index: 9997;
 }
 
-/* ===== 托盘设置面板（windows/menu.ts） ===== */
-#menu-panel {
-  display: flex;
-  flex-direction: column;
-  /* 填充型面板 chrome 规则：border-box 100%，border 内绘 */
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;
-  background: var(--ov-panel-bg);
-  border-radius: var(--ov-panel-radius);
-  border: 1px solid var(--ov-panel-border-soft);
-  color: var(--ov-text-strong);
-  font-size: 12px;
-  overflow: hidden;
-}
-#panel-head {
-  padding: 10px 12px;
-  font-weight: 600;
-  border-bottom: 1px solid var(--ov-divider);
-  display: flex;
-  justify-content: space-between;
-}
-#panel-status.ok { color: var(--ov-ok); }
-#panel-status.err { color: var(--ov-error); }
-#panel-status.warn { color: var(--ov-warn); }
-#panel-body { flex: 1; overflow-y: auto; padding: 8px 12px; }
-#panel-foot {
-  padding: 8px 12px;
-  border-top: 1px solid var(--ov-divider);
-  display: flex;
-  gap: 8px;
-}
-#panel-foot button {
-  flex: 1;
-  background: var(--ov-input-bg);
-  color: var(--ov-text-strong);
-  border: 1px solid var(--ov-input-border);
-  border-radius: var(--ov-control-radius);
-  padding: 5px 0;
-  cursor: pointer;
-}
-#panel-foot button:hover { background: var(--ov-hover-bg); }
-.group {
-  margin: 10px 0 4px;
-  font-weight: 600;
-  color: var(--ov-group);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+/* 配置行族：ConfigRow / ApiKeyRow / MenuPanel 三家共用（.dim 到四家、.err 三家），故留在共享样式表。
+   单家持有的样式已随组件迁走（PetWindow / MenuWindow / MenuPanel / ApiKeyRow / ConfigRow）。 */
 .cfg-row { margin: 4px 0; }
 .cfg-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .cfg-line .name { flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -326,82 +89,18 @@ html.browser body {
   padding: 3px 6px;
 }
 .cfg-line input.bad, .cfg-line select.bad, .cfg-line button.bad { border-color: var(--ov-error); }
-/* 下拉（components 里的 Select widget）与引导 modal（SetupModal + Dialog widget）的样式
-   已随组件迁走（本文件不再持有）；此处只留配置行族共用的一行样式。 */
 .cfg-line input:disabled { opacity: 0.45; }
 .desc { color: color-mix(in srgb, var(--ov-text-strong) 45%, transparent); font-size: 11px; margin-top: 1px; }
-/* provider key 输入行（形态乙）：密码框 + 保存，保存后自动测连通；无清除 */
-.api-key-row .api-key-input {
-  width: 170px;
-  background: var(--ov-input-bg);
-  border: 1px solid var(--ov-input-border);
-  border-radius: 5px;
-  color: var(--ov-text-strong);
-  padding: 3px 6px;
-  font: inherit;
-}
-.api-key-row .api-key-input::placeholder { color: color-mix(in srgb, var(--ov-text-strong) 40%, transparent); }
-.api-key-row .api-key-input:disabled { opacity: 0.45; }
-.api-key-row .api-key-save {
-  background: var(--ov-input-bg);
-  color: var(--ov-text-strong);
-  border: 1px solid var(--ov-input-border);
-  border-radius: var(--ov-control-radius);
-  padding: 3px 10px;
-  cursor: pointer;
-  font: inherit;
-  white-space: nowrap;
-}
-.api-key-row .api-key-save:hover {
-  border-color: var(--ov-accent-border);
-  color: var(--ov-accent);
-}
-.api-key-row .api-key-save:disabled { opacity: 0.45; cursor: default; }
-.api-key-hint.ok { color: var(--ov-ok); }
-.api-key-hint.warn { color: var(--ov-warn); }
-.map-head { color: color-mix(in srgb, var(--ov-text-strong) 75%, transparent); font-weight: 600; margin-top: 6px; }
 .dim { color: color-mix(in srgb, var(--ov-text-strong) 35%, transparent); font-weight: 400; }
 .warn { color: var(--ov-warn); padding: 6px 0; }
 .err { color: var(--ov-error); }
-.readonly { color: color-mix(in srgb, var(--ov-text-strong) 50%, transparent); }
-
-#panel-head-right { display: flex; align-items: center; gap: 8px; }
-#btn-close {
-  background: transparent;
-  border: none;
-  color: color-mix(in srgb, var(--ov-text-strong) 60%, transparent);
-  font-size: 13px;
-  cursor: pointer;
-  padding: 0 4px;
-  line-height: 1;
-}
-#btn-close:hover { color: var(--ov-error); }
-
 /* ===== 文本选择：chrome 不可选、内容可选 =====
-   chrome = 标题 / 按钮 / 标签；内容 = 消息正文、Card 文本、代码。 */
-button,
-.cmp-header,
-.setup-head,
-#panel-head,
-.map-head,
-.cfg-line .name,
-.chat-queue-status,
-#panel-status,
-.setup-test-status,
-.api-key-hint,
-.desc,
-.dim,
-.readonly {
-  user-select: none;
-}
-
-.cmp-body,
-.chat-history,
-.think-card pre,
-.cmp-body pre,
-input,
-textarea,
-select {
-  user-select: text;
+   chrome = 标题 / 按钮 / 标签；内容 = 消息正文、Card 文本、代码。
+   chrome 元素各自在 markup 上带 select-none；按钮是全局元素默认，落在 base 层。
+   内容无需声明：user-select 默认 auto 即 text，只有落在 none 祖先里时才要 select-text。 */
+@layer base {
+  button {
+    @apply select-none;
+  }
 }
 

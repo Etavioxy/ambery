@@ -57,7 +57,7 @@
         onChanged={() => void setup.runTest()}
       />
     {/if}
-    <div class="setup-test-status {setup.testClass}">{setup.testText}</div>
+    <div class="setup-test-status select-none {setup.testClass}">{setup.testText}</div>
     <button
       class="setup-test-btn"
       type="button"

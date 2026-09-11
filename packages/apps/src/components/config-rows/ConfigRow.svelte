@@ -58,15 +58,15 @@
 {#if kind === "map"}
   <!-- map 节点只作分组标记（条目已展开为独立子节点） -->
   <div class="cfg-row">
-    <div class="map-head" title={node.desc ?? ""}>
-      {label} <span class="dim">{t("menu.map-tag")}</span>
+    <div class="map-head select-none" title={node.desc ?? ""}>
+      {label} <span class="dim select-none">{t("menu.map-tag")}</span>
     </div>
   </div>
 {:else}
   <div class="cfg-row">
     <div class="cfg-line">
       <!-- 长路径在面板内被截断，hover 看全；desc 已作为行下 hint 可见，不再重复 -->
-      <div class="name" title={node.path}>{label}</div>
+      <div class="name select-none" title={node.path}>{label}</div>
       {#if kind === "bool"}
         <Input
           type="checkbox"
@@ -104,7 +104,7 @@
           onCommit={commit}
         />
       {:else}
-        <code class="readonly">{JSON.stringify(node.value)}</code>
+        <code class="readonly select-none">{JSON.stringify(node.value)}</code>
       {/if}
       {#if poolMove && pools && moveTo}
         <Button
@@ -116,7 +116,13 @@
       {/if}
     </div>
     {#if node.desc}
-      <div class="desc">{node.desc}</div>
+      <div class="desc select-none">{node.desc}</div>
     {/if}
   </div>
 {/if}
+
+<style>
+  /* 本组件独有的两处（.desc / .dim / .cfg-line 跨组件共用，仍在共享样式表） */
+  .map-head { color: color-mix(in srgb, var(--ov-text-strong) 75%, transparent); font-weight: 600; margin-top: 6px; }
+  .readonly { color: color-mix(in srgb, var(--ov-text-strong) 50%, transparent); }
+</style>

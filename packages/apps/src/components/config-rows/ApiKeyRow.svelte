@@ -73,12 +73,12 @@
 <div class="cfg-row api-key-row" data-provider={provider}>
   {#if local}
     <div class="cfg-line">
-      <div class="name">{provider} · key</div>
-      <span class="dim">{t("setup.key-not-needed")}</span>
+      <div class="name select-none">{provider} · key</div>
+      <span class="dim select-none">{t("setup.key-not-needed")}</span>
     </div>
   {:else}
     <div class="cfg-line">
-      <div class="name" title={envName}>{provider} · key</div>
+      <div class="name select-none" title={envName}>{provider} · key</div>
       <input
         class="api-key-input"
         type="password"
@@ -93,8 +93,41 @@
         onclick={() => void submit()}
       >{t("setup.key-save")}</button>
     </div>
-    <div class="desc api-key-hint {errorText !== null ? "warn" : isSet ? "ok" : "warn"}">
+    <div class="desc api-key-hint select-none {errorText !== null ? "warn" : isSet ? "ok" : "warn"}">
       {errorText ?? (isSet ? t("setup.key-set-hint", { source: source ?? "" }) : t("setup.key-unset-hint"))}
     </div>
   {/if}
 </div>
+
+<style>
+  /* provider key 输入行（形态乙）：密码框 + 保存，保存后自动测连通；无清除。
+     .desc / .cfg-line 等跨组件共用的类仍留在共享样式表。 */
+  .api-key-row .api-key-input {
+    width: 170px;
+    background: var(--ov-input-bg);
+    border: 1px solid var(--ov-input-border);
+    border-radius: 5px;
+    color: var(--ov-text-strong);
+    padding: 3px 6px;
+    font: inherit;
+  }
+  .api-key-row .api-key-input::placeholder { color: color-mix(in srgb, var(--ov-text-strong) 40%, transparent); }
+  .api-key-row .api-key-input:disabled { opacity: 0.45; }
+  .api-key-row .api-key-save {
+    background: var(--ov-input-bg);
+    color: var(--ov-text-strong);
+    border: 1px solid var(--ov-input-border);
+    border-radius: var(--ov-control-radius);
+    padding: 3px 10px;
+    cursor: pointer;
+    font: inherit;
+    white-space: nowrap;
+  }
+  .api-key-row .api-key-save:hover {
+    border-color: var(--ov-accent-border);
+    color: var(--ov-accent);
+  }
+  .api-key-row .api-key-save:disabled { opacity: 0.45; cursor: default; }
+  .api-key-hint.ok { color: var(--ov-ok); }
+  .api-key-hint.warn { color: var(--ov-warn); }
+</style>

@@ -153,7 +153,7 @@ export class ComponentManager {
     card.dataset.id = spec.id;
 
     const header = document.createElement("div");
-    header.className = "cmp-header";
+    header.className = "cmp-header select-none";
     const title = document.createElement("span");
     title.className = "cmp-title";
     title.textContent = "title" in spec ? spec.title : spec.label;
@@ -171,7 +171,7 @@ export class ComponentManager {
     card.append(header, body);
     // #20 高度 cap（单源：Tauri/browser 共用渲染路径）——body 限高 = 屏高×0.5 − header，
     // 屏高经 adapter 取口（分支不各自 window.screen），
-    // 超长走 .cmp-body 滚动（styles/index.css overflow-y:auto），内容不截断
+    // 超长走 .cmp-body 滚动（card.css 的 overflow-y:auto），内容不截断
     const screenH = this.screenH ?? window.screen.availHeight;
     const cap = Math.max(screenH * 0.5 - (header.offsetHeight || 40), 120);
     body.style.maxHeight = `${cap}px`;

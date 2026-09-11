@@ -32,7 +32,7 @@ export async function startPetWindow(shell: WindowShell, dom: PetView): Promise<
   const faceEl = dom.face;
   const mount = viewEl.parentElement ?? document.body;
 
-  // #5 pet 未读角标（默认纯数字、容器内右上；样式/方位走 Config，视觉在 styles/index.css 类）
+  // #5 pet 未读角标（默认纯数字、容器内右上；样式/方位走 Config，视觉在 PetWindow 的 scoped 样式里）
   const applyBadgeStyle = (style: string, side: string) => {
     petFace.badge.style = style === "bubble" ? "bubble" : "number";
     petFace.badge.side = side === "left" ? "left" : "right";

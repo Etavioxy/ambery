@@ -218,7 +218,7 @@
 
   {#if !follow && pendingNew > 0}
     <div
-      class="chat-pill"
+      class="chat-pill select-none"
       role="button"
       tabindex="0"
       onclick={clickPill}
@@ -227,7 +227,7 @@
   {/if}
 
   {#if chat.queued > 0}
-    <div class="chat-queue-status">{label("chat.queued", { n: String(chat.queued) })}</div>
+    <div class="chat-queue-status select-none">{label("chat.queued", { n: String(chat.queued) })}</div>
   {/if}
 
   <div class="chat-input-row">
@@ -281,7 +281,6 @@
     font-size: 11px;
     padding: 3px 10px;
     cursor: pointer;
-    user-select: none;
   }
   /* 排队状态翻译（已发送未回复 > 正在处理的一条时显示） */
   .chat-queue-status {

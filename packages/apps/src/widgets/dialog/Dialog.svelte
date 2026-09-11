@@ -21,7 +21,7 @@
   <BitsDialog.Portal>
     <BitsDialog.Overlay class="setup-overlay" />
     <BitsDialog.Content class="setup-modal">
-      <div class="setup-head">
+      <div class="setup-head select-none">
         <BitsDialog.Close class="setup-close">×</BitsDialog.Close>
       </div>
       <div class="setup-body">

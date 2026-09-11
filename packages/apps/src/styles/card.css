@@ -1,0 +1,103 @@
+/* 卡片窗的渲染样式：DOM 由 component-manager 建（.component / .cmp-*，含各类型 Component 的正文块），
+   cards-mode 的自然流式布局类由 card-window 切。
+   这块 DOM 不是 Svelte 组件渲染的，样式无处可随，故按归属收口到本文件，不再混在入口里。
+   数值仍走 token（--ov-card-* / --ov-input-* 等），与本仓其它样式同一口径。 */
+
+.component {
+  position: fixed;
+  min-width: 200px;
+  max-width: 480px;
+  background: var(--ov-card-bg);
+  border: 1px solid var(--ov-card-border);
+  border-radius: var(--ov-card-radius);
+  color: var(--ov-text);
+  font-size: 13px;
+}
+
+/* cards 窗口模式：卡片自然流式布局，窗口自身定位；
+   窗口量 offsetWidth/offsetHeight（已含 border），恰好包裹内容（chrome 规则） */
+.cards-mode { height: 100vh; }
+.cards-mode .component { position: static; margin-bottom: 8px; width: fit-content; }
+
+.cmp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px 4px;
+}
+
+.cmp-title {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cmp-close {
+  background: none;
+  border: none;
+  color: var(--ov-muted);
+  font-size: 15px;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.cmp-close:hover { color: var(--ov-danger); }
+
+.cmp-body {
+  padding: 4px 10px 10px;
+  overflow-y: auto; /* #20：max-height 由 card-window 按屏高 cap 内联下发，超长滚动 */
+}
+
+.cmp-body p { margin: 4px 0 8px; white-space: pre-wrap; }
+
+.cmp-body button {
+  background: var(--ov-accent-bg);
+  border: 1px solid var(--ov-accent-border);
+  border-radius: var(--ov-control-radius);
+  color: var(--ov-accent);
+  padding: 3px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit; /* preflight 把表单控件字体 revert 了；不显式继承会用 UA 默认（Arial），与卡内正文不一致 */
+}
+
+.cmp-git-log {
+  margin: 4px 0;
+  padding-left: 16px;
+  list-style: disc; /* preflight 清空列表标记；git log 条目需要圆点 */
+}
+
+.cmp-git-log li { margin: 2px 0; font-family: Consolas, monospace; font-size: 12px; }
+
+.cmp-body details summary { cursor: pointer; color: var(--ov-accent); }
+
+.cmp-body details pre {
+  background: var(--ov-code-bg);
+  padding: 6px;
+  border-radius: var(--ov-control-radius);
+  overflow: auto;
+  max-height: 180px;
+  font-size: 11px;
+}
+
+.cmp-todo ul { margin: 4px 0; padding: 0; list-style: none; }
+
+.cmp-todo li { display: flex; gap: 6px; align-items: center; margin: 3px 0; }
+
+.cmp-todo li input[type="checkbox"] { accent-color: var(--ov-success); }
+
+.cmp-todo li:has(input:checked) span { text-decoration: line-through; opacity: 0.55; }
+
+.cmp-todo > input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--ov-input-bg);
+  border: 1px solid var(--ov-input-border);
+  border-radius: var(--ov-control-radius);
+  color: var(--ov-text);
+  padding: 4px 8px;
+  margin-top: 6px;
+}
+
+.cmp-chart svg { display: block; }

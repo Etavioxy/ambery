@@ -25,7 +25,7 @@
 
 {#snippet headRight()}
   <span id="panel-head-right">
-    <span id="panel-status" class={menu.status.cls}>{menu.status.text}</span>
+    <span id="panel-status" class="select-none {menu.status.cls}">{menu.status.text}</span>
   </span>
 {/snippet}
 
@@ -43,3 +43,11 @@
     {/key}
   </Panel>
 </Window>
+
+<style>
+  /* 状态字与标题栏右侧：本窗口在 Panel 的 headRight snippet 里自己渲染，只有这一个消费者 */
+  #panel-status.ok { color: var(--ov-ok); }
+  #panel-status.err { color: var(--ov-error); }
+  #panel-status.warn { color: var(--ov-warn); }
+  #panel-head-right { display: flex; align-items: center; gap: 8px; }
+</style>

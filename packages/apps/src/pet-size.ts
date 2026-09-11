@@ -1,6 +1,6 @@
 // Pet 窗口尺寸公式：纯函数 + 设计常量。
 // 窗口尺寸 = f(baseline, scale, face, motion)，输入计算不读当前 OS 窗口大小。
-// ⚠ CSS ↔ JS 一致性契约：以下常量与 styles/index.css #view/#face 的标注 token 一一对应，
+// ⚠ CSS ↔ JS 一致性契约：以下常量与 PetWindow 里 #view/#face 的标注值一一对应，
 //   改 CSS 必须同步改这里，否则窗口尺寸会错。
 
 import { ANIM_BOTTOM, ANIM_LEFT, ANIM_RIGHT, ANIM_TOP, type MotionOverflow } from "./motions";
